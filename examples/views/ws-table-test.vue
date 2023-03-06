@@ -41,6 +41,16 @@
           {{ JSON.stringify(row) }}
         </div>
       </template>
+      <template v-slot:plantName_header="{ column }">
+        <div>
+          {{ column.label + '--插槽' }}
+        </div>
+      </template>
+      <template v-slot:plantName="{ row, fieldItem }">
+        <div>
+          {{ row.plantName + '--插槽' + fieldItem.field }}
+        </div>
+      </template>
     </ws-table>
   </div>
 </template>
@@ -73,7 +83,8 @@ export default {
           testSelect: '苹果',
           testMinDatetime: '',
           testMaxDatetime: '',
-          testTime: ''
+          testTime: '',
+          testFormatter: '内容'
         },
         {
           plantName: '二号机组',
@@ -82,7 +93,8 @@ export default {
           testSelect: '香蕉',
           testMinDatetime: '',
           testMaxDatetime: '',
-          testTime: ''
+          testTime: '',
+          testFormatter: '内容'
         }
       ],
       loading: false
@@ -97,7 +109,8 @@ export default {
         testSelect: '',
         testMinDatetime: '',
         testMaxDatetime: '',
-        testTime: ''
+        testTime: '',
+        testFormatter: '内容'
       })
     }, '1000')
   },

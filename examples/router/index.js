@@ -35,6 +35,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/ws-echarts-test.vue')
   },
   {
+    path: '/ws-checkbox',
+    name: 'ws-checkbox',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-checkbox-test.vue')
+  },
+  {
     path: '/test',
     name: 'test',
     component: () => import(/* webpackChunkName: "about" */ '../views/test.vue')

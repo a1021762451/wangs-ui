@@ -222,11 +222,7 @@ export default {
       bind(el, binding) {
         let width = '',
           height = ''
-        console.log('v-resize-bind', el)
-
         function get() {
-          console.log('v-resize-get')
-
           const style = document.defaultView.getComputedStyle(el)
           if (width !== style.width || height !== style.height) {
             binding.value({ width, height })
@@ -234,7 +230,6 @@ export default {
           width = style.width
           height = style.height
         }
-
         el.__vueReize__ = setInterval(get, 200)
       },
       unbind(el) {
@@ -288,7 +283,6 @@ export default {
           const minField = params.minTime
           obj[item.field].push({
             validator: (rule, value, callback) => {
-              console.log(this, 'validator')
               if (
                 +this.dayjs(value).valueOf() <=
                 +this.dayjs(this.form[minField]).valueOf()
@@ -305,7 +299,6 @@ export default {
           const maxField = params.maxTime
           obj[item.field].push({
             validator: (rule, value, callback) => {
-              console.log(this, 'validator')
               if (
                 +this.dayjs(value).valueOf() >=
                 +this.dayjs(this.form[maxField]).valueOf()
@@ -347,24 +340,7 @@ export default {
     },
     // 下拉框变更
     changeSelect(value, fieldItem) {
-      if (fieldItem.field === 'type' && value) {
-        this.formData = {}
-        this.$emit('changeType', value)
-      }
-    },
-    // 下拉树失焦
-    treeSelectBlur($event, refName) {
-      console.log($event, refName, '$event, refName')
-      console.log(this.$refs[refName], 'this.$refs[refName]')
-      console.log(this.$refs[refName].$emit, 'this.$refs[refName].$emit')
-      this.$refs[refName].$emit('el.form.blur', $event)
-    },
-    // 保存按钮
-    confirm() {
-      this.$refs.formRef.validate((valid) => {
-        const formData = deepClone(this.formData)
-        if (valid) this.$emit('confirm', formData, this)
-      })
+      this.$emit('changeSelect', value, fieldItem)
     },
     // 下拉框选项确认
     async filterList(field) {

@@ -4,6 +4,7 @@ export const list = [
   'ws-table',
   'ws-tree',
   'ws-echarts',
+  'ws-checkbox',
   'test'
 ]
 // 按钮组配置同tableButtons
@@ -64,12 +65,25 @@ export const tableColumns = [
   { type: 'selection' },
   { type: 'index', label: '序号' },
   { type: 'expand', slotName: 'expand' },
+  // 自定义表头，内容
   {
+    headerSlotName: "plantName_header",
+    slotName: "plantName",
     field: 'plantName',
-    label: '厂站名称',
+    label: '测试插槽',
     formatter: function (value) {
       return value + 'filter'
-    }
+    },
+    showTooltip: true
+  },
+  // 自定义表头，内容
+  {
+    field: 'testFormatter',
+    label: '测试过滤',
+    formatter: function (value) {
+      return value + '--过滤'
+    },
+    showTooltip: true
   },
   // 宽度自调节举例
   { field: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
@@ -101,6 +115,7 @@ export const tableColumns = [
     field: 'testSelect',
     label: '测试下拉框',
     eleType: 'select',
+    width: 200,
     options: [
       { label: '苹果', value: '苹果' },
       { label: '香蕉', value: '香蕉' }
@@ -110,6 +125,7 @@ export const tableColumns = [
   {
     field: 'testMinDatetime',
     label: '测试时间框小',
+    width: 200,
     eleType: 'datetime',
     valueFormat: 'yyyy-MM-dd',
     params: { maxTime: 'testMaxDatetime' }
@@ -117,6 +133,7 @@ export const tableColumns = [
   {
     field: 'testMaxDatetime',
     label: '测试时间框大',
+    width: 200,
     eleType: 'datetime',
     valueFormat: 'yyyy-MM-dd',
     params: { minTime: 'testMinDatetime' }
@@ -124,6 +141,7 @@ export const tableColumns = [
   {
     field: 'testTime',
     label: '测试时间框(time)',
+    width: 200,
     eleType: 'datetime',
     valueFormat: 'HH:mm',
     params: { minTime: 'testMinDatetime' }

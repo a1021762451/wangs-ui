@@ -23,7 +23,8 @@
           :key="fieldItem.type"
         >
           <template v-if="fieldItem.slotName" v-slot="scope">
-            <slot :name="fieldItem.slotName" v-bind="scope"> </slot>
+            <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }">
+            </slot>
           </template>
         </el-table-column>
         <!-- 内容列 -->
@@ -38,12 +39,20 @@
           v-else
         >
           <template v-if="fieldItem.headerSlotName" v-slot:header="scope">
-            <slot :name="fieldItem.headerSlotName" v-bind="scope"> </slot>
+            <slot
+              :name="fieldItem.headerSlotName"
+              v-bind="{ ...scope, fieldItem }"
+            >
+              {{ fieldItem.label }}
+            </slot>
           </template>
           <template v-slot="{ row, column, $index }">
             <template v-if="fieldItem.slotName">
-              <slot :name="fieldItem.slotName" v-bind="{ row, column, $index }">
-                {{ scope.row[fieldItem.field] }}
+              <slot
+                :name="fieldItem.slotName"
+                v-bind="{ row, column, $index, fieldItem }"
+              >
+                {{ row[fieldItem.field] }}
               </slot>
             </template>
             <!-- 输入框模式 -->
@@ -67,6 +76,7 @@
             <!-- 复选框模式 -->
             <input
               v-else-if="fieldItem.eleType === 'checkBox'"
+              style="cursor: pointer"
               type="checkbox"
               true-value="1"
               false-value="0"
@@ -348,7 +358,6 @@ export default {
       this.property = ''
       // 如果前后值相同则不处理
       if (row[field] == this.temRow[field]) {
-        console.log('前后值相同')
         return
       }
       // 自定义数据过滤
