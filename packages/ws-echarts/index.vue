@@ -13,7 +13,7 @@
 import { otherOptions, seriesConfig, commonOptions } from './echartsContant'
 import { deepClone, deepMerge, getRandomId } from '../utils/util'
 export default {
-  name: 'renderEcharts',
+  name: 'ws-echarts',
   data() {
     return {
       echartsId: getRandomId(),
@@ -23,12 +23,14 @@ export default {
     }
   },
   props: {
+    // 全部配置
     echartsData: {
       type: Object,
       default() {
         return {}
       }
     },
+    // 主体类型
     echarsType: {
       type: String,
       default: ''
@@ -41,19 +43,19 @@ export default {
       }
     }
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.resizeEcharts)
+  },
   mounted() {
     this.init()
   },
   methods: {
     // 初始化
     init() {
-      console.log(this.$echarts, 'this.echarts');
       // 基于准备好的dom，初始化echarts实例
       const echarts = this.$echarts || require('echarts')
       this.myChart = echarts.init(document.getElementById(this.echartsId))
-      window.addEventListener('resize', () => {
-        this.myChart.resize()
-      })
+      window.addEventListener('resize', this.resizeEcharts)
       // 通用配置
       this.options = deepClone(commonOptions)
       // 合并通用配置和特殊配置
@@ -72,7 +74,7 @@ export default {
       let { series = [] } = this.echartsData
       series = series.map((item) => {
         return {
-          ...seriesConfig[item.type] || {},
+          ...(seriesConfig[item.type] || {}),
           ...item
         }
       })
@@ -82,6 +84,10 @@ export default {
       this.$nextTick(() => {
         this.myChart.resize()
       })
+    },
+    // 重置echats大小
+    resizeEcharts() {
+      this.myChart.resize()
     }
   }
 }

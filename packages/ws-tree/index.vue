@@ -96,7 +96,7 @@
 <script>
 import { debounce } from '../utils/util'
 export default {
-  name: 'renderTree',
+  name: 'ws-tree',
   props: {
     // 是否有复选框
     showCheckBox: {

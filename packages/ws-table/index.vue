@@ -15,9 +15,11 @@
       <template v-for="fieldItem in columns">
         <!-- 特殊列，如复选框，序号列 -->
         <el-table-column
+          width="55"
+          align="center"
           v-if="fieldItem.type"
           :type="fieldItem.type"
-          width="55"
+          :label="fieldItem.label"
           :key="fieldItem.type"
         >
           <template v-if="fieldItem.slotName" v-slot="scope">
@@ -35,6 +37,9 @@
           :show-overflow-tooltip="fieldItem.showTooltip"
           v-else
         >
+          <template v-if="fieldItem.headerSlotName" v-slot:header="scope">
+            <slot :name="fieldItem.headerSlotName" v-bind="scope"> </slot>
+          </template>
           <template v-slot="{ row, column, $index }">
             <template v-if="fieldItem.slotName">
               <slot :name="fieldItem.slotName" v-bind="{ row, column, $index }">
@@ -48,15 +53,8 @@
                 v-focus
                 v-if="property === fieldItem.field && index === $index"
                 :value="row[fieldItem.field]"
-                @blur="handleBlur(row, fieldItem.field, fieldItem.blurHandler)"
-                @input="
-                  handleInput(
-                    $event,
-                    row,
-                    fieldItem.field,
-                    fieldItem.inputHandler
-                  )
-                "
+                @blur="handleBlur(row, fieldItem)"
+                @input="handleInput($event, row, fieldItem)"
               ></el-input>
               <div
                 style="min-height: 23px"
@@ -76,7 +74,7 @@
                 row[fieldItem.field] !== '1' && row[fieldItem.field] !== '0'
               "
               v-model="row[fieldItem.field]"
-              @change="checkBoxChange($event, fieldItem.field, row)"
+              @change="checkBoxChange($event, fieldItem, row)"
             />
             <!-- 下拉框模式 -->
             <el-select
@@ -86,7 +84,7 @@
               placeholder="请选择"
               filterable
               clearable
-              @change="selectChange($event, fieldItem.field, row)"
+              @change="selectChange($event, fieldItem, row)"
             >
               <el-option
                 v-for="fieldItem in fieldItem.options"
@@ -100,24 +98,25 @@
             <el-date-picker
               v-else-if="
                 fieldItem.eleType === 'datetime' &&
-                judgeTimeType(fieldItem.timeFormat) !== 'time'
+                judgeTimeType(fieldItem.valueFormat) !== 'time'
               "
               size="mini"
               clearable
               v-model="row[fieldItem.field]"
-              :type="judgeTimeType(fieldItem.timeFormat)"
-              :value-format="fieldItem.timeFormat"
+              :type="judgeTimeType(fieldItem.valueFormat)"
+              :value-format="fieldItem.valueFormat"
               :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
               :disabled="row[fieldItem.disabledKey]"
               :picker-options="
                 getPicker(fieldItem, row, globalMinDate, globalMaxDate)
               "
+              @change="datetimeChange($event, fieldItem, row)"
             ></el-date-picker>
             <el-time-select
               size="mini"
               v-else-if="
                 fieldItem.eleType === 'datetime' &&
-                judgeTimeType(fieldItem.timeFormat) === 'time'
+                judgeTimeType(fieldItem.valueFormat) === 'time'
               "
               clearable
               v-model="row[fieldItem.field]"
@@ -126,7 +125,11 @@
               :picker-options="
                 getPicker(fieldItem, row, globalMinDate, globalMaxDate)
               "
+              @change="datetimeChange($event, fieldItem, row)"
             ></el-time-select>
+            <template v-else-if="fieldItem.formatter">{{
+              fieldItem.formatter(row[fieldItem.field], row, column, $index)
+            }}</template>
             <template v-else>{{ row[fieldItem.field] }}</template>
           </template>
         </el-table-column>
@@ -141,7 +144,7 @@
         v-if="tableButtons.length"
       >
         <template v-slot="{ row }">
-          <renderButtons
+          <ws-buttons
             isLinkButton
             :buttonConfigList="filterButtons(row, tableButtons)"
             @happenEvent="happenEvent($event, row)"
@@ -152,7 +155,7 @@
             >
               <slot :name="name" v-bind="scope"></slot>
             </template>
-          </renderButtons>
+          </ws-buttons>
         </template>
       </el-table-column>
     </el-table>
@@ -174,10 +177,10 @@
 
 <script>
 import { deepClone, judgeTimeType, getPicker } from '../utils/util'
-import renderButtons from '../componentes/renderButtons.vue'
+import wsButtons from '../componentes/ws-buttons.vue'
 export default {
-  name: 'renderTable',
-  components: { renderButtons },
+  name: 'ws-table',
+  components: { wsButtons },
   props: {
     // 必传,
     // 表格列
@@ -268,7 +271,6 @@ export default {
     // 监听tableData变化， 并按条件自适应表格宽度，固定表头等
     tableData(newData) {
       // 配置selfAdjust为true,则宽度自调节
-      console.log('tableData变更')
       this.columns.forEach((column) => {
         const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
         arr.push(column.label) // 把每列的表头也加进去算
@@ -276,6 +278,15 @@ export default {
         if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
       })
     }
+  },
+  created() {
+    // 处理tableColumns
+    // this.tableColumns.forEach(fieldItem => {
+    //   // 过滤器进行绑定vue实例
+    //   if(fieldItem.formatter) {
+    //     fieldItem.formatter = fieldItem.formatter.bind(this)
+    //   }
+    // })
   },
   methods: {
     judgeTimeType,
@@ -331,7 +342,8 @@ export default {
       this.temRow = deepClone(row)
     },
     // input框失焦处理
-    handleBlur(row, field, handler) {
+    handleBlur(row, fieldItem) {
+      const { field, blurHandler: handler } = fieldItem
       this.index = ''
       this.property = ''
       // 如果前后值相同则不处理
@@ -350,7 +362,8 @@ export default {
       })
     },
     // input框输入处理
-    handleInput(value, row, field, handler) {
+    handleInput(value, row, fieldItem) {
+      const { field, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
         row[field] = newValue
@@ -359,23 +372,23 @@ export default {
       }
     },
     // 表格内复选框变更
-    checkBoxChange(value, field, row) {
+    checkBoxChange(value, fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'checkBoxChange', field },
+        buttonItem: { method: 'checkBoxChange', fieldItem },
         row
       })
     },
     // 表格内下拉框变更
-    selectChange(value, field, row) {
+    selectChange(value, fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'selectChange', field },
+        buttonItem: { method: 'selectChange', fieldItem },
         row
       })
     },
     // 表格内时间变更
-    datetimeChange(value, field, row) {
+    datetimeChange(value, fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'selectChange', field },
+        buttonItem: { method: 'datetimeChange', fieldItem },
         row
       })
     }

@@ -10,29 +10,29 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/index.vue')
   },
   {
-    path: '/renderButtons',
-    name: 'renderButtons',
-    component: () => import(/* webpackChunkName: "about" */ '../views/renderButtons-test.vue')
+    path: '/ws-buttons',
+    name: 'ws-buttons',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-buttons-test.vue')
   },
   {
-    path: '/renderForm',
-    name: 'renderForm',
-    component: () => import(/* webpackChunkName: "about" */ '../views/renderForm-test.vue')
+    path: '/ws-form',
+    name: 'ws-form',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-form-test.vue')
   },
   {
-    path: '/renderTable',
-    name: 'renderTable',
-    component: () => import(/* webpackChunkName: "about" */ '../views/renderTable-test.vue')
+    path: '/ws-table',
+    name: 'ws-table',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-table-test.vue')
   },
   {
-    path: '/renderTree',
-    name: 'renderTree',
-    component: () => import(/* webpackChunkName: "about" */ '../views/renderTree-test.vue')
+    path: '/ws-tree',
+    name: 'ws-tree',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-tree-test.vue')
   },
   {
-    path: '/renderEcharts',
-    name: 'renderEcharts',
-    component: () => import(/* webpackChunkName: "about" */ '../views/renderEcharts-test.vue')
+    path: '/ws-echarts',
+    name: 'ws-echarts',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-echarts-test.vue')
   },
   {
     path: '/test',

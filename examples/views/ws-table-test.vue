@@ -1,6 +1,6 @@
 <template>
   <div>
-    <renderForm
+    <ws-form
       :formConfigList="formConfigList"
       :buttonConfigList="buttonConfigList"
       :allOptions="allOptions"
@@ -8,7 +8,7 @@
       @happenEvent="happenEvent"
       style="margin-bottom: 20px"
     >
-      <!-- 指向renderForm组件的插槽 -->
+      <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">
         <el-input
           clearable
@@ -17,14 +17,14 @@
           :disabled="fieldItem.disabled"
         ></el-input>
       </template>
-      <!-- 指向renderButtons组件的插槽 -->
+      <!-- 指向ws-buttons组件的插槽 -->
       <template #download="scope">
         <el-button type="primary" size="small" @click="happenEvent(scope)"
           >下载</el-button
         >
       </template>
-    </renderForm>
-    <renderTable
+    </ws-form>
+    <ws-table
       style="height: 450px"
       :loading="loading"
       :tableData="tableData"
@@ -34,14 +34,14 @@
       globalMaxDate="2024-01-22"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
-      ref="renderTable"
+      ref="ws-table"
     >
       <template v-slot:expand="{ row }">
         <div>
           {{ JSON.stringify(row) }}
         </div>
       </template>
-    </renderTable>
+    </ws-table>
   </div>
 </template>
 
@@ -55,7 +55,7 @@ import {
   happenEvent
 } from '../contant'
 export default {
-  name: 'renderTable-test',
+  name: 'ws-table-test',
   data() {
     return {
       buttonConfigList,

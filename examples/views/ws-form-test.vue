@@ -1,13 +1,13 @@
 <template>
   <div>
-    <renderForm
+    <ws-form
       :formConfigList="formConfigList"
       :buttonConfigList="buttonConfigList"
       :allOptions="allOptions"
       isSearchList
       @happenEvent="happenEvent"
     >
-     <!-- 指向renderForm组件的插槽 -->
+     <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">
         <el-input
           clearable
@@ -16,7 +16,7 @@
           :disabled="fieldItem.disabled"
         ></el-input>
       </template>
-     <!-- 指向renderButtons组件的插槽 -->
+     <!-- 指向ws-buttons组件的插槽 -->
       <template #download="scope">
         <el-button
           type="primary"
@@ -25,7 +25,7 @@
           >下载</el-button
         >
       </template>
-    </renderForm>
+    </ws-form>
   </div>
 </template>
 
@@ -36,10 +36,8 @@ import {
   allOptions,
   happenEvent
 } from '../contant'
-import renderButtons from '@/componentes/renderButtons'
 export default {
   name: 'renderSearch-test',
-  components: { renderButtons },
   data() {
     return {
       buttonConfigList,

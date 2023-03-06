@@ -12,7 +12,7 @@
 <script>
 import { list } from '../contant';
 export default {
-  name: 'index',
+  name: 'entry',
   data() {
     return {};
   },

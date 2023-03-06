@@ -34,7 +34,7 @@
 
 <script>
 export default {
-  name: 'renderButtons',
+  name: 'ws-buttons',
   props: {
     // 按钮配置数组
     buttonConfigList: {

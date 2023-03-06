@@ -132,7 +132,7 @@ export function judgeTimeType(limit) {
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   // console.log(formData, 'formData')
-  const timeType = judgeTimeType(fieldItem.timeFormat)
+  const timeType = judgeTimeType(fieldItem.valueFormat)
   // 单独处理日月年限制
   const minField = fieldItem.params ? fieldItem.params.minTime : ''
   const maxField = fieldItem.params ? fieldItem.params.maxTime : ''

@@ -1,5 +1,9 @@
 <template>
-  <div class="render" :class="{ fold: isFold, searchMode: isSearchList }">
+  <div
+    class="render"
+    :class="{ fold: isFold, searchMode: isSearchList }"
+    ref="wsForm"
+  >
     <el-form
       ref="formRef"
       label-width="auto"
@@ -8,8 +12,8 @@
       :validate-on-rule-change="false"
       :size="size"
     >
-      <!-- 申请信息 -->
       <el-row :gutter="12" type="flex">
+        <!-- 表单元素 -->
         <el-col
           :span="fieldItem.col || 6"
           v-for="fieldItem in formConfigList"
@@ -75,7 +79,7 @@
                 "
                 v-model="formData[fieldItem.field]"
                 :type="fieldItem.timeType"
-                :value-format="fieldItem.timeFormat"
+                :value-format="fieldItem.valueFormat"
                 :placeholder="fieldItem.disabled ? '' : '选择时间'"
                 :picker-options="
                   getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
@@ -104,10 +108,11 @@
             </div>
           </el-form-item>
         </el-col>
-        <el-form-item :class="isSearchList ? '' : 'formMode-renderButtons'">
-          <renderButtons
+        <!-- 按钮 -->
+        <el-form-item :class="isSearchList ? '' : 'formMode-ws-buttons'">
+          <ws-buttons
             :buttonConfigList="buttonConfigList"
-            class="searchMode-renderButtons"
+            class="searchMode-ws-buttons"
             @happenEvent="happenEvent"
           >
             <template
@@ -117,7 +122,7 @@
               <slot :name="name" v-bind="scope"></slot>
             </template>
             <el-link
-              v-if="isSearchList"
+              v-if="isSearchList && exceedOneRow"
               :underline="false"
               type="primary"
               @click="isFold = !isFold"
@@ -127,7 +132,7 @@
                 :class="!isFold ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
               ></i
             ></el-link>
-          </renderButtons>
+          </ws-buttons>
         </el-form-item>
       </el-row>
     </el-form>
@@ -135,18 +140,17 @@
 </template>
 
 <script>
-import * as dayjs from 'dayjs'
 import { deepClone, judgeTimeType, getPicker } from '../utils/util'
-import renderButtons from '../componentes/renderButtons.vue'
+import wsButtons from '../componentes/ws-buttons.vue'
 export default {
-  name: 'renderForm',
-  components: { renderButtons },
+  name: 'ws-form',
+  components: { wsButtons },
   data() {
     return {
       formData: {},
       cloneForm: {},
-      saveLoading: false,
-      isFold: false
+      isFold: false,
+      exceedOneRow: false
     }
   },
   props: {
@@ -188,10 +192,6 @@ export default {
       default: 'medium',
       type: String
     },
-    isShowbtn: {
-      default: true,
-      type: Boolean
-    },
     // 表单默认值
     defaultForm: {
       default() {
@@ -215,6 +215,33 @@ export default {
       type: String | Number
     }
   },
+  //自定义指令
+  directives: {
+    // 监听元素宽度变化，用于地图自适应小
+    resize: {
+      bind(el, binding) {
+        let width = '',
+          height = ''
+        console.log('v-resize-bind', el)
+
+        function get() {
+          console.log('v-resize-get')
+
+          const style = document.defaultView.getComputedStyle(el)
+          if (width !== style.width || height !== style.height) {
+            binding.value({ width, height })
+          }
+          width = style.width
+          height = style.height
+        }
+
+        el.__vueReize__ = setInterval(get, 200)
+      },
+      unbind(el) {
+        clearInterval(el.__vueReize__)
+      }
+    }
+  },
   watch: {
     formConfigList: {
       handler() {
@@ -229,7 +256,7 @@ export default {
           }
           // 时间控件类型判断
           if (item.type === '5') {
-            item.timeType = this.judgeTimeType(item.timeFormat)
+            item.timeType = this.judgeTimeType(item.valueFormat)
           }
         })
       },
@@ -295,9 +322,23 @@ export default {
       return obj
     }
   },
+  mounted() {
+    this.$nextTick(this.judgeOneRow)
+    window.addEventListener('resize', this.judgeOneRow)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.judgeOneRow)
+  },
   methods: {
     judgeTimeType,
     getPicker,
+    // 判断高度是否只有一行，从而隐藏折叠按钮
+    judgeOneRow() {
+      const el = this.$refs.wsForm
+      window.wsForm = el
+      this.exceedOneRow = el.offsetHeight > 40
+    },
+    // 集中处理事件
     happenEvent(buttonItem) {
       this.$emit('happenEvent', {
         buttonItem,
@@ -340,7 +381,7 @@ export default {
   /deep/ .el-form-item {
     margin-bottom: 0;
   }
-  .searchMode-renderButtons {
+  .searchMode-ws-buttons {
     /deep/ .el-button + .el-button,
     .el-checkbox.is-bordered + .el-checkbox.is-bordered {
       margin-left: 0;
@@ -361,7 +402,7 @@ export default {
     }
   }
 }
-/deep/ .formMode-renderButtons.el-form-item {
+/deep/ .formMode-ws-buttons.el-form-item {
   display: flex;
   justify-content: flex-end;
   width: 100%;

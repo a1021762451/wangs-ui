@@ -1,5 +1,5 @@
 <template>
-  <renderTree
+  <ws-tree
     showCheckBox
     draggable
     excludeFirstSearch
@@ -12,12 +12,12 @@
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     :treeData="treeData"
-  ></renderTree>
+  ></ws-tree>
 </template>
 
 <script>
 export default {
-  name: 'renderTree-test',
+  name: 'ws-tree-test',
   data() {
     return {
       treeData: [

@@ -1,12 +1,12 @@
 <template>
   <div style="height: 300px; width: 600px">
-    <renderEcharts :echartsData="echartsData"></renderEcharts>
+    <ws-echarts :echartsData="echartsData"></ws-echarts>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'renderEcharts-test',
+  name: 'ws-echarts-test',
   data() {
     return {
       echartsData: {

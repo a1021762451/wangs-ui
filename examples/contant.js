@@ -1,9 +1,9 @@
 export const list = [
-  'renderButtons',
-  'renderForm',
-  'renderTable',
-  'renderTree',
-  'renderEcharts',
+  'ws-buttons',
+  'ws-form',
+  'ws-table',
+  'ws-tree',
+  'ws-echarts',
   'test'
 ]
 // 按钮组配置同tableButtons
@@ -38,7 +38,7 @@ export const formConfigList = [
     type: '5',
     field: 'endTime',
     label: '竣工日期',
-    timeFormat: 'yyyy-MM-dd',
+    valueFormat: 'yyyy-MM-dd',
     required: true
   },
   {
@@ -62,9 +62,15 @@ export const allOptions = {
 // 表格列配置
 export const tableColumns = [
   { type: 'selection' },
-  { type: 'index' },
+  { type: 'index', label: '序号' },
   { type: 'expand', slotName: 'expand' },
-  { field: 'plantName', label: '厂站名称' },
+  {
+    field: 'plantName',
+    label: '厂站名称',
+    formatter: function (value) {
+      return value + 'filter'
+    }
+  },
   // 宽度自调节举例
   { field: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
   // 输入框模式举例
@@ -105,21 +111,21 @@ export const tableColumns = [
     field: 'testMinDatetime',
     label: '测试时间框小',
     eleType: 'datetime',
-    timeFormat: 'yyyy-MM-dd',
+    valueFormat: 'yyyy-MM-dd',
     params: { maxTime: 'testMaxDatetime' }
   },
   {
     field: 'testMaxDatetime',
     label: '测试时间框大',
     eleType: 'datetime',
-    timeFormat: 'yyyy-MM-dd',
+    valueFormat: 'yyyy-MM-dd',
     params: { minTime: 'testMinDatetime' }
   },
   {
     field: 'testTime',
     label: '测试时间框(time)',
     eleType: 'datetime',
-    timeFormat: 'HH:mm',
+    valueFormat: 'HH:mm',
     params: { minTime: 'testMinDatetime' }
   }
 ]
@@ -140,10 +146,5 @@ export const tableButtons = [
 export function happenEvent(eventData) {
   console.log(eventData, 'eventData')
   const { buttonItem = {}, formData, row } = eventData
-  buttonItem.method && console.log(buttonItem.method, 'buttonItem.method')
-  buttonItem.label && console.log(buttonItem.label, 'buttonItem.label')
-  buttonItem.slotName && console.log(buttonItem.slotName, 'buttonItem.slotName')
-  console.log(formData, 'formData')
-  console.log(row, 'row')
   this[buttonItem.method] && this[buttonItem.method](eventData)
 }
