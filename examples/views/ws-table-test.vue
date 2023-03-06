@@ -4,6 +4,8 @@
       :formConfigList="formConfigList"
       :buttonConfigList="buttonConfigList"
       :allOptions="allOptions"
+      :defaultForm="defaultForm"
+      buttonSize="small"
       isSearchList
       @happenEvent="happenEvent"
       style="margin-bottom: 20px"
@@ -73,6 +75,7 @@ export default {
       allOptions,
       tableColumns,
       tableButtons,
+      defaultForm: { applyComId: '南昌', equipName: '4号' },
       selection: [],
       tableData: [
         {

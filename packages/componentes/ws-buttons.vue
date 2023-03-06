@@ -10,7 +10,7 @@
         v-else-if="isLinkButton"
         type="primary"
         class="button-item"
-        size="small"
+        :size="size"
         :key="buttonItem.name"
         :underline="false"
         @click="$emit('happenEvent', buttonItem)"
@@ -21,7 +21,7 @@
         :key="buttonItem.label"
         :type="buttonItem.type || 'primary'"
         class="button-item"
-        :size="buttonItem.size || 'small'"
+        :size="size"
         :loading="buttonItem.loading"
         :icon="buttonItem.icon"
         @click="$emit('happenEvent', buttonItem)"
@@ -47,6 +47,11 @@ export default {
     isLinkButton: {
       type: Boolean,
       default: false
+    },
+    // 按钮组尺寸
+    size: {
+      default: 'small',
+      type: String
     }
   }
 }

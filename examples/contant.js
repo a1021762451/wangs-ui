@@ -10,16 +10,6 @@ export const list = [
 // 按钮组配置同tableButtons
 export const buttonConfigList = [
   {
-    method: 'search',
-    label: '查看'
-  },
-  {
-    method: 'reset',
-    label: '重置',
-    type: 'plain',
-    size: 'mini'
-  },
-  {
     method: 'export',
     label: '导出EXCEL',
     icon: 'el-icon-setting'

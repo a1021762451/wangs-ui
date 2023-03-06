@@ -111,9 +111,10 @@
         <!-- 按钮 -->
         <el-form-item :class="isSearchList ? '' : 'formMode-ws-buttons'">
           <ws-buttons
-            :buttonConfigList="buttonConfigList"
+            :buttonConfigList="buttonsList"
             class="searchMode-ws-buttons"
             @happenEvent="happenEvent"
+            :size="buttonSize"
           >
             <template
               v-for="(index, name) in $scopedSlots"
@@ -124,6 +125,7 @@
             <el-link
               v-if="isSearchList && exceedOneRow"
               :underline="false"
+              :size="buttonSize"
               type="primary"
               @click="isFold = !isFold"
               class="fold-button"
@@ -150,7 +152,8 @@ export default {
       formData: {},
       cloneForm: {},
       isFold: false,
-      exceedOneRow: false
+      exceedOneRow: false,
+      buttonsList: []
     }
   },
   props: {
@@ -213,6 +216,11 @@ export default {
     globalMaxDate: {
       default: 0,
       type: String | Number
+    },
+    // 按钮组尺寸
+    buttonSize: {
+      default: 'small',
+      type: String
     }
   },
   //自定义指令
@@ -261,6 +269,27 @@ export default {
       handler() {
         if (Object.keys(this.fatherForm).length) {
           this.formData = this.fatherForm
+        }
+      },
+      immediate: true
+    },
+    buttonConfigList: {
+      handler() {
+        if (this.isSearchList) {
+          this.buttonsList = [
+            {
+              method: 'search',
+              label: '查看'
+            },
+            {
+              method: 'reset',
+              label: '重置',
+              type: 'plain'
+            },
+            ...this.buttonConfigList
+          ]
+        } else {
+          this.buttonsList = [...this.buttonConfigList]
         }
       },
       immediate: true
@@ -333,6 +362,16 @@ export default {
     },
     // 集中处理事件
     happenEvent(buttonItem) {
+      const { method } = buttonItem
+      // method为reset则进行默认处理
+      if (method === 'reset') {
+        this.formData = { ...this.formData, ...this.defaultForm }
+        this.$emit('happenEvent', {
+          buttonItem: { method: 'search' },
+          formData: this.formData
+        })
+        return
+      }
       this.$emit('happenEvent', {
         buttonItem,
         formData: this.formData
