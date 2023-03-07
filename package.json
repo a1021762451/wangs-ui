@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lib": "vue-cli-service build --target lib --name wangs-ui --dest lib packages/index.js"
+    "lib": "vue-cli-service build --target lib --name wangs-ui --dest lib packages/index.js",
+    "push": "npm run lib && npm publish"
   },
   "dependencies": {
     "core-js": "^3.8.3",
