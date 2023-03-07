@@ -1,4 +1,3 @@
-import * as dayjs from 'dayjs'
 /**
  * 对象深拷贝
  */
@@ -138,8 +137,8 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   const maxField = fieldItem.params ? fieldItem.params.maxTime : ''
   const minValue = formData[minField]
   const maxValue = formData[maxField]
-  const minTimeValue = () => +dayjs(dayjs(minValue).format('YYYY-MM-DD'))
-  const maxTimeValue = () => +dayjs(dayjs(maxValue).format('YYYY-MM-DD'))
+  const minTimeValue = () => +new Date(new Date(minValue).format('YYYY-MM-DD'))
+  const maxTimeValue = () => +new Date(new Date(maxValue).format('YYYY-MM-DD'))
   const minTime = minValue ? minTimeValue() : +new Date(globalMinDate)
   const maxTime = maxValue ? maxTimeValue() : +new Date(globalMaxDate)
   // console.log(minField, maxField, 'minField, maxField')
@@ -193,4 +192,58 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
       maxTime: fieldItem.maxTime ? formData[fieldItem.maxTime] : null
     }
   }
+}
+
+// export function formatTime(date, fmt = 'YYYY-MM-DD') {
+//   const time = new Date(date)
+//   var o = {
+//     'M+': time.getMonth() + 1, //月份
+//     'D+': time.getDate(), //日
+//     'H+': time.getHours(), //小时
+//     'm+': time.getMinutes(), //分
+//     's+': time.getSeconds(), //秒
+//     'q+': Math.floor((time.getMonth() + 3) / 3), //季度
+//     S: time.getMilliseconds() //毫秒
+//   }
+//   let match
+//   if ((match = fmt.match(/(Y+)/)))
+//     fmt = fmt.replace(
+//       match[1],
+//       (time.getFullYear() + '').substring(4 - match[1].length)
+//     )
+//   for (var k in o)
+//     if ((match = fmt.match(new RegExp('(' + k + ')'))))
+//       fmt = fmt.replace(
+//         match[1],
+//         match[1].length == 1
+//           ? o[k]
+//           : ('00' + o[k]).substring(('' + o[k]).length)
+//       )
+//   return fmt
+// }
+Date.prototype.format= function(fmt = 'YYYY-MM-DD') {
+  var o = {
+    'M+': this.getMonth() + 1, //月份
+    'D+': this.getDate(), //日
+    'H+': this.getHours(), //小时
+    'm+': this.getMinutes(), //分
+    's+': this.getSeconds(), //秒
+    'q+': Math.floor((this.getMonth() + 3) / 3), //季度
+    S: this.getMilliseconds() //毫秒
+  }
+  let match
+  if ((match = fmt.match(/(Y+)/)))
+    fmt = fmt.replace(
+      match[1],
+      (this.getFullYear() + '').substring(4 - match[1].length)
+    )
+  for (var k in o)
+    if ((match = fmt.match(new RegExp('(' + k + ')'))))
+      fmt = fmt.replace(
+        match[1],
+        match[1].length == 1
+          ? o[k]
+          : ('00' + o[k]).substring(('' + o[k]).length)
+      )
+  return fmt
 }

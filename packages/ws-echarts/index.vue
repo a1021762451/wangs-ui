@@ -53,8 +53,7 @@ export default {
     // 初始化
     init() {
       // 基于准备好的dom，初始化echarts实例
-      const echarts = this.$echarts || require('echarts')
-      this.myChart = echarts.init(document.getElementById(this.echartsId))
+      this.myChart = this.$echarts.init(document.getElementById(this.echartsId))
       window.addEventListener('resize', this.resizeEcharts)
       // 通用配置
       this.options = deepClone(commonOptions)

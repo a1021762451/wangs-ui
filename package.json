@@ -1,14 +1,19 @@
 {
-  "name": "ws-ui",
-  "version": "0.1.0",
-  "private": true,
+  "name": "wangs-ui",
+  "version": "1.0.3",
+  "private": false,
+  "description": "基于element-ui封装的组件",
+  "author": {"name":"wangshuai"},
+  "license": "MIT",
+  "main": "lib/wangs-ui.umd.min.js",
+  "keywords": ["vue","element-ui"],
   "scripts": {
     "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "lib": "vue-cli-service build --target lib --name wangs-ui --dest lib packages/index.js"
   },
   "dependencies": {
     "core-js": "^3.8.3",
-    "dayjs": "^1.11.7",
     "echarts": "5.4.1",
     "element-ui": "2.15.13",
     "vue": "^2.6.14",

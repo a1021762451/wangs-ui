@@ -313,8 +313,8 @@ export default {
           obj[item.field].push({
             validator: (rule, value, callback) => {
               if (
-                +this.dayjs(value).valueOf() <=
-                +this.dayjs(this.form[minField]).valueOf()
+                +new Date(value) <=
+                +new Date(this.form[minField])
               ) {
                 callback(new Error('请注意时间先后'))
               } else {
@@ -329,8 +329,8 @@ export default {
           obj[item.field].push({
             validator: (rule, value, callback) => {
               if (
-                +this.dayjs(value).valueOf() >=
-                +this.dayjs(this.form[maxField]).valueOf()
+                +new Date(value) >=
+                +new Date(this.form[maxField])
               ) {
                 callback(new Error('请注意时间先后'))
               } else {
