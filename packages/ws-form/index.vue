@@ -16,96 +16,102 @@
         <!-- 表单元素 -->
         <el-col
           :span="fieldItem.col || 6"
-          v-for="fieldItem in formConfigList"
+          v-for="fieldItem in configList"
           :key="fieldItem.field"
         >
-          <el-form-item :label="fieldItem.label" :prop="fieldItem.field">
-            <div class="search-item_wrapper">
-              <el-select
-                clearable
-                filterable
-                v-if="fieldItem.type == '1'"
-                v-model="formData[fieldItem.field]"
-                :placeholder="fieldItem.disabled ? '' : '请选择'"
-                :disabled="fieldItem.disabled"
-                @change="changeSelect($event, fieldItem)"
-              >
-                <el-option
-                  v-for="item in allOptions[fieldItem.field]"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-              <el-input
-                clearable
-                v-else-if="fieldItem.type == '2'"
-                v-model="formData[fieldItem.field]"
-                :placeholder="fieldItem.disabled ? '' : '请输入内容'"
-                :disabled="fieldItem.disabled"
-              ></el-input>
-              <el-input-number
-                clearable
-                v-else-if="fieldItem.type == '3'"
-                v-model="formData[fieldItem.field]"
-                :placeholder="fieldItem.disabled ? '' : '请输入数字'"
-                :disabled="fieldItem.disabled"
-                :min="(fieldItem.params && fieldItem.params.min) || 1"
-                :max="(fieldItem.params && fieldItem.params.max) || 100"
-                :step="(fieldItem.params && fieldItem.params.step) || 1"
-                :precision="
-                  (fieldItem.params && fieldItem.params.precision) || 0
-                "
-                :controls="false"
-              >
-              </el-input-number>
-              <el-input
-                clearable
-                :maxlength="
-                  (fieldItem.params && +fieldItem.params.maxlength) || 1000
-                "
-                show-word-limit
-                v-else-if="fieldItem.type == '4'"
-                type="textarea"
-                v-model="formData[fieldItem.field]"
-                :placeholder="fieldItem.disabled ? '' : '请输入内容'"
-                :rows="2"
-                :disabled="fieldItem.disabled"
-              ></el-input>
-              <el-date-picker
-                clearable
-                v-else-if="
-                  fieldItem.type == '5' && fieldItem.timeType !== 'time'
-                "
-                v-model="formData[fieldItem.field]"
-                :type="fieldItem.timeType"
-                :value-format="fieldItem.valueFormat"
-                :placeholder="fieldItem.disabled ? '' : '选择时间'"
-                :picker-options="
-                  getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
-                "
-                :disabled="fieldItem.disabled"
-              ></el-date-picker>
-              <el-time-select
-                clearable
-                v-else-if="
-                  fieldItem.type == '5' && fieldItem.timeType === 'time'
-                "
-                v-model="formData[fieldItem.field]"
-                :placeholder="fieldItem.disabled ? '' : '选择时间'"
-                :picker-options="
-                  getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
-                "
-                :disabled="fieldItem.disabled"
-              ></el-time-select>
-              <template v-else-if="fieldItem.slotName">
-                <slot
-                  :name="fieldItem.slotName"
-                  :formData="formData"
-                  :fieldItem="fieldItem"
-                ></slot>
+          <el-form-item
+            :label="fieldItem.label"
+            :prop="fieldItem.field"
+            :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
+          >
+            <template v-slot:label>
+              <slot
+                v-if="fieldItem.headerSlotName"
+                :name="fieldItem.headerSlotName"
+              ></slot>
+              <template v-else>
+                {{ fieldItem.label }}
+                <span v-if="colon">:</span>
               </template>
-            </div>
+            </template>
+            <el-select
+              clearable
+              filterable
+              v-if="fieldItem.type == '1'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请选择'"
+              :disabled="fieldItem.disabled"
+              @change="changeSelect($event, fieldItem)"
+            >
+              <el-option
+                v-for="item in allOptions[fieldItem.field]"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <el-input
+              clearable
+              v-else-if="fieldItem.type == '2'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+              :disabled="fieldItem.disabled"
+            ></el-input>
+            <el-input-number
+              clearable
+              v-else-if="fieldItem.type == '3'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入数字'"
+              :disabled="fieldItem.disabled"
+              :min="(fieldItem.params && fieldItem.params.min) || 1"
+              :max="(fieldItem.params && fieldItem.params.max) || 100"
+              :step="(fieldItem.params && fieldItem.params.step) || 1"
+              :precision="(fieldItem.params && fieldItem.params.precision) || 0"
+              :controls="false"
+            >
+            </el-input-number>
+            <el-input
+              clearable
+              :maxlength="
+                (fieldItem.params && +fieldItem.params.maxlength) || 1000
+              "
+              show-word-limit
+              v-else-if="fieldItem.type == '4'"
+              type="textarea"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+              :rows="2"
+              :disabled="fieldItem.disabled"
+            ></el-input>
+            <el-date-picker
+              clearable
+              v-else-if="fieldItem.type == '5' && fieldItem.timeType !== 'time'"
+              v-model="formData[fieldItem.field]"
+              :type="fieldItem.timeType"
+              :value-format="fieldItem.valueFormat"
+              :placeholder="fieldItem.disabled ? '' : '选择时间'"
+              :picker-options="
+                getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
+              "
+              :disabled="fieldItem.disabled"
+            ></el-date-picker>
+            <el-time-select
+              clearable
+              v-else-if="fieldItem.type == '5' && fieldItem.timeType === 'time'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '选择时间'"
+              :picker-options="
+                getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
+              "
+              :disabled="fieldItem.disabled"
+            ></el-time-select>
+            <template v-else-if="fieldItem.slotName">
+              <slot
+                :name="fieldItem.slotName"
+                :formData="formData"
+                :fieldItem="fieldItem"
+              ></slot>
+            </template>
           </el-form-item>
         </el-col>
         <!-- 按钮 -->
@@ -153,7 +159,8 @@ export default {
       cloneForm: {},
       isFold: false,
       exceedOneRow: false,
-      buttonsList: []
+      buttonsList: [],
+      configList: []
     }
   },
   props: {
@@ -221,6 +228,11 @@ export default {
     buttonSize: {
       default: 'small',
       type: String
+    },
+    // 标签后面是否有冒号
+    colon: {
+      default: false,
+      type: Boolean
     }
   },
   //自定义指令
@@ -248,8 +260,17 @@ export default {
   watch: {
     formConfigList: {
       handler() {
-        // this.formData = {}
-        this.formConfigList.forEach((item) => {
+        const configList = deepClone(this.formConfigList)
+        let remain = 0
+        let total = 0
+        configList.forEach((item, index) => {
+          const col = item.col || 6
+          total += col
+          const newRemain = Math.floor((total - 1) / 24)
+          if (newRemain !== remain || index === 0) {
+            this.$set(item, 'isSide', true)
+            remain = newRemain
+          }
           if (!this.isDetail) {
             if (this.defaultForm[item.field] !== undefined) {
               this.$set(this.formData, item.field, this.defaultForm[item.field])
@@ -262,6 +283,7 @@ export default {
             item.timeType = this.judgeTimeType(item.valueFormat)
           }
         })
+        this.configList = configList
       },
       immediate: true
     },
@@ -312,10 +334,7 @@ export default {
           const minField = params.minTime
           obj[item.field].push({
             validator: (rule, value, callback) => {
-              if (
-                +new Date(value) <=
-                +new Date(this.form[minField])
-              ) {
+              if (+new Date(value) <= +new Date(this.form[minField])) {
                 callback(new Error('请注意时间先后'))
               } else {
                 callback()
@@ -328,10 +347,7 @@ export default {
           const maxField = params.maxTime
           obj[item.field].push({
             validator: (rule, value, callback) => {
-              if (
-                +new Date(value) >=
-                +new Date(this.form[maxField])
-              ) {
+              if (+new Date(value) >= +new Date(this.form[maxField])) {
                 callback(new Error('请注意时间先后'))
               } else {
                 callback()
@@ -357,8 +373,11 @@ export default {
     // 判断高度是否只有一行，从而隐藏折叠按钮
     judgeOneRow() {
       const el = this.$refs.wsForm
-      window.wsForm = el
-      this.exceedOneRow = el.offsetHeight > 40
+      let compareEle = el.getElementsByClassName('el-col')[0]
+      if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
+      const compareHeight = compareEle.offsetHeight
+      this.exceedOneRow = el.offsetHeight - 10 > compareHeight
+      console.log(compareHeight, el.offsetHeight - 10)
     },
     // 集中处理事件
     happenEvent(buttonItem) {
@@ -395,8 +414,22 @@ export default {
 .searchMode {
   /deep/ .el-form-item {
     margin-bottom: 0;
+    display: flex;
+  }
+  .notLeftMargin {
+    /deep/ .el-form-item__label-wrap {
+      margin-left: 0px !important;
+    }
+  }
+  /deep/ .el-form-item__label-wrap {
+    margin-left: 20px !important;
+  }
+  /deep/ .el-form-item__content {
+    margin-left: 0 !important;
+    flex: 1;
   }
   .searchMode-ws-buttons {
+    margin-left: 40px;
     /deep/ .el-button + .el-button,
     .el-checkbox.is-bordered + .el-checkbox.is-bordered {
       margin-left: 0;

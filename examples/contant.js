@@ -21,7 +21,7 @@ export const buttonConfigList = [
 
 // 表单配置
 export const formConfigList = [
-  { type: '1', field: 'applyComId', label: '申请单位', required: true },
+  { type: '1', field: 'applyComId', label: '申请单位申请单位申请单位', required: true },
   { type: '2', field: 'equipName', label: '停电设备', required: true },
   { type: '3', field: 'equipNum', label: '设备数量', required: true },
   { type: '4', field: 'protectContent', label: '检修内容' },
