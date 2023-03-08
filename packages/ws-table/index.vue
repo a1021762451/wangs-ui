@@ -1,174 +1,194 @@
 <template>
   <div>
     <!-- 表格 -->
-    <el-table
-      border
-      tooltip-effect="dark"
-      style="width: 100%"
-      height="calc(100% - 35px)"
-      :header-cell-style="{ background: '#f3f3f3' }"
-      :data="tableData"
-      v-loading="loading"
-      v-bind="$attrs"
-      v-on="$listeners"
+    <el-form
+      :model="tableForm"
+      ref="tableForm"
+      label-width="80px"
+      :validate-on-rule-change="true"
+      inline
+      size="small"
+      style="height: calc(100% - 35px);"
     >
-      <template v-for="fieldItem in columns">
-        <!-- 特殊列，如复选框，序号列 -->
-        <el-table-column
-          width="55"
-          align="center"
-          v-if="fieldItem.type"
-          :type="fieldItem.type"
-          :label="fieldItem.label"
-          :key="fieldItem.type"
-        >
-          <template v-if="fieldItem.slotName" v-slot="scope">
-            <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }">
-            </slot>
-          </template>
-        </el-table-column>
-        <!-- 内容列 -->
-        <el-table-column
-          :key="fieldItem.field"
-          align="center"
-          :prop="fieldItem.field"
-          :label="fieldItem.label"
-          :width="fieldItem.width"
-          :fixed="fieldItem.fixed"
-          :show-overflow-tooltip="fieldItem.showTooltip"
-          v-else
-        >
-          <template v-if="fieldItem.headerSlotName" v-slot:header="scope">
-            <slot
-              :name="fieldItem.headerSlotName"
-              v-bind="{ ...scope, fieldItem }"
-            >
-              {{ fieldItem.label }}
-            </slot>
-          </template>
-          <template v-slot="{ row, column, $index }">
-            <template v-if="fieldItem.slotName">
-              <slot
-                :name="fieldItem.slotName"
-                v-bind="{ row, column, $index, fieldItem }"
-              >
-                {{ row[fieldItem.field] }}
+      <el-table
+        border
+        tooltip-effect="dark"
+        style="width: 100%"
+        :header-cell-style="{ background: '#f3f3f3' }"
+        :data="tableForm.tableData"
+        v-loading="loading"
+        v-bind="$attrs"
+        v-on="$listeners"
+        height="height: 100%"
+      >
+        <template v-for="fieldItem in columns">
+          <!-- 特殊列，如复选框，序号列 -->
+          <el-table-column
+            width="55"
+            align="center"
+            v-if="fieldItem.type"
+            :type="fieldItem.type"
+            :label="fieldItem.label"
+            :key="fieldItem.type"
+          >
+            <template v-if="fieldItem.slotName" v-slot="scope">
+              <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }">
               </slot>
             </template>
-            <!-- 输入框模式 -->
-            <template v-else-if="fieldItem.eleType === 'input'">
-              <el-input
-                size="mini"
-                v-focus
-                v-if="property === fieldItem.field && index === $index"
-                :value="row[fieldItem.field]"
-                @blur="handleBlur(row, fieldItem)"
-                @input="handleInput($event, row, fieldItem)"
-              ></el-input>
-              <div
-                style="min-height: 23px"
-                v-else
-                @dblclick="toggleInput(row, column, $index)"
+          </el-table-column>
+          <!-- 内容列 -->
+          <el-table-column
+            :key="fieldItem.field"
+            align="center"
+            :prop="fieldItem.field"
+            :label="fieldItem.label"
+            :width="fieldItem.width"
+            :fixed="fieldItem.fixed"
+            :show-overflow-tooltip="fieldItem.showTooltip"
+            v-else
+          >
+            <template v-slot:header="scope">
+              <slot
+                :name="fieldItem.headerSlotName"
+                v-bind="{ ...scope, fieldItem }"
+                v-if="fieldItem.headerSlotName"
               >
-                {{ row[fieldItem.field] }}
-              </div>
+                {{ fieldItem.label }}
+              </slot>
+              <template v-else>
+                {{ fieldItem.label }}
+                <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
+              </template>
             </template>
-            <!-- 复选框模式 -->
-            <input
-              v-else-if="fieldItem.eleType === 'checkBox'"
-              style="cursor: pointer"
-              type="checkbox"
-              true-value="1"
-              false-value="0"
-              :disabled="
-                row[fieldItem.field] !== '1' && row[fieldItem.field] !== '0'
-              "
-              v-model="row[fieldItem.field]"
-              @change="checkBoxChange($event, fieldItem, row)"
-            />
-            <!-- 下拉框模式 -->
-            <el-select
-              v-else-if="fieldItem.eleType === 'select'"
-              size="mini"
-              v-model="row[fieldItem.field]"
-              placeholder="请选择"
-              filterable
-              clearable
-              @change="selectChange($event, fieldItem, row)"
-            >
-              <el-option
-                v-for="fieldItem in fieldItem.options"
-                :key="fieldItem.value"
-                :label="fieldItem.label"
-                :value="fieldItem.value"
+            <template v-slot="{ row, column, $index }">
+              <el-form-item
+                :prop="`tableData.${$index}.${fieldItem.field}`"
+                :rules="rules[fieldItem.field]"
               >
-              </el-option>
-            </el-select>
-            <!-- 时间框模式 -->
-            <el-date-picker
-              v-else-if="
-                fieldItem.eleType === 'datetime' &&
-                judgeTimeType(fieldItem.valueFormat) !== 'time'
-              "
-              size="mini"
-              clearable
-              v-model="row[fieldItem.field]"
-              :type="judgeTimeType(fieldItem.valueFormat)"
-              :value-format="fieldItem.valueFormat"
-              :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
-              :disabled="row[fieldItem.disabledKey]"
-              :picker-options="
-                getPicker(fieldItem, row, globalMinDate, globalMaxDate)
-              "
-              @change="datetimeChange($event, fieldItem, row)"
-            ></el-date-picker>
-            <el-time-select
-              size="mini"
-              v-else-if="
-                fieldItem.eleType === 'datetime' &&
-                judgeTimeType(fieldItem.valueFormat) === 'time'
-              "
-              clearable
-              v-model="row[fieldItem.field]"
-              :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
-              :disabled="row[fieldItem.disabledKey]"
-              :picker-options="
-                getPicker(fieldItem, row, globalMinDate, globalMaxDate)
-              "
-              @change="datetimeChange($event, fieldItem, row)"
-            ></el-time-select>
-            <template v-else-if="fieldItem.formatter">{{
-              fieldItem.formatter(row[fieldItem.field], row, column, $index)
-            }}</template>
-            <template v-else>{{ row[fieldItem.field] }}</template>
+                <template v-if="fieldItem.slotName">
+                  <slot
+                    :name="fieldItem.slotName"
+                    v-bind="{ row, column, $index, fieldItem }"
+                  >
+                    {{ row[fieldItem.field] }}
+                  </slot>
+                </template>
+                <!-- 输入框模式 -->
+                <template v-else-if="fieldItem.eleType === 'input'">
+                  <el-input
+                    size="mini"
+                    v-focus
+                    v-if="property === fieldItem.field && index === $index"
+                    :value="row[fieldItem.field]"
+                    @blur="handleBlur(row, fieldItem)"
+                    @input="handleInput($event, row, fieldItem)"
+                  ></el-input>
+                  <div
+                    style="min-height: 23px"
+                    v-else
+                    @dblclick="toggleInput(row, column, $index)"
+                  >
+                    {{ row[fieldItem.field] }}
+                  </div>
+                </template>
+                <!-- 复选框模式 -->
+                <input
+                  v-else-if="fieldItem.eleType === 'checkBox'"
+                  style="cursor: pointer"
+                  type="checkbox"
+                  true-value="1"
+                  false-value="0"
+                  :disabled="
+                    row[fieldItem.field] !== '1' && row[fieldItem.field] !== '0'
+                  "
+                  v-model="row[fieldItem.field]"
+                  @change="checkBoxChange($event, fieldItem, row)"
+                />
+                <!-- 下拉框模式 -->
+                <el-select
+                  v-else-if="fieldItem.eleType === 'select'"
+                  size="mini"
+                  v-model="row[fieldItem.field]"
+                  placeholder="请选择"
+                  filterable
+                  clearable
+                  @change="selectChange($event, fieldItem, row)"
+                >
+                  <el-option
+                    v-for="fieldItem in fieldItem.options"
+                    :key="fieldItem.value"
+                    :label="fieldItem.label"
+                    :value="fieldItem.value"
+                  >
+                  </el-option>
+                </el-select>
+                <!-- 时间框模式 -->
+                <el-date-picker
+                  v-else-if="
+                    fieldItem.eleType === 'datetime' &&
+                    judgeTimeType(fieldItem.valueFormat) !== 'time'
+                  "
+                  size="mini"
+                  clearable
+                  v-model="row[fieldItem.field]"
+                  :type="judgeTimeType(fieldItem.valueFormat)"
+                  :value-format="fieldItem.valueFormat"
+                  :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
+                  :disabled="row[fieldItem.disabledKey]"
+                  :picker-options="
+                    getPicker(fieldItem, row, globalMinDate, globalMaxDate)
+                  "
+                  @change="datetimeChange($event, fieldItem, row)"
+                ></el-date-picker>
+                <el-time-select
+                  size="mini"
+                  v-else-if="
+                    fieldItem.eleType === 'datetime' &&
+                    judgeTimeType(fieldItem.valueFormat) === 'time'
+                  "
+                  clearable
+                  v-model="row[fieldItem.field]"
+                  :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
+                  :disabled="row[fieldItem.disabledKey]"
+                  :picker-options="
+                    getPicker(fieldItem, row, globalMinDate, globalMaxDate)
+                  "
+                  @change="datetimeChange($event, fieldItem, row)"
+                ></el-time-select>
+                <template v-else-if="fieldItem.formatter">{{
+                  fieldItem.formatter(row[fieldItem.field], row, column, $index)
+                }}</template>
+                <template v-else>{{ row[fieldItem.field] }}</template>
+              </el-form-item>
+            </template>
+          </el-table-column>
+        </template>
+        <!-- 操作列 -->
+        <el-table-column
+          align="center"
+          label="操作"
+          key="operation"
+          :fixed="operationFixed ? 'right' : undefined"
+          :width="tableButtons.length * 70"
+          v-if="tableButtons.length"
+        >
+          <template v-slot="{ row, column, $index }">
+            <ws-buttons
+              isLinkButton
+              :buttonConfigList="filterButtons(row, tableButtons)"
+              @happenEvent="happenEvent($event, { row, column, $index })"
+            >
+              <template
+                v-for="(index, name) in $scopedSlots"
+                v-slot:[name]="scope"
+              >
+                <slot :name="name" v-bind="scope"></slot>
+              </template>
+            </ws-buttons>
           </template>
         </el-table-column>
-      </template>
-      <!-- 操作列 -->
-      <el-table-column
-        align="center"
-        label="操作"
-        key="operation"
-        :fixed="operationFixed ? 'right' : undefined"
-        :width="tableButtons.length * 70"
-        v-if="tableButtons.length"
-      >
-        <template v-slot="{ row }">
-          <ws-buttons
-            isLinkButton
-            :buttonConfigList="filterButtons(row, tableButtons)"
-            @happenEvent="happenEvent($event, row)"
-          >
-            <template
-              v-for="(index, name) in $scopedSlots"
-              v-slot:[name]="scope"
-            >
-              <slot :name="name" v-bind="scope"></slot>
-            </template>
-          </ws-buttons>
-        </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
+    </el-form>
     <!-- 分页 -->
     <el-pagination
       v-if="showPagination"
@@ -274,19 +294,77 @@ export default {
       // 用于表格input组件
       temRow: {},
       property: '',
-      index: ''
+      index: '',
+      tableForm: {
+        tableData: [],
+        rules: {}
+      }
     }
   },
   watch: {
+    tableData: {
+      handler(newData) {
+        // 配置selfAdjust为true,则宽度自调节
+        this.columns.forEach((column) => {
+          const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
+          arr.push(column.label) // 把每列的表头也加进去算
+          const conditon = column.selfAdjust
+          if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
+        })
+        this.tableForm.tableData = this.tableData
+      },
+      immediate: true
+    }
     // 监听tableData变化， 并按条件自适应表格宽度，固定表头等
-    tableData(newData) {
-      // 配置selfAdjust为true,则宽度自调节
-      this.columns.forEach((column) => {
-        const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
-        arr.push(column.label) // 把每列的表头也加进去算
-        const conditon = column.selfAdjust
-        if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
+    // tableData(newData) {
+    //   // 配置selfAdjust为true,则宽度自调节
+    //   this.columns.forEach((column) => {
+    //     const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
+    //     arr.push(column.label) // 把每列的表头也加进去算
+    //     const conditon = column.selfAdjust
+    //     if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
+    //   })
+    // }
+  },
+  computed: {
+    rules() {
+      let obj = {}
+      const form = this.tableForm.tableData
+      this.columns.forEach((item) => {
+        if (item.required && !item.disabled) {
+          obj[item.field] = [
+            { required: true, message: `请输入${item.label}`, trigger: 'change' }
+          ]
+        }
+        const params = item.params
+        // if (params && params.minTime && !item.disabled) {
+        //   const minField = params.minTime
+        //   obj[item.field].push({
+        //     validator: (rule, value, callback) => {
+        //       if (+new Date(value) <= +new Date(this.form[minField])) {
+        //         callback(new Error('请注意时间先后'))
+        //       } else {
+        //         callback()
+        //       }
+        //     },
+        //     trigger: 'blur'
+        //   })
+        // }
+        // if (params && params.maxTime && !item.disabled) {
+        //   const maxField = params.maxTime
+        //   obj[item.field].push({
+        //     validator: (rule, value, callback) => {
+        //       if (+new Date(value) >= +new Date(this.form[maxField])) {
+        //         callback(new Error('请注意时间先后'))
+        //       } else {
+        //         callback()
+        //       }
+        //     },
+        //     trigger: 'blur'
+        //   })
+        // }
       })
+      return obj
     }
   },
   created() {
@@ -315,7 +393,16 @@ export default {
       })
     },
     // 监听转发事件
-    happenEvent(buttonItem, row) {
+    happenEvent(buttonItem,{ row, column, $index }) {
+      console.log('xxxxxxxxxxxxxxx');
+      const props = []
+      for(let key in this.rules) {
+        props.push(`tableData.${$index}.${key}`)
+      }
+      console.log(props);
+      this.$refs.tableForm.validateField(props,valid => {
+
+      })
       this.$emit('happenEvent', {
         buttonItem,
         row

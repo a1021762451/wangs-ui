@@ -66,7 +66,7 @@ export const tableColumns = [
     },
     showTooltip: true
   },
-  // 自定义表头，内容
+  // 过滤举例
   {
     field: 'testFormatter',
     label: '测试过滤',
@@ -92,13 +92,14 @@ export const tableColumns = [
     // 限制输入6位小数
     inputHandler: function (value) {
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
-    }
+    },
+    required: true
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
     field: 'testCheckBox',
     label: '测试复选框',
-    eleType: 'checkBox'
+    eleType: 'checkBox',
   },
   // 测试下拉框
   {
@@ -109,7 +110,8 @@ export const tableColumns = [
     options: [
       { label: '苹果', value: '苹果' },
       { label: '香蕉', value: '香蕉' }
-    ]
+    ],
+    required: true
   },
   // 测试时间框模式
   {
@@ -118,7 +120,8 @@ export const tableColumns = [
     width: 200,
     eleType: 'datetime',
     valueFormat: 'yyyy-MM-dd',
-    params: { maxTime: 'testMaxDatetime' }
+    params: { maxTime: 'testMaxDatetime' },
+    required: true
   },
   {
     field: 'testMaxDatetime',
@@ -126,7 +129,8 @@ export const tableColumns = [
     width: 200,
     eleType: 'datetime',
     valueFormat: 'yyyy-MM-dd',
-    params: { minTime: 'testMinDatetime' }
+    params: { minTime: 'testMinDatetime' },
+    required: true
   },
   {
     field: 'testTime',
@@ -134,7 +138,8 @@ export const tableColumns = [
     width: 200,
     eleType: 'datetime',
     valueFormat: 'HH:mm',
-    params: { minTime: 'testMinDatetime' }
+    params: { minTime: 'testMinDatetime' },
+    required: true
   }
 ]
 

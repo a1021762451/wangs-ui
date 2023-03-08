@@ -194,33 +194,6 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   }
 }
 
-// export function formatTime(date, fmt = 'YYYY-MM-DD') {
-//   const time = new Date(date)
-//   var o = {
-//     'M+': time.getMonth() + 1, //月份
-//     'D+': time.getDate(), //日
-//     'H+': time.getHours(), //小时
-//     'm+': time.getMinutes(), //分
-//     's+': time.getSeconds(), //秒
-//     'q+': Math.floor((time.getMonth() + 3) / 3), //季度
-//     S: time.getMilliseconds() //毫秒
-//   }
-//   let match
-//   if ((match = fmt.match(/(Y+)/)))
-//     fmt = fmt.replace(
-//       match[1],
-//       (time.getFullYear() + '').substring(4 - match[1].length)
-//     )
-//   for (var k in o)
-//     if ((match = fmt.match(new RegExp('(' + k + ')'))))
-//       fmt = fmt.replace(
-//         match[1],
-//         match[1].length == 1
-//           ? o[k]
-//           : ('00' + o[k]).substring(('' + o[k]).length)
-//       )
-//   return fmt
-// }
 Date.prototype.format= function(fmt = 'YYYY-MM-DD') {
   var o = {
     'M+': this.getMonth() + 1, //月份

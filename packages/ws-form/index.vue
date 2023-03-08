@@ -115,7 +115,7 @@
           </el-form-item>
         </el-col>
         <!-- 按钮 -->
-        <el-form-item :class="isSearchList ? '' : 'formMode-ws-buttons'">
+        <el-form-item  v-if="showButtons" :class="isSearchList ? '' : 'formMode-ws-buttons'">
           <ws-buttons
             :buttonConfigList="buttonsList"
             class="searchMode-ws-buttons"
@@ -358,6 +358,9 @@ export default {
         }
       })
       return obj
+    },
+    showButtons() {
+      return this.configList.length > 0
     }
   },
   mounted() {

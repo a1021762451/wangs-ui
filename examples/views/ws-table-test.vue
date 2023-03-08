@@ -98,6 +98,16 @@ export default {
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容'
+        },
+        {
+          plantName: '二号机组',
+          testInput: '2',
+          widthAdjust: '宽度宽度宽度',
+          testSelect: '香蕉',
+          testMinDatetime: '',
+          testMaxDatetime: '',
+          testTime: '',
+          testFormatter: '内容'
         }
       ],
       loading: false
