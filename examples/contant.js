@@ -21,12 +21,12 @@ export const buttonConfigList = [
 
 // 表单配置
 export const formConfigList = [
-  { type: '1', field: 'applyComId', label: '申请单位申请单位申请单位', required: true },
-  { type: '2', field: 'equipName', label: '停电设备', required: true },
-  { type: '3', field: 'equipNum', label: '设备数量', required: true },
-  { type: '4', field: 'protectContent', label: '检修内容' },
+  { eleType: 'select', field: 'applyComId', label: '申请单位申请单位申请单位', required: true },
+  { eleType: 'input', field: 'equipName', label: '停电设备', required: true },
+  { eleType: 'input-number', field: 'equipNum', label: '设备数量', required: true },
+  { eleType: 'textarea', field: 'protectContent', label: '检修内容' },
   {
-    type: '5',
+    eleType: 'datetime',
     field: 'endTime',
     label: '竣工日期',
     valueFormat: 'yyyy-MM-dd',
@@ -93,7 +93,8 @@ export const tableColumns = [
     inputHandler: function (value) {
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
     },
-    required: true
+    width: 200,
+    required: true,
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
@@ -119,7 +120,7 @@ export const tableColumns = [
     label: '测试时间框小',
     width: 200,
     eleType: 'datetime',
-    valueFormat: 'yyyy-MM-dd',
+    valueFormat: 'yyyy-MM-dd HH:mm',
     params: { maxTime: 'testMaxDatetime' },
     required: true
   },
@@ -128,7 +129,7 @@ export const tableColumns = [
     label: '测试时间框大',
     width: 200,
     eleType: 'datetime',
-    valueFormat: 'yyyy-MM-dd',
+    valueFormat: 'yyyy-MM-dd HH:mm',
     params: { minTime: 'testMinDatetime' },
     required: true
   },

@@ -2,9 +2,15 @@
   <div
     class="render"
     :class="{ fold: isFold, searchMode: isSearchList }"
+    :style="{ height: isFold ? colHeight + 1 + 'px' : undefined }"
     ref="wsForm"
   >
     <el-form
+      :style="{
+        transform: isFold
+          ? `translateY(-100%) translateY(${colHeight + 1}px)`
+          : undefined
+      }"
       ref="formRef"
       label-width="auto"
       :model="formData"
@@ -37,7 +43,7 @@
             <el-select
               clearable
               filterable
-              v-if="fieldItem.type == '1'"
+              v-if="fieldItem.eleType == 'select'"
               v-model="formData[fieldItem.field]"
               :placeholder="fieldItem.disabled ? '' : '请选择'"
               :disabled="fieldItem.disabled"
@@ -52,14 +58,14 @@
             </el-select>
             <el-input
               clearable
-              v-else-if="fieldItem.type == '2'"
+              v-else-if="fieldItem.eleType == 'input'"
               v-model="formData[fieldItem.field]"
               :placeholder="fieldItem.disabled ? '' : '请输入内容'"
               :disabled="fieldItem.disabled"
             ></el-input>
             <el-input-number
               clearable
-              v-else-if="fieldItem.type == '3'"
+              v-else-if="fieldItem.eleType == 'input-number'"
               v-model="formData[fieldItem.field]"
               :placeholder="fieldItem.disabled ? '' : '请输入数字'"
               :disabled="fieldItem.disabled"
@@ -76,7 +82,7 @@
                 (fieldItem.params && +fieldItem.params.maxlength) || 1000
               "
               show-word-limit
-              v-else-if="fieldItem.type == '4'"
+              v-else-if="fieldItem.eleType == 'textarea'"
               type="textarea"
               v-model="formData[fieldItem.field]"
               :placeholder="fieldItem.disabled ? '' : '请输入内容'"
@@ -85,10 +91,13 @@
             ></el-input>
             <el-date-picker
               clearable
-              v-else-if="fieldItem.type == '5' && fieldItem.timeType !== 'time'"
+              v-else-if="
+                fieldItem.eleType == 'datetime' && fieldItem.timeType !== 'time'
+              "
               v-model="formData[fieldItem.field]"
               :type="fieldItem.timeType"
               :value-format="fieldItem.valueFormat"
+              :format="fieldItem.valueFormat"
               :placeholder="fieldItem.disabled ? '' : '选择时间'"
               :picker-options="
                 getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
@@ -97,7 +106,9 @@
             ></el-date-picker>
             <el-time-select
               clearable
-              v-else-if="fieldItem.type == '5' && fieldItem.timeType === 'time'"
+              v-else-if="
+                fieldItem.eleType == 'datetime' && fieldItem.timeType === 'time'
+              "
               v-model="formData[fieldItem.field]"
               :placeholder="fieldItem.disabled ? '' : '选择时间'"
               :picker-options="
@@ -115,7 +126,10 @@
           </el-form-item>
         </el-col>
         <!-- 按钮 -->
-        <el-form-item  v-if="showButtons" :class="isSearchList ? '' : 'formMode-ws-buttons'">
+        <el-form-item
+          v-if="showButtons"
+          :class="isSearchList ? '' : 'formMode-ws-buttons'"
+        >
           <ws-buttons
             :buttonConfigList="buttonsList"
             class="searchMode-ws-buttons"
@@ -160,7 +174,8 @@ export default {
       isFold: false,
       exceedOneRow: false,
       buttonsList: [],
-      configList: []
+      configList: [],
+      colHeight: '50'
     }
   },
   props: {
@@ -279,7 +294,7 @@ export default {
             }
           }
           // 时间控件类型判断
-          if (item.type === '5') {
+          if (item.eleType === 'datetime') {
             item.timeType = this.judgeTimeType(item.valueFormat)
           }
         })
@@ -323,10 +338,15 @@ export default {
     },
     rules() {
       let obj = {}
+      const blurEletypes = ['input', 'input-number', 'textarea']
       this.formConfigList.forEach((item) => {
         if (item.required && !item.disabled) {
           obj[item.field] = [
-            { required: true, message: `请输入${item.label}`, trigger: 'blur' }
+            {
+              required: true,
+              message: `请输入${item.label}`,
+              trigger: blurEletypes.includes(item.eleType) ? 'blur' : 'change'
+            }
           ]
         }
         const params = item.params
@@ -379,8 +399,8 @@ export default {
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
       const compareHeight = compareEle.offsetHeight
+      this.colHeight = compareHeight
       this.exceedOneRow = el.offsetHeight - 10 > compareHeight
-      console.log(compareHeight, el.offsetHeight - 10)
     },
     // 集中处理事件
     happenEvent(buttonItem) {
@@ -416,7 +436,7 @@ export default {
 <style lang="less" scoped>
 .searchMode {
   /deep/ .el-form-item {
-    margin-bottom: 0;
+    margin-bottom: 18px;
     display: flex;
   }
   .notLeftMargin {
@@ -441,6 +461,9 @@ export default {
       margin-right: 10px;
     }
   }
+  /deep/ .el-form-item__error  {
+    white-space: nowrap;
+  }
 }
 .render {
   /deep/ .el-row--flex {
@@ -464,9 +487,9 @@ export default {
 .fold {
   height: 50px;
   overflow: hidden;
-  /deep/ .el-form {
-    transform: translateY(-100%) translateY(50px);
-  }
+  // /deep/ .el-form {
+  //   transform: translateY(-100%) translateY(50px);
+  // }
 }
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;
@@ -476,7 +499,6 @@ export default {
 }
 /deep/ .el-input-number {
   width: 100%;
-  overflow: hidden;
 }
 /deep/ .el-select {
   width: 100%;

@@ -141,40 +141,43 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   const maxTimeValue = () => +new Date(new Date(maxValue).format('YYYY-MM-DD'))
   const minTime = minValue ? minTimeValue() : +new Date(globalMinDate)
   const maxTime = maxValue ? maxTimeValue() : +new Date(globalMaxDate)
-  // console.log(minField, maxField, 'minField, maxField')
-  // console.log(minValue, maxValue, 'minValue, maxValue')
   // console.log(minTime, maxTime, 'minTime, maxTime')
   // 单独处理分秒限制 --- 此方案还有瑕疵，目前用rules控制。
-  let selectableRange = ''
-  let minRange = '00:00:00'
-  let maxRange = '23:59:59'
-  if (minValue && formData[fieldItem.field]) {
-    const isSameDay =
-      new Date(minValue).toDateString() ===
-      new Date(formData[fieldItem.field]).toDateString()
-    if (isSameDay) {
-      const HH = new Date(minValue).getHours()
-      const mm = new Date(minValue).getMinutes()
-      const ss = new Date(minValue).getSeconds()
-      minRange = HH + ':' + mm + ':' + ss
-    }
-  }
-  if (maxValue && formData[fieldItem.field]) {
-    const isSameDay =
-      new Date(maxValue).toDateString() ===
-      new Date(formData[fieldItem.field]).toDateString()
-    if (isSameDay) {
-      const HH = new Date(maxValue).getHours()
-      const mm = new Date(maxValue).getMinutes()
-      const ss = new Date(maxValue).getSeconds()
-      maxRange = HH + ':' + mm + ':' + ss
-    }
-  }
-  selectableRange = minRange + '-' + maxRange
+  // let selectableRange = ''
+  // let minRange = '00:00:00'
+  // let maxRange = '23:59:59'
+  // if (minValue && formData[fieldItem.field]) {
+  //   const isSameDay =
+  //     new Date(minValue).toDateString() ===
+  //     new Date(formData[fieldItem.field]).toDateString()
+  //   if (isSameDay) {
+  //     const HH = new Date(minValue).getHours()
+  //     const mm = new Date(minValue).getMinutes()
+  //     const ss = new Date(minValue).getSeconds()
+  //     minRange = HH + ':' + mm + ':' + ss
+  //   }
+  // }
+  // if (maxValue && formData[fieldItem.field]) {
+  //   const isSameDay =
+  //     new Date(maxValue).toDateString() ===
+  //     new Date(formData[fieldItem.field]).toDateString()
+  //   if (isSameDay) {
+  //     const HH = new Date(maxValue).getHours()
+  //     const mm = new Date(maxValue).getMinutes()
+  //     const ss = new Date(maxValue).getSeconds()
+  //     maxRange = HH + ':' + mm + ':' + ss
+  //   }
+  // }
+  // selectableRange = minRange + '-' + maxRange
   if (timeType === 'datetime' || timeType === 'date') {
     return {
       disabledDate(time) {
-        time = new Date(time).getTime()
+        // if (new Date(time).format('YYYY-MM-DD') === '2023-03-09') {
+        //   console.log(new Date(time).format('YYYY-MM-DD HH:mm:ss'))
+        //   console.log(+new Date(time), +new Date(new Date(time).format('YYYY-MM-DD HH:mm:ss')));
+        //   console.log('+new Date(2023-03-09)', time, fieldItem.label)
+        // }
+        time = +new Date(new Date(time).format('YYYY-MM-DD'))
         if (maxTime) {
           return !(minTime <= time && time <= maxTime)
         } else {
@@ -194,7 +197,7 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   }
 }
 
-Date.prototype.format= function(fmt = 'YYYY-MM-DD') {
+Date.prototype.format = function (fmt = 'YYYY-MM-DD') {
   var o = {
     'M+': this.getMonth() + 1, //月份
     'D+': this.getDate(), //日

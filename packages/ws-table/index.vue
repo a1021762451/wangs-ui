@@ -5,10 +5,10 @@
       :model="tableForm"
       ref="tableForm"
       label-width="80px"
-      :validate-on-rule-change="true"
+      :validate-on-rule-change="false"
       inline
       size="small"
-      style="height: calc(100% - 35px);"
+      style="height: calc(100% - 35px)"
     >
       <el-table
         border
@@ -19,7 +19,7 @@
         v-loading="loading"
         v-bind="$attrs"
         v-on="$listeners"
-        height="height: 100%"
+        height="100%"
       >
         <template v-for="fieldItem in columns">
           <!-- 特殊列，如复选框，序号列 -->
@@ -61,9 +61,10 @@
               </template>
             </template>
             <template v-slot="{ row, column, $index }">
-              <el-form-item
+              <component
+                :is="fieldItem.required ? 'el-form-item' : 'div'"
                 :prop="`tableData.${$index}.${fieldItem.field}`"
-                :rules="rules[fieldItem.field]"
+                :rules="getRules(fieldItem, row)"
               >
                 <template v-if="fieldItem.slotName">
                   <slot
@@ -73,23 +74,35 @@
                     {{ row[fieldItem.field] }}
                   </slot>
                 </template>
-                <!-- 输入框模式 -->
+                <!-- 输入框模式 allowToggle控制是否能够双击切换-->
                 <template v-else-if="fieldItem.eleType === 'input'">
-                  <el-input
-                    size="mini"
-                    v-focus
-                    v-if="property === fieldItem.field && index === $index"
-                    :value="row[fieldItem.field]"
-                    @blur="handleBlur(row, fieldItem)"
-                    @input="handleInput($event, row, fieldItem)"
-                  ></el-input>
                   <div
                     style="min-height: 23px"
-                    v-else
+                    v-if="
+                      fieldItem.allowToggle &&
+                      !(property === fieldItem.field && index === $index)
+                    "
                     @dblclick="toggleInput(row, column, $index)"
                   >
                     {{ row[fieldItem.field] }}
                   </div>
+                  <template v-else>
+                    <el-input
+                      v-if="fieldItem.allowToggle"
+                      size="mini"
+                      v-focus
+                      :value="row[fieldItem.field]"
+                      @blur="handleBlur(row, fieldItem)"
+                      @input="handleInput($event, row, fieldItem)"
+                    ></el-input>
+                    <el-input
+                      size="mini"
+                      v-model="row[fieldItem.field]"
+                      @blur="handleBlur(row, fieldItem)"
+                      @input="handleInput($event, row, fieldItem)"
+                      clearable
+                    ></el-input>
+                  </template>
                 </template>
                 <!-- 复选框模式 -->
                 <input
@@ -102,7 +115,7 @@
                     row[fieldItem.field] !== '1' && row[fieldItem.field] !== '0'
                   "
                   v-model="row[fieldItem.field]"
-                  @change="checkBoxChange($event, fieldItem, row)"
+                  @change="fieldItemChange(fieldItem, row)"
                 />
                 <!-- 下拉框模式 -->
                 <el-select
@@ -112,7 +125,7 @@
                   placeholder="请选择"
                   filterable
                   clearable
-                  @change="selectChange($event, fieldItem, row)"
+                  @change="fieldItemChange(fieldItem, row)"
                 >
                   <el-option
                     v-for="fieldItem in fieldItem.options"
@@ -133,12 +146,13 @@
                   v-model="row[fieldItem.field]"
                   :type="judgeTimeType(fieldItem.valueFormat)"
                   :value-format="fieldItem.valueFormat"
+                  :format="fieldItem.valueFormat"
                   :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
                   :disabled="row[fieldItem.disabledKey]"
                   :picker-options="
                     getPicker(fieldItem, row, globalMinDate, globalMaxDate)
                   "
-                  @change="datetimeChange($event, fieldItem, row)"
+                  @change="fieldItemChange(fieldItem, row)"
                 ></el-date-picker>
                 <el-time-select
                   size="mini"
@@ -153,13 +167,13 @@
                   :picker-options="
                     getPicker(fieldItem, row, globalMinDate, globalMaxDate)
                   "
-                  @change="datetimeChange($event, fieldItem, row)"
+                  @change="fieldItemChange(fieldItem, row)"
                 ></el-time-select>
                 <template v-else-if="fieldItem.formatter">{{
                   fieldItem.formatter(row[fieldItem.field], row, column, $index)
                 }}</template>
                 <template v-else>{{ row[fieldItem.field] }}</template>
-              </el-form-item>
+              </component>
             </template>
           </el-table-column>
         </template>
@@ -277,7 +291,7 @@ export default {
     globalMaxDate: {
       default: 0,
       type: String | Number
-    }
+    },
   },
   //自定义指令
   directives: {
@@ -329,40 +343,17 @@ export default {
   computed: {
     rules() {
       let obj = {}
-      const form = this.tableForm.tableData
+      const blurEletypes = ['input', 'input-number', 'textarea']
       this.columns.forEach((item) => {
         if (item.required && !item.disabled) {
           obj[item.field] = [
-            { required: true, message: `请输入${item.label}`, trigger: 'change' }
+            {
+              required: true,
+              message: `请输入${item.label}`,
+              trigger: blurEletypes.includes(item.eleType) ? 'blur' : 'change'
+            }
           ]
         }
-        const params = item.params
-        // if (params && params.minTime && !item.disabled) {
-        //   const minField = params.minTime
-        //   obj[item.field].push({
-        //     validator: (rule, value, callback) => {
-        //       if (+new Date(value) <= +new Date(this.form[minField])) {
-        //         callback(new Error('请注意时间先后'))
-        //       } else {
-        //         callback()
-        //       }
-        //     },
-        //     trigger: 'blur'
-        //   })
-        // }
-        // if (params && params.maxTime && !item.disabled) {
-        //   const maxField = params.maxTime
-        //   obj[item.field].push({
-        //     validator: (rule, value, callback) => {
-        //       if (+new Date(value) >= +new Date(this.form[maxField])) {
-        //         callback(new Error('请注意时间先后'))
-        //       } else {
-        //         callback()
-        //       }
-        //     },
-        //     trigger: 'blur'
-        //   })
-        // }
       })
       return obj
     }
@@ -379,6 +370,41 @@ export default {
   methods: {
     judgeTimeType,
     getPicker,
+    // 动态获取校验
+    getRules(fieldItem, row) {
+      if (!fieldItem.required) return
+      let rules = deepClone(this.rules[fieldItem.field])
+      if (fieldItem.eleType === 'datetime') {
+        const params = fieldItem.params
+        if (params && params.minTime && !fieldItem.disabled) {
+          const minField = params.minTime
+          rules.push({
+            validator: (rule, value, callback) => {
+              if (+new Date(value) < +new Date(row[minField])) {
+                callback(new Error('请注意时间先后'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          })
+        }
+        if (params && params.maxTime && !fieldItem.disabled) {
+          const maxField = params.maxTime
+          rules.push({
+            validator: (rule, value, callback) => {
+              if (+new Date(value) > +new Date(row[maxField])) {
+                callback(new Error('请注意时间先后'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          })
+        }
+      }
+      return rules
+    },
     // 分页操作
     handleCurrentChange(val) {
       this.handleSearch()
@@ -393,16 +419,10 @@ export default {
       })
     },
     // 监听转发事件
-    happenEvent(buttonItem,{ row, column, $index }) {
-      console.log('xxxxxxxxxxxxxxx');
-      const props = []
-      for(let key in this.rules) {
-        props.push(`tableData.${$index}.${key}`)
-      }
-      console.log(props);
-      this.$refs.tableForm.validateField(props,valid => {
-
-      })
+    async happenEvent(buttonItem, { row, column, $index }) {
+      // const valid = await this.validateRow($index)
+      // const valid = await this.validateAll()
+      // console.log('xxxxxxxxxxxxxxx', valid)
       this.$emit('happenEvent', {
         buttonItem,
         row
@@ -452,10 +472,7 @@ export default {
         const newValue = handler(row[field])
         row[field] = newValue
       }
-      this.$emit('happenEvent', {
-        buttonItem: { method: 'inputChange', field },
-        row
-      })
+      this.fieldItemChange(fieldItem, row)
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
@@ -468,24 +485,42 @@ export default {
       }
     },
     // 表格内复选框变更
-    checkBoxChange(value, fieldItem, row) {
+    fieldItemChange(fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'checkBoxChange', fieldItem },
+        buttonItem: { method: 'fieldItemChange', fieldItem },
         row
       })
     },
-    // 表格内下拉框变更
-    selectChange(value, fieldItem, row) {
-      this.$emit('happenEvent', {
-        buttonItem: { method: 'selectChange', fieldItem },
-        row
+    // 校验单行
+    validateRow(index) {
+      const props = []
+      let allpromise = []
+      for (let key in this.rules) {
+        props.push(`tableData.${index}.${key}`)
+      }
+      this.$refs.tableForm.validateField(props, (valid) => {
+        const promise = new Promise((resolve, reject) => {
+          if (!valid) resolve()
+          else reject()
+        })
+        allpromise.push(promise)
+      })
+      return new Promise((resolve) => {
+        Promise.all(allpromise)
+          .then((res) => {
+            resolve(true)
+          })
+          .catch((err) => {
+            resolve(false)
+          })
       })
     },
-    // 表格内时间变更
-    datetimeChange(value, fieldItem, row) {
-      this.$emit('happenEvent', {
-        buttonItem: { method: 'datetimeChange', fieldItem },
-        row
+    // 校验全部
+    validateAll() {
+      return new Promise((resolve, reject) => {
+        this.$refs.tableForm.validate((valid) => {
+          resolve(valid)
+        })
       })
     }
   }
