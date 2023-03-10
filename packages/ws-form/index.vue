@@ -29,6 +29,13 @@
             :label="fieldItem.label"
             :prop="fieldItem.field"
             :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
+            :style="{
+              marginBottom: isSearchList
+                ? Object.keys(rules).length
+                  ? '18px'
+                  : '5px'
+                : undefined
+            }"
           >
             <template v-slot:label>
               <slot
@@ -461,7 +468,7 @@ export default {
       margin-right: 10px;
     }
   }
-  /deep/ .el-form-item__error  {
+  /deep/ .el-form-item__error {
     white-space: nowrap;
   }
 }
