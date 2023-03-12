@@ -87,7 +87,9 @@ export default {
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
-          testFormatter: '内容'
+          testFormatter: '内容',
+          name: '王',
+          age: 18,
         },
         {
           plantName: '二号机组',
@@ -97,7 +99,9 @@ export default {
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
-          testFormatter: '内容'
+          testFormatter: '内容',
+          adress: '北京',
+          work: '程序员'
         },
         {
           plantName: '二号机组',

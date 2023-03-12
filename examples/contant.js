@@ -55,6 +55,33 @@ export const tableColumns = [
   { type: 'selection' },
   { type: 'index', label: '序号' },
   { type: 'expand', slotName: 'expand' },
+  // 测试多级表头
+  {
+    label: '测试多级表头',
+    childrens: [
+      {
+        field: 'name',
+        label: '姓名',
+      },
+      {
+        field: 'age',
+        label: '年龄',
+      },
+      {
+        label: '测试多级表头-1',
+        childrens: [
+          {
+            field: 'adress',
+            label: '地址',
+          },
+          {
+            field: 'work',
+            label: '工作',
+          },
+        ]
+      },
+    ]
+  },
   // 自定义表头，内容
   {
     headerSlotName: "plantName_header",
