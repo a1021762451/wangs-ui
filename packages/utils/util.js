@@ -1,3 +1,82 @@
+const globalAttrs = {
+  clearable: true
+}
+const commonAttrs = {
+  'el-select': {
+    default: {
+      filterable: true,
+      placeholder: '请选择'
+    }
+  },
+  'el-input': {
+    default: {
+      placeholder: '请输入'
+    },
+    textarea: {
+      'show-word-limit': true,
+      maxlength: 1000,
+      placeholder: '请输入',
+      rows: 2
+    }
+  },
+  'el-input-number': {
+    default: {
+      controls: false,
+      placeholder: '请输入数字',
+      min: 1,
+      max: 100,
+      step: 1,
+      precision: 0
+    }
+  },
+  'el-date-picker': {
+    default: {
+      placeholder: '选择时间',
+      'picker-options': getPicker
+    }
+  },
+  'el-time-select': {
+    default: {
+      placeholder: '选择时间',
+      'picker-options': getPicker
+    }
+  },
+  'el-checkbox': {
+    default: {
+      'true-label': '1',
+      'false-label': '0'
+    }
+  }
+}
+
+export function getAttrs(
+  fieldItem,
+  formData = {},
+  globalMinDate,
+  globalMaxDate
+) {
+  const allTypes = commonAttrs[fieldItem.component] || {}
+  const attrs = fieldItem.attrs || {}
+  const type = attrs.type
+  const obj = {
+    ...globalAttrs,
+    ...(allTypes[type] || allTypes.default || {}),
+    ...attrs
+  }
+  obj.placeholder = obj.disabled ? '' : obj.placeholder
+  if (
+    fieldItem.component === 'el-date-picker' ||
+    fieldItem.component === 'el-time-select'
+  ) {
+    obj['picker-options'] = getPicker(
+      fieldItem,
+      formData,
+      globalMinDate,
+      globalMaxDate
+    )
+  }
+  return obj
+}
 /**
  * 对象深拷贝
  */
@@ -131,10 +210,12 @@ export function judgeTimeType(limit) {
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   // console.log(formData, 'formData')
-  const timeType = judgeTimeType(fieldItem.valueFormat)
+  const attrs = fieldItem.attrs || {}
+  const type = attrs.type
+  const timeType = type || judgeTimeType(fieldItem.valueFormat)
   // 单独处理日月年限制
-  const minField = fieldItem.params ? fieldItem.params.minTime : ''
-  const maxField = fieldItem.params ? fieldItem.params.maxTime : ''
+  const minField = fieldItem.minTime
+  const maxField = fieldItem.maxTime
   const minValue = formData[minField]
   const maxValue = formData[maxField]
   const minTimeValue = () => +new Date(new Date(minValue).format('YYYY-MM-DD'))

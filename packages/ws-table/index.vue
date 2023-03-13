@@ -44,6 +44,7 @@
             :globalMaxDate="globalMaxDate"
             :fieldItem="fieldItem"
             :rules="rules"
+            :allOptions="allOptions"
             @happenEvent="(params) => $emit('happenEvent', params)"
           >
           </tableColumn>
@@ -91,42 +92,42 @@
 </template>
 
 <script>
-import { deepClone, judgeTimeType, getPicker } from "../utils/util";
-import wsButtons from "../componentes/ws-buttons.vue";
-import tableColumn from "./components/tableColumn";
+import { deepClone } from '../utils/util'
+import wsButtons from '../componentes/ws-buttons.vue'
+import tableColumn from './components/tableColumn'
 export default {
-  name: "ws-table",
+  name: 'ws-table',
   components: { wsButtons, tableColumn },
   props: {
     // 必传,
     // 表格列
     tableColumns: {
       default() {
-        return [];
+        return []
       },
-      type: Array,
+      type: Array
     },
     // 表格数据
     tableData: {
       default() {
-        return [];
+        return []
       },
-      type: Array,
+      type: Array
     },
     // 非必传
     // 表格按钮
     tableButtons: {
       default() {
-        return [];
+        return []
       },
-      type: Array,
+      type: Array
     },
     // 过滤表格操作按钮
     filterButtons: {
       default(row, tableButtons) {
-        return tableButtons;
+        return tableButtons
       },
-      type: Function,
+      type: Function
     },
     // 默认分页配置
     defaultPageInfo: {
@@ -134,90 +135,97 @@ export default {
         return {
           size: 10,
           current: 1,
-          total: 0,
-        };
+          total: 0
+        }
       },
-      type: Object,
+      type: Object
     },
     // 展示分页组件
     showPagination: {
       type: Boolean,
-      default: true,
+      default: true
     },
     // 操作列是否固定
     operationFixed: {
       type: Boolean,
-      default: true,
+      default: true
     },
     // 加载样式
     loading: {
       type: Boolean,
-      default: false,
+      default: false
     },
     // 全局最小时间
     globalMinDate: {
       default: 0,
-      type: String | Number,
+      type: String | Number
     },
     // 全局最大时间
     globalMaxDate: {
       default: 0,
-      type: String | Number,
+      type: String | Number
     },
+    // 下拉框选项配置数组
+    allOptions: {
+      default() {
+        return {}
+      },
+      type: Object
+    }
   },
   //自定义指令
   directives: {
     focus: {
       inserted: function (el) {
-        el.querySelector("input").focus();
-      },
-    },
+        el.querySelector('input').focus()
+      }
+    }
   },
   data() {
     return {
       columns: deepClone(this.tableColumns), // 列数据
       pageInfo: this.defaultPageInfo, // 分页数据
       // 用于表格input组件
-      property: "",
-      index: "",
+      property: '',
+      index: '',
       tableForm: {
-        tableData: [],
-      },
-    };
+        tableData: []
+      }
+    }
   },
   watch: {
     tableData: {
       handler(newData) {
         // 配置selfAdjust为true,则宽度自调节
         this.columns.forEach((column) => {
-          const arr = newData.map((x) => x[column.field]); // 获取每一列的所有数据
-          arr.push(column.label); // 把每列的表头也加进去算
-          const conditon = column.selfAdjust;
-          if (conditon) this.$set(column, "width", this.getMaxLength(arr) + 40);
-        });
-        this.tableForm.tableData = this.tableData;
+          const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
+          arr.push(column.label) // 把每列的表头也加进去算
+          const conditon = column.selfAdjust
+          if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
+        })
+        this.tableForm.tableData = this.tableData
         this.pageInfo.total = this.tableForm.tableData.length
       },
-      immediate: true,
-    },
+      immediate: true
+    }
   },
   computed: {
     rules() {
-      let obj = {};
-      const blurEletypes = ["input", "input-number", "textarea"];
+      let obj = {}
+      const blurEletypes = ['input', 'input-number', 'textarea']
       this.columns.forEach((item) => {
         if (item.required && !item.disabled) {
           obj[item.field] = [
             {
               required: true,
               message: `请输入${item.label}`,
-              trigger: blurEletypes.includes(item.eleType) ? "blur" : "change",
-            },
-          ];
+              trigger: blurEletypes.includes(item.eleType) ? 'blur' : 'change'
+            }
+          ]
         }
-      });
-      return obj;
-    },
+      })
+      return obj
+    }
   },
   created() {
     // 处理tableColumns
@@ -234,82 +242,82 @@ export default {
       // const valid = await this.validateRow($index)
       // const valid = await this.validateAll()
       // console.log('xxxxxxxxxxxxxxx', valid)
-      this.$emit("happenEvent", {
+      this.$emit('happenEvent', {
         buttonItem,
-        row,
-      });
+        row
+      })
     },
     // 分页操作
     handleCurrentChange(val) {
-      this.handleSearch();
+      this.handleSearch()
     },
     handleSizeChange(val) {
-      this.pageInfo.current = 1;
-      this.handleSearch();
+      this.pageInfo.current = 1
+      this.handleSearch()
     },
     handleSearch() {
-      this.$emit("happenEvent", {
-        buttonItem: { method: "handleSearch" },
-      });
+      this.$emit('happenEvent', {
+        buttonItem: { method: 'handleSearch' }
+      })
     },
     // 遍历列的所有内容，获取最宽一列的宽度
     getMaxLength(arr) {
       const width = arr.reduce((acc, item) => {
         if (item) {
-          let calcLen = this.getTextWidth(item);
+          let calcLen = this.getTextWidth(item)
           if (acc < calcLen) {
-            acc = calcLen;
+            acc = calcLen
           }
         }
-        return acc;
-      }, 0);
-      return width > 600 ? 600 : width;
+        return acc
+      }, 0)
+      return width > 600 ? 600 : width
     },
     // 使用span标签包裹内容，然后计算span的宽度 width： px
     getTextWidth(str) {
-      let width = 0;
-      let html = document.createElement("span");
-      html.innerText = str;
-      html.className = "getTextWidth";
-      document.querySelector("body").appendChild(html);
-      width = document.querySelector(".getTextWidth").offsetWidth;
-      document.querySelector(".getTextWidth").remove();
-      return width;
+      let width = 0
+      let html = document.createElement('span')
+      html.innerText = str
+      html.className = 'getTextWidth'
+      document.querySelector('body').appendChild(html)
+      width = document.querySelector('.getTextWidth').offsetWidth
+      document.querySelector('.getTextWidth').remove()
+      return width
     },
     // 校验单行
     validateRow(index) {
-      const props = [];
-      let allpromise = [];
+      const props = []
+      let allpromise = []
       for (let key in this.rules) {
-        props.push(`tableData.${index}.${key}`);
+        props.push(`tableData.${index}.${key}`)
       }
       this.$refs.tableForm.validateField(props, (valid) => {
         const promise = new Promise((resolve, reject) => {
-          if (!valid) resolve();
-          else reject();
-        });
-        allpromise.push(promise);
-      });
+          if (!valid) resolve()
+          else reject()
+        })
+        allpromise.push(promise)
+      })
       return new Promise((resolve) => {
         Promise.all(allpromise)
           .then((res) => {
-            resolve(true);
+            resolve(true)
           })
           .catch((err) => {
-            resolve(false);
-          });
-      });
+            resolve(false)
+          })
+      })
     },
     // 校验全部
     validateAll() {
       return new Promise((resolve, reject) => {
         this.$refs.tableForm.validate((valid) => {
-          resolve(valid);
-        });
-      });
-    },
-  },
-};
+          resolve(valid)
+        })
+      })
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

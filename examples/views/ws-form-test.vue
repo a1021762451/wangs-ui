@@ -6,6 +6,8 @@
       :allOptions="allOptions"
       isSearchList
       @happenEvent="happenEvent"
+      globalMinDate="2022-01-22"
+      globalMaxDate="2024-01-22"
     >
      <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">

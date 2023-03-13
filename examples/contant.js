@@ -21,9 +21,75 @@ export const buttonConfigList = [
 
 // 表单配置
 export const formConfigList = [
-  { eleType: 'select', field: 'applyComId', label: '申请单位申请单位申请单位', required: true },
+  {
+    component: 'el-select',
+    field: 'applyComId',
+    label: '申请单位申请单位申请单位',
+    required: true
+  },
+  {
+    component: 'el-input',
+    field: 'equipName',
+    label: '停电设备',
+    required: true
+  },
+  {
+    component: 'el-input-number',
+    field: 'equipNum',
+    label: '设备数量',
+    required: true
+  },
+  {
+    component: 'el-input',
+    field: 'protectContent',
+    label: '检修内容',
+    attrs: {
+      type: 'textarea'
+    }
+  },
+  {
+    component: 'el-date-picker',
+    field: 'endTime_min',
+    label: '竣工日期小',
+    required: true,
+    maxTime: 'endTime_max',
+    attrs: {
+      type: 'date',
+      'value-format': 'yyyy-MM-dd'
+    }
+  },
+  {
+    component: 'el-date-picker',
+    field: 'endTime_max',
+    label: '竣工日期大',
+    required: true,
+    minTime: 'endTime_min',
+    attrs: {
+      type: 'date',
+      'value-format': 'yyyy-MM-dd'
+    }
+  },
+  {
+    slotName: 'lightOut',
+    field: 'lightOut',
+    label: '光年之外',
+    required: true
+  }
+]
+export const formConfigList_copy = [
+  {
+    eleType: 'select',
+    field: 'applyComId',
+    label: '申请单位申请单位申请单位',
+    required: true
+  },
   { eleType: 'input', field: 'equipName', label: '停电设备', required: true },
-  { eleType: 'input-number', field: 'equipNum', label: '设备数量', required: true },
+  {
+    eleType: 'input-number',
+    field: 'equipNum',
+    label: '设备数量',
+    required: true
+  },
   { eleType: 'textarea', field: 'protectContent', label: '检修内容' },
   {
     eleType: 'datetime',
@@ -47,7 +113,11 @@ export const allOptions = {
     { label: '宁波', value: '宁波' },
     { label: '鹰潭', value: '鹰潭' },
     { label: '上饶', value: '上饶' }
-  ]
+  ],
+  testSelect: [
+    { label: '苹果', value: '苹果' },
+    { label: '香蕉', value: '香蕉' }
+  ],
 }
 
 // 表格列配置
@@ -61,31 +131,156 @@ export const tableColumns = [
     childrens: [
       {
         field: 'name',
-        label: '姓名',
+        label: '姓名'
       },
       {
         field: 'age',
-        label: '年龄',
+        label: '年龄'
       },
       {
         label: '测试多级表头-1',
         childrens: [
           {
             field: 'adress',
-            label: '地址',
+            label: '地址'
           },
           {
             field: 'work',
-            label: '工作',
-          },
+            label: '工作'
+          }
         ]
-      },
+      }
     ]
   },
   // 自定义表头，内容
   {
-    headerSlotName: "plantName_header",
-    slotName: "plantName",
+    headerSlotName: 'plantName_header',
+    slotName: 'plantName',
+    field: 'plantName',
+    label: '测试插槽',
+    formatter: function (value) {
+      return value + 'filter'
+    },
+    showTooltip: true
+  },
+  // 过滤举例
+  {
+    field: 'testFormatter',
+    label: '测试过滤',
+    formatter: function (value) {
+      return value + '--过滤'
+    },
+    showTooltip: true
+  },
+  // 宽度自调节举例
+  { field: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
+  // 输入框模式举例
+  {
+    field: 'testInput',
+    label: '测试输入框',
+    component: 'el-input',
+    // '如果输入格式为数字加小数点， 去掉小数点'
+    blurHandler: function (value) {
+      if (/^\d*\.$/.test(value)) {
+        return value.replace('.', '')
+      }
+      return value
+    },
+    // 限制输入6位小数
+    inputHandler: function (value) {
+      return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
+    },
+    width: 200,
+    required: true
+  },
+  // 复选框模式 对应的值不等于0或者1则代表禁用
+  {
+    field: 'testCheckBox',
+    label: '测试复选框',
+    component: 'el-checkbox'
+  },
+  // 测试下拉框
+  {
+    field: 'testSelect',
+    label: '测试下拉框',
+    component: 'el-select',
+    width: 200,
+    required: true
+  },
+  // 测试时间框模式
+  {
+    field: 'testMinDatetime',
+    label: '测试时间框小',
+    width: 200,
+    component: 'el-date-picker',
+    maxTime: 'testMaxDatetime',
+    required: true,
+    attrs: {
+      type: 'datetime',
+      'value-format': 'yyyy-MM-dd HH:mm',
+      format: 'yyyy-MM-dd HH:mm'
+    }
+  },
+  {
+    field: 'testMaxDatetime',
+    label: '测试时间框大',
+    width: 200,
+    component: 'el-date-picker',
+    minTime: 'testMinDatetime',
+    required: true,
+    attrs: {
+      type: 'datetime',
+      'value-format': 'yyyy-MM-dd HH:mm',
+      format: 'yyyy-MM-dd HH:mm'
+    }
+  },
+  {
+    field: 'testTime',
+    label: '测试时间框(time)',
+    width: 200,
+    component: 'el-time-select',
+    valueFormat: 'HH:mm',
+    required: true,
+    attrs: {
+      'value-format': 'HH:mm'
+    }
+  }
+]
+export const tableColumns_copy = [
+  { type: 'selection' },
+  { type: 'index', label: '序号' },
+  { type: 'expand', slotName: 'expand' },
+  // 测试多级表头
+  {
+    label: '测试多级表头',
+    childrens: [
+      {
+        field: 'name',
+        label: '姓名'
+      },
+      {
+        field: 'age',
+        label: '年龄'
+      },
+      {
+        label: '测试多级表头-1',
+        childrens: [
+          {
+            field: 'adress',
+            label: '地址'
+          },
+          {
+            field: 'work',
+            label: '工作'
+          }
+        ]
+      }
+    ]
+  },
+  // 自定义表头，内容
+  {
+    headerSlotName: 'plantName_header',
+    slotName: 'plantName',
     field: 'plantName',
     label: '测试插槽',
     formatter: function (value) {
@@ -121,13 +316,13 @@ export const tableColumns = [
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
     },
     width: 200,
-    required: true,
+    required: true
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
     field: 'testCheckBox',
     label: '测试复选框',
-    eleType: 'checkBox',
+    eleType: 'checkBox'
   },
   // 测试下拉框
   {

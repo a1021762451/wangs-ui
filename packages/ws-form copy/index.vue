@@ -47,24 +47,82 @@
                 <span v-if="colon">:</span>
               </template>
             </template>
-            <component
-              v-if="fieldItem.component"
-              :is="fieldItem.component"
-              v-bind="
-                getAttrs(fieldItem, formData, globalMinDate, globalMaxDate)
+            <el-select
+              clearable
+              filterable
+              v-if="fieldItem.eleType == 'select'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请选择'"
+              :disabled="fieldItem.disabled"
+              @change="changeSelect($event, fieldItem)"
+            >
+              <el-option
+                v-for="item in allOptions[fieldItem.field]"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <el-input
+              clearable
+              v-else-if="fieldItem.eleType == 'input'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+              :disabled="fieldItem.disabled"
+            ></el-input>
+            <el-input-number
+              clearable
+              v-else-if="fieldItem.eleType == 'input-number'"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入数字'"
+              :disabled="fieldItem.disabled"
+              :min="(fieldItem.params && fieldItem.params.min) || 1"
+              :max="(fieldItem.params && fieldItem.params.max) || 100"
+              :step="(fieldItem.params && fieldItem.params.step) || 1"
+              :precision="(fieldItem.params && fieldItem.params.precision) || 0"
+              :controls="false"
+            >
+            </el-input-number>
+            <el-input
+              clearable
+              :maxlength="
+                (fieldItem.params && +fieldItem.params.maxlength) || 1000
+              "
+              show-word-limit
+              v-else-if="fieldItem.eleType == 'textarea'"
+              type="textarea"
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+              :rows="2"
+              :disabled="fieldItem.disabled"
+            ></el-input>
+            <el-date-picker
+              clearable
+              v-else-if="
+                fieldItem.eleType == 'datetime' && fieldItem.timeType !== 'time'
               "
               v-model="formData[fieldItem.field]"
-              @change="fieldItemChange(fieldItem, formData)"
-            >
-              <template v-if="fieldItem.component === 'el-select'">
-                <el-option
-                  v-for="item in allOptions[fieldItem.field]"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </template>
-            </component>
+              :type="fieldItem.timeType"
+              :value-format="fieldItem.valueFormat"
+              :format="fieldItem.valueFormat"
+              :placeholder="fieldItem.disabled ? '' : '选择时间'"
+              :picker-options="
+                getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
+              "
+              :disabled="fieldItem.disabled"
+            ></el-date-picker>
+            <el-time-select
+              clearable
+              v-else-if="
+                fieldItem.eleType == 'datetime' && fieldItem.timeType === 'time'
+              "
+              v-model="formData[fieldItem.field]"
+              :placeholder="fieldItem.disabled ? '' : '选择时间'"
+              :picker-options="
+                getPicker(fieldItem, formData, globalMinDate, globalMaxDate)
+              "
+              :disabled="fieldItem.disabled"
+            ></el-time-select>
             <template v-else-if="fieldItem.slotName">
               <slot
                 :name="fieldItem.slotName"
@@ -111,7 +169,7 @@
 </template>
 
 <script>
-import { deepClone, getPicker, getAttrs } from '../utils/util'
+import { deepClone, judgeTimeType, getPicker } from '../utils/util'
 import wsButtons from '../componentes/ws-buttons.vue'
 export default {
   name: 'ws-form',
@@ -242,6 +300,10 @@ export default {
               this.$set(this.formData, item.field, '')
             }
           }
+          // 时间控件类型判断
+          if (item.eleType === 'datetime') {
+            item.timeType = this.judgeTimeType(item.valueFormat)
+          }
         })
         this.configList = configList
       },
@@ -336,15 +398,8 @@ export default {
     window.removeEventListener('resize', this.judgeOneRow)
   },
   methods: {
+    judgeTimeType,
     getPicker,
-    getAttrs,
-    // 表格内复选框变更
-    fieldItemChange(fieldItem, row) {
-      this.$emit('happenEvent', {
-        buttonItem: { method: 'fieldItemChange', fieldItem },
-        row
-      })
-    },
     // 判断高度是否只有一行，从而隐藏折叠按钮
     judgeOneRow() {
       const el = this.$refs.wsForm
