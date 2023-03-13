@@ -13,7 +13,7 @@
       <template #lightOut="{ fieldItem, formData }">
         <el-input
           clearable
-          v-model="formData[fieldItem.field]"
+          v-model="formData[fieldItem.prop]"
           :placeholder="fieldItem.disabled ? '' : '请输入内容'"
           :disabled="fieldItem.disabled"
         ></el-input>

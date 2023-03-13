@@ -23,25 +23,25 @@ export const buttonConfigList = [
 export const formConfigList = [
   {
     component: 'el-select',
-    field: 'applyComId',
+    prop: 'applyComId',
     label: '申请单位申请单位申请单位',
     required: true
   },
   {
     component: 'el-input',
-    field: 'equipName',
+    prop: 'equipName',
     label: '停电设备',
     required: true
   },
   {
     component: 'el-input-number',
-    field: 'equipNum',
+    prop: 'equipNum',
     label: '设备数量',
     required: true
   },
   {
     component: 'el-input',
-    field: 'protectContent',
+    prop: 'protectContent',
     label: '检修内容',
     attrs: {
       type: 'textarea'
@@ -49,7 +49,7 @@ export const formConfigList = [
   },
   {
     component: 'el-date-picker',
-    field: 'endTime_min',
+    prop: 'endTime_min',
     label: '竣工日期小',
     required: true,
     maxTime: 'endTime_max',
@@ -60,7 +60,7 @@ export const formConfigList = [
   },
   {
     component: 'el-date-picker',
-    field: 'endTime_max',
+    prop: 'endTime_max',
     label: '竣工日期大',
     required: true,
     minTime: 'endTime_min',
@@ -71,7 +71,7 @@ export const formConfigList = [
   },
   {
     slotName: 'lightOut',
-    field: 'lightOut',
+    prop: 'lightOut',
     label: '光年之外',
     required: true
   }
@@ -79,28 +79,28 @@ export const formConfigList = [
 export const formConfigList_copy = [
   {
     eleType: 'select',
-    field: 'applyComId',
+    prop: 'applyComId',
     label: '申请单位申请单位申请单位',
     required: true
   },
-  { eleType: 'input', field: 'equipName', label: '停电设备', required: true },
+  { eleType: 'input', prop: 'equipName', label: '停电设备', required: true },
   {
     eleType: 'input-number',
-    field: 'equipNum',
+    prop: 'equipNum',
     label: '设备数量',
     required: true
   },
-  { eleType: 'textarea', field: 'protectContent', label: '检修内容' },
+  { eleType: 'textarea', prop: 'protectContent', label: '检修内容' },
   {
     eleType: 'datetime',
-    field: 'endTime',
+    prop: 'endTime',
     label: '竣工日期',
     valueFormat: 'yyyy-MM-dd',
     required: true
   },
   {
     slotName: 'lightOut',
-    field: 'lightOut',
+    prop: 'lightOut',
     label: '光年之外',
     required: true
   }
@@ -130,22 +130,22 @@ export const tableColumns = [
     label: '测试多级表头',
     childrens: [
       {
-        field: 'name',
+        prop: 'name',
         label: '姓名'
       },
       {
-        field: 'age',
+        prop: 'age',
         label: '年龄'
       },
       {
         label: '测试多级表头-1',
         childrens: [
           {
-            field: 'adress',
+            prop: 'adress',
             label: '地址'
           },
           {
-            field: 'work',
+            prop: 'work',
             label: '工作'
           }
         ]
@@ -156,27 +156,25 @@ export const tableColumns = [
   {
     headerSlotName: 'plantName_header',
     slotName: 'plantName',
-    field: 'plantName',
+    prop: 'plantName',
     label: '测试插槽',
-    formatter: function (value) {
-      return value + 'filter'
-    },
-    showTooltip: true
+    'show-overflow-tooltip': true
   },
   // 过滤举例
   {
-    field: 'testFormatter',
+    prop: 'testFormatter',
     label: '测试过滤',
-    formatter: function (value) {
-      return value + '--过滤'
+    formatter: function (row, column, cellValue, index) {
+      console.log(row, column, cellValue, index, 'formatter');
+      return cellValue
     },
-    showTooltip: true
+    'show-overflow-tooltip': true
   },
   // 宽度自调节举例
-  { field: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
+  { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
   // 输入框模式举例
   {
-    field: 'testInput',
+    prop: 'testInput',
     label: '测试输入框',
     component: 'el-input',
     // '如果输入格式为数字加小数点， 去掉小数点'
@@ -195,13 +193,13 @@ export const tableColumns = [
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
-    field: 'testCheckBox',
+    prop: 'testCheckBox',
     label: '测试复选框',
     component: 'el-checkbox'
   },
   // 测试下拉框
   {
-    field: 'testSelect',
+    prop: 'testSelect',
     label: '测试下拉框',
     component: 'el-select',
     width: 200,
@@ -209,7 +207,7 @@ export const tableColumns = [
   },
   // 测试时间框模式
   {
-    field: 'testMinDatetime',
+    prop: 'testMinDatetime',
     label: '测试时间框小',
     width: 200,
     component: 'el-date-picker',
@@ -222,7 +220,7 @@ export const tableColumns = [
     }
   },
   {
-    field: 'testMaxDatetime',
+    prop: 'testMaxDatetime',
     label: '测试时间框大',
     width: 200,
     component: 'el-date-picker',
@@ -235,7 +233,7 @@ export const tableColumns = [
     }
   },
   {
-    field: 'testTime',
+    prop: 'testTime',
     label: '测试时间框(time)',
     width: 200,
     component: 'el-time-select',
@@ -255,22 +253,22 @@ export const tableColumns_copy = [
     label: '测试多级表头',
     childrens: [
       {
-        field: 'name',
+        prop: 'name',
         label: '姓名'
       },
       {
-        field: 'age',
+        prop: 'age',
         label: '年龄'
       },
       {
         label: '测试多级表头-1',
         childrens: [
           {
-            field: 'adress',
+            prop: 'adress',
             label: '地址'
           },
           {
-            field: 'work',
+            prop: 'work',
             label: '工作'
           }
         ]
@@ -281,27 +279,27 @@ export const tableColumns_copy = [
   {
     headerSlotName: 'plantName_header',
     slotName: 'plantName',
-    field: 'plantName',
+    prop: 'plantName',
     label: '测试插槽',
     formatter: function (value) {
       return value + 'filter'
     },
-    showTooltip: true
+    'show-overflow-tooltip': true
   },
   // 过滤举例
   {
-    field: 'testFormatter',
+    prop: 'testFormatter',
     label: '测试过滤',
     formatter: function (value) {
       return value + '--过滤'
     },
-    showTooltip: true
+    'show-overflow-tooltip': true
   },
   // 宽度自调节举例
-  { field: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
+  { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
   // 输入框模式举例
   {
-    field: 'testInput',
+    prop: 'testInput',
     label: '测试输入框',
     eleType: 'input',
     // '如果输入格式为数字加小数点， 去掉小数点'
@@ -320,13 +318,13 @@ export const tableColumns_copy = [
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
-    field: 'testCheckBox',
+    prop: 'testCheckBox',
     label: '测试复选框',
     eleType: 'checkBox'
   },
   // 测试下拉框
   {
-    field: 'testSelect',
+    prop: 'testSelect',
     label: '测试下拉框',
     eleType: 'select',
     width: 200,
@@ -338,7 +336,7 @@ export const tableColumns_copy = [
   },
   // 测试时间框模式
   {
-    field: 'testMinDatetime',
+    prop: 'testMinDatetime',
     label: '测试时间框小',
     width: 200,
     eleType: 'datetime',
@@ -347,7 +345,7 @@ export const tableColumns_copy = [
     required: true
   },
   {
-    field: 'testMaxDatetime',
+    prop: 'testMaxDatetime',
     label: '测试时间框大',
     width: 200,
     eleType: 'datetime',
@@ -356,7 +354,7 @@ export const tableColumns_copy = [
     required: true
   },
   {
-    field: 'testTime',
+    prop: 'testTime',
     label: '测试时间框(time)',
     width: 200,
     eleType: 'datetime',

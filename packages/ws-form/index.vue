@@ -23,11 +23,11 @@
         <el-col
           :span="fieldItem.col || 6"
           v-for="fieldItem in configList"
-          :key="fieldItem.field"
+          :key="fieldItem.prop"
         >
           <el-form-item
             :label="fieldItem.label"
-            :prop="fieldItem.field"
+            :prop="fieldItem.prop"
             :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
             :style="{
               marginBottom: isSearchList
@@ -53,12 +53,12 @@
               v-bind="
                 getAttrs(fieldItem, formData, globalMinDate, globalMaxDate)
               "
-              v-model="formData[fieldItem.field]"
+              v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
             >
               <template v-if="fieldItem.component === 'el-select'">
                 <el-option
-                  v-for="item in allOptions[fieldItem.field]"
+                  v-for="item in allOptions[fieldItem.prop]"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -236,10 +236,10 @@ export default {
             remain = newRemain
           }
           if (!this.isDetail) {
-            if (this.defaultForm[item.field] !== undefined) {
-              this.$set(this.formData, item.field, this.defaultForm[item.field])
+            if (this.defaultForm[item.prop] !== undefined) {
+              this.$set(this.formData, item.prop, this.defaultForm[item.prop])
             } else {
-              this.$set(this.formData, item.field, '')
+              this.$set(this.formData, item.prop, '')
             }
           }
         })
@@ -286,7 +286,7 @@ export default {
       const blurEletypes = ['input', 'input-number', 'textarea']
       this.formConfigList.forEach((item) => {
         if (item.required && !item.disabled) {
-          obj[item.field] = [
+          obj[item.prop] = [
             {
               required: true,
               message: `请输入${item.label}`,
@@ -297,7 +297,7 @@ export default {
         const params = item.params
         if (params && params.minTime && !item.disabled) {
           const minField = params.minTime
-          obj[item.field].push({
+          obj[item.prop].push({
             validator: (rule, value, callback) => {
               if (+new Date(value) <= +new Date(this.form[minField])) {
                 callback(new Error('请注意时间先后'))
@@ -310,7 +310,7 @@ export default {
         }
         if (params && params.maxTime && !item.disabled) {
           const maxField = params.maxTime
-          obj[item.field].push({
+          obj[item.prop].push({
             validator: (rule, value, callback) => {
               if (+new Date(value) >= +new Date(this.form[maxField])) {
                 callback(new Error('请注意时间先后'))
@@ -376,9 +376,9 @@ export default {
       this.$emit('changeSelect', value, fieldItem)
     },
     // 下拉框选项确认
-    async filterList(field) {
+    async filterList(prop) {
       let res = null
-      res = this.allOptions[field]
+      res = this.allOptions[prop]
       return res
     }
   }

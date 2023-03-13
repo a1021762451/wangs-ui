@@ -227,10 +227,10 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   // let selectableRange = ''
   // let minRange = '00:00:00'
   // let maxRange = '23:59:59'
-  // if (minValue && formData[fieldItem.field]) {
+  // if (minValue && formData[fieldItem.prop]) {
   //   const isSameDay =
   //     new Date(minValue).toDateString() ===
-  //     new Date(formData[fieldItem.field]).toDateString()
+  //     new Date(formData[fieldItem.prop]).toDateString()
   //   if (isSameDay) {
   //     const HH = new Date(minValue).getHours()
   //     const mm = new Date(minValue).getMinutes()
@@ -238,10 +238,10 @@ export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   //     minRange = HH + ':' + mm + ':' + ss
   //   }
   // }
-  // if (maxValue && formData[fieldItem.field]) {
+  // if (maxValue && formData[fieldItem.prop]) {
   //   const isSameDay =
   //     new Date(maxValue).toDateString() ===
-  //     new Date(formData[fieldItem.field]).toDateString()
+  //     new Date(formData[fieldItem.prop]).toDateString()
   //   if (isSameDay) {
   //     const HH = new Date(maxValue).getHours()
   //     const mm = new Date(maxValue).getMinutes()

@@ -12,15 +12,7 @@
     >
     </tableColumn>
   </el-table-column>
-  <el-table-column
-    v-else
-    align="center"
-    :prop="fieldItem.field"
-    :label="fieldItem.label"
-    :width="fieldItem.width"
-    :fixed="fieldItem.fixed"
-    :show-overflow-tooltip="fieldItem.showTooltip"
-  >
+  <el-table-column v-else align="center" resizable v-bind="fieldItem">
     <template v-slot:header="scope">
       <slot
         :name="fieldItem.headerSlotName"
@@ -37,7 +29,8 @@
     <template v-slot="{ row, column, $index }">
       <component
         :is="fieldItem.required ? 'el-form-item' : 'div'"
-        :prop="`tableData.${$index}.${fieldItem.field}`"
+        :class="{ overflow_tip: fieldItem['show-overflow-tooltip'] }"
+        :prop="`tableData.${$index}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
         <template v-if="fieldItem.slotName">
@@ -45,7 +38,7 @@
             :name="fieldItem.slotName"
             v-bind="{ row, column, $index, fieldItem }"
           >
-            {{ row[fieldItem.field] }}
+            {{ row[fieldItem.prop] }}
           </slot>
         </template>
         <!-- 输入框模式 allowToggle控制是否能够双击切换-->
@@ -56,17 +49,17 @@
         >
           <div
             style="min-height: 23px"
-            v-if="!(property === fieldItem.field && index === $index)"
+            v-if="!(property === fieldItem.prop && index === $index)"
             @dblclick="toggleInput(row, column, $index)"
           >
-            {{ row[fieldItem.field] }}
+            {{ row[fieldItem.prop] }}
           </div>
           <template v-else>
             <el-input
               v-if="fieldItem.allowToggle"
               size="mini"
               v-focus
-              :value="row[fieldItem.field]"
+              :value="row[fieldItem.prop]"
               @blur="handleBlur(row, fieldItem)"
               @input="handleInput($event, row, fieldItem)"
             ></el-input>
@@ -78,12 +71,12 @@
           :is="fieldItem.component"
           :disabled="row[fieldItem.disabledKey]"
           v-bind="getAttrs(fieldItem, row, globalMinDate, globalMaxDate)"
-          v-model="row[fieldItem.field]"
+          v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
         >
           <template v-if="fieldItem.component === 'el-select'">
             <el-option
-              v-for="item in allOptions[fieldItem.field]"
+              v-for="item in allOptions[fieldItem.prop]"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -91,9 +84,9 @@
           </template>
         </component>
         <template v-else-if="fieldItem.formatter">{{
-          fieldItem.formatter(row[fieldItem.field], row, column, $index)
+          fieldItem.formatter(row, column, row[fieldItem.prop], $index)
         }}</template>
-        <template v-else>{{ row[fieldItem.field] }}</template>
+        <template v-else>{{ row[fieldItem.prop] }}</template>
       </component>
     </template>
   </el-table-column>
@@ -145,7 +138,7 @@ export default {
     // 动态获取校验
     getRules(fieldItem, row) {
       if (!fieldItem.required) return
-      let rules = deepClone(this.rules[fieldItem.field])
+      let rules = deepClone(this.rules[fieldItem.prop])
       if (
         fieldItem.component === 'el-date-picker' ||
         fieldItem.component === 'el-time-select'
@@ -188,28 +181,28 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
-      const { field, blurHandler: handler } = fieldItem
+      const { prop, blurHandler: handler } = fieldItem
       this.index = ''
       this.property = ''
       // 如果前后值相同则不处理
-      if (row[field] == this.temRow[field]) {
+      if (row[prop] == this.temRow[prop]) {
         return
       }
       // 自定义数据过滤
       if (typeof handler === 'function') {
-        const newValue = handler(row[field])
-        row[field] = newValue
+        const newValue = handler(row[prop])
+        row[prop] = newValue
       }
       this.fieldItemChange(fieldItem, row)
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
-      const { field, inputHandler: handler } = fieldItem
+      const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
-        row[field] = newValue
+        row[prop] = newValue
       } else {
-        row[field] = value
+        row[prop] = value
       }
     },
     // 表格内复选框变更
@@ -226,5 +219,9 @@ export default {
 <style lang="less" scoped>
 /deep/ .el-table tr input[type='checkbox'] {
   cursor: pointer;
+}
+.overflow_tip {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -29,9 +29,9 @@
         </el-table-column>
         <!-- 内容列 -->
         <el-table-column
-          :key="fieldItem.field"
+          :key="fieldItem.prop"
           align="center"
-          :prop="fieldItem.field"
+          :prop="fieldItem.prop"
           :label="fieldItem.label"
           :width="fieldItem.width"
           :fixed="fieldItem.fixed"
@@ -52,7 +52,7 @@
                 :name="fieldItem.slotName"
                 v-bind="{ row, column, $index, fieldItem }"
               >
-                {{ row[fieldItem.field] }}
+                {{ row[fieldItem.prop] }}
               </slot>
             </template>
             <!-- 输入框模式 -->
@@ -60,8 +60,8 @@
               <el-input
                 size="mini"
                 v-focus
-                v-if="property === fieldItem.field && index === $index"
-                :value="row[fieldItem.field]"
+                v-if="property === fieldItem.prop && index === $index"
+                :value="row[fieldItem.prop]"
                 @blur="handleBlur(row, fieldItem)"
                 @input="handleInput($event, row, fieldItem)"
               ></el-input>
@@ -70,7 +70,7 @@
                 v-else
                 @dblclick="toggleInput(row, column, $index)"
               >
-                {{ row[fieldItem.field] }}
+                {{ row[fieldItem.prop] }}
               </div>
             </template>
             <!-- 复选框模式 -->
@@ -81,16 +81,16 @@
               true-value="1"
               false-value="0"
               :disabled="
-                row[fieldItem.field] !== '1' && row[fieldItem.field] !== '0'
+                row[fieldItem.prop] !== '1' && row[fieldItem.prop] !== '0'
               "
-              v-model="row[fieldItem.field]"
+              v-model="row[fieldItem.prop]"
               @change="checkBoxChange($event, fieldItem, row)"
             />
             <!-- 下拉框模式 -->
             <el-select
               v-else-if="fieldItem.eleType === 'select'"
               size="mini"
-              v-model="row[fieldItem.field]"
+              v-model="row[fieldItem.prop]"
               placeholder="请选择"
               filterable
               clearable
@@ -112,7 +112,7 @@
               "
               size="mini"
               clearable
-              v-model="row[fieldItem.field]"
+              v-model="row[fieldItem.prop]"
               :type="judgeTimeType(fieldItem.valueFormat)"
               :value-format="fieldItem.valueFormat"
               :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
@@ -129,7 +129,7 @@
                 judgeTimeType(fieldItem.valueFormat) === 'time'
               "
               clearable
-              v-model="row[fieldItem.field]"
+              v-model="row[fieldItem.prop]"
               :placeholder="row[fieldItem.disabledKey] ? '' : '选择时间'"
               :disabled="row[fieldItem.disabledKey]"
               :picker-options="
@@ -138,9 +138,9 @@
               @change="datetimeChange($event, fieldItem, row)"
             ></el-time-select>
             <template v-else-if="fieldItem.formatter">{{
-              fieldItem.formatter(row[fieldItem.field], row, column, $index)
+              fieldItem.formatter(row[fieldItem.prop], row, column, $index)
             }}</template>
-            <template v-else>{{ row[fieldItem.field] }}</template>
+            <template v-else>{{ row[fieldItem.prop] }}</template>
           </template>
         </el-table-column>
       </template>
@@ -282,7 +282,7 @@ export default {
     tableData(newData) {
       // 配置selfAdjust为true,则宽度自调节
       this.columns.forEach((column) => {
-        const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
+        const arr = newData.map((x) => x[column.prop]) // 获取每一列的所有数据
         arr.push(column.label) // 把每列的表头也加进去算
         const conditon = column.selfAdjust
         if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
@@ -353,31 +353,31 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
-      const { field, blurHandler: handler } = fieldItem
+      const { prop, blurHandler: handler } = fieldItem
       this.index = ''
       this.property = ''
       // 如果前后值相同则不处理
-      if (row[field] == this.temRow[field]) {
+      if (row[prop] == this.temRow[prop]) {
         return
       }
       // 自定义数据过滤
       if (typeof handler === 'function') {
-        const newValue = handler(row[field])
-        row[field] = newValue
+        const newValue = handler(row[prop])
+        row[prop] = newValue
       }
       this.$emit('happenEvent', {
-        buttonItem: { method: 'inputChange', field },
+        buttonItem: { method: 'inputChange', prop },
         row
       })
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
-      const { field, inputHandler: handler } = fieldItem
+      const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
-        row[field] = newValue
+        row[prop] = newValue
       } else {
-        row[field] = value
+        row[prop] = value
       }
     },
     // 表格内复选框变更

@@ -14,7 +14,7 @@
       <template #lightOut="{ fieldItem, formData }">
         <el-input
           clearable
-          v-model="formData[fieldItem.field]"
+          v-model="formData[fieldItem.prop]"
           :placeholder="fieldItem.disabled ? '' : '请输入内容'"
           :disabled="fieldItem.disabled"
         ></el-input>
@@ -51,7 +51,7 @@
       </template>
       <template v-slot:plantName="{ row, fieldItem }">
         <div>
-          {{ row.plantName + '--插槽' + fieldItem.field }}
+          {{ row.plantName + '--插槽' + fieldItem.prop }}
         </div>
       </template>
     </ws-table>
@@ -88,7 +88,7 @@ export default {
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
-          testFormatter: '内容',
+          testFormatter: '内容内容内容内容',
           name: '王',
           age: 18,
         },

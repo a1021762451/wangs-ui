@@ -39,7 +39,7 @@
           <!-- 内容列 -->
           <tableColumn
             v-else
-            :key="fieldItem.field"
+            :key="fieldItem.prop"
             :globalMinDate="globalMinDate"
             :globalMaxDate="globalMaxDate"
             :fieldItem="fieldItem"
@@ -198,7 +198,7 @@ export default {
       handler(newData) {
         // 配置selfAdjust为true,则宽度自调节
         this.columns.forEach((column) => {
-          const arr = newData.map((x) => x[column.field]) // 获取每一列的所有数据
+          const arr = newData.map((x) => x[column.prop]) // 获取每一列的所有数据
           arr.push(column.label) // 把每列的表头也加进去算
           const conditon = column.selfAdjust
           if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
@@ -215,7 +215,7 @@ export default {
       const blurEletypes = ['input', 'input-number', 'textarea']
       this.columns.forEach((item) => {
         if (item.required && !item.disabled) {
-          obj[item.field] = [
+          obj[item.prop] = [
             {
               required: true,
               message: `请输入${item.label}`,
