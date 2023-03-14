@@ -282,14 +282,14 @@ export default {
     },
     rules() {
       let obj = {}
-      const blurEletypes = ['input', 'input-number', 'textarea']
+      const blurEletypes = ['el-input', 'el-input-number']
       this.formConfigList.forEach((item) => {
         if (item.required && !item.disabled) {
           obj[item.prop] = [
             {
               required: true,
               message: `请输入${item.label}`,
-              trigger: blurEletypes.includes(item.eleType) ? 'blur' : 'change'
+              trigger: blurEletypes.includes(item.component) ? 'blur' : 'change'
             }
           ]
         }
