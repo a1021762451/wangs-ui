@@ -9,6 +9,7 @@
       isSearchList
       @happenEvent="happenEvent"
       style="margin-bottom: 20px"
+      ref="wsForm"
     >
       <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">
@@ -37,7 +38,7 @@
       globalMaxDate="2024-01-22"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
-      ref="ws-table"
+      ref="wsTable"
     >
       <template v-slot:expand="{ row }">
         <div>
@@ -119,6 +120,11 @@ export default {
     }
   },
   mounted() {
+    const wsForm = this.$refs.wsForm
+    const wsTable = this.$refs.wsTable
+    const formData = wsForm.formData
+    const pageInfo = wsTable.pageInfo
+    console.log(formData, pageInfo, 'formData, pageInfo');
     setTimeout(() => {
       this.tableData.push({
         plantName: '四号机组',

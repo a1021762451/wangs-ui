@@ -14,23 +14,39 @@
         ></el-checkbox>
       </div>
       <el-checkbox-group v-model="checkedData" @change="handleCheckedChange">
-        <el-row :gutter="20">
+        <el-row :gutter="10">
           <el-col :span="span" v-for="option in data" :key="option.id">
             <el-checkbox-button
               v-if="isCheckboxButton"
               :disabled="option.disabled"
               :border="border"
               :label="option.id"
-              >{{ option.label }}</el-checkbox-button
             >
+              <ws-tooltip
+                :content="option.label"
+                overflow
+                placement="top-start"
+              >
+                <div class="el-checkbox-tooltip">
+                  {{ option.label }}
+                </div>
+              </ws-tooltip>
+            </el-checkbox-button>
 
-            <el-checkbox
+            <ws-tooltip
+              :content="option.label"
+              overflow
+              placement="top-start"
               v-else
-              :disabled="option.disabled"
-              :border="border"
-              :label="option.id"
-              >{{ option.label }}</el-checkbox
             >
+              <el-checkbox
+                :disabled="option.disabled"
+                :border="border"
+                :label="option.id"
+              >
+                {{ option.label }}
+              </el-checkbox>
+            </ws-tooltip>
           </el-col>
         </el-row>
       </el-checkbox-group>
@@ -40,8 +56,12 @@
 
 <script>
 import { deepClone } from '../../utils/util'
+import wsTooltip from '../../ws-tooltip'
 export default {
   name: 'ws-checkbox-item',
+  components: {
+    wsTooltip
+  },
   data() {
     return {
       checkAll: false,
@@ -157,5 +177,24 @@ export default {
 
 .inner-text {
   margin-bottom: 5px;
+}
+
+/deep/ .el-checkbox-group .el-checkbox{
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/deep/ .el-checkbox-group .el-checkbox-button__inner, .el-checkbox-group .el-checkbox-button  {
+  width: 100%;
+}
+.el-checkbox-tooltip {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/deep/ .el-checkbox__label {
+  display: inline;
 }
 </style>

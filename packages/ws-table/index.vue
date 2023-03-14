@@ -214,7 +214,6 @@ export default {
           if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
         })
         this.tableForm.tableData = this.tableData
-        this.pageInfo.total = this.tableForm.tableData.length
       },
       immediate: true
     }
@@ -237,6 +236,9 @@ export default {
       return obj
     }
   },
+  // created() {
+  //   this.handleSearch()
+  // },
   methods: {
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
@@ -244,7 +246,7 @@ export default {
       // const valid = await this.validateAll()
       // console.log('xxxxxxxxxxxxxxx', valid)
       this.$emit('happenEvent', {
-        buttonItem,
+        ...buttonItem,
         row
       })
     },
@@ -258,7 +260,8 @@ export default {
     },
     handleSearch() {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'handleSearch' }
+        method: 'pageChange',
+        pageInfo: this.pageInfo,
       })
     },
     // 遍历列的所有内容，获取最宽一列的宽度

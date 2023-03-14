@@ -1,85 +1,41 @@
 <template>
-  <el-table :data="tableData" style="width: 100%">
-    <el-table-column prop="date" label="日期" width="150"> </el-table-column>
-    <el-table-column prop="date" label="日期" width="150"> </el-table-column>
-    <el-table-column label="配送信息">
-      <el-table-column prop="name" label="姓名" width="120"> </el-table-column>
-      <el-table-column label="地址">
-        <el-table-column prop="province" label="省份" width="120">
-        </el-table-column>
-        <el-table-column prop="city" label="市区" width="120">
-        </el-table-column>
-        <el-table-column prop="address" label="地址" width="300">
-        </el-table-column>
-        <el-table-column prop="zip" label="邮编" width="120"> </el-table-column>
-      </el-table-column>
-    </el-table-column>
-  </el-table>
+  <div>
+    <el-button @click="toggleStr" type="primary" style="margin-bottom: 20px">切换文字长度</el-button>
+    <ws-tooltip :content="flag ? overStr :str" overflow>
+      <div class="box">
+        {{ flag ? overStr :str  }}
+      </div>
+    </ws-tooltip>
+  </div>
 </template>
 
 <script>
 export default {
+  name: 'test',
   data() {
     return {
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-08",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-06",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-        {
-          date: "2016-05-07",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333,
-        },
-      ],
-    };
+      str: '文字正常长度',
+      overStr: '文字超出文字超出文字超出文字超出文字超出文字超出',
+      flag: false
+    }
   },
-};
+  methods: {
+    toggleStr() {
+      this.flag = !this.flag
+      this.str =
+        this.str === '文字正常长度'
+          ? '文字超出文字超出文字超出文字超出文字超出文字超出'
+          : '文字正常'
+    }
+  }
+}
 </script>
+
+<style lang="less" scoped>
+.box {
+  width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+</style>

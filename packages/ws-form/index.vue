@@ -330,6 +330,7 @@ export default {
   mounted() {
     this.$nextTick(this.judgeOneRow)
     window.addEventListener('resize', this.judgeOneRow)
+    this.cloneForm = deepClone(this.formData)
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.judgeOneRow)
@@ -340,7 +341,8 @@ export default {
     // 表格内复选框变更
     fieldItemChange(fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'fieldItemChange', fieldItem },
+        method: 'fieldItemChange',
+        fieldItem,
         row
       })
     },
@@ -358,15 +360,18 @@ export default {
       const { method } = buttonItem
       // method为reset则进行默认处理
       if (method === 'reset') {
-        this.formData = { ...this.formData, ...this.defaultForm }
-        this.$emit('happenEvent', {
-          buttonItem: { method: 'search' },
-          formData: this.formData
-        })
+        this.formData = deepClone(this.cloneForm)
+        this.handleSearch()
         return
       }
       this.$emit('happenEvent', {
-        buttonItem,
+        ...buttonItem,
+        formData: this.formData
+      })
+    },
+    handleSearch() {
+      this.$emit('happenEvent', {
+        method: 'search',
         formData: this.formData
       })
     },
