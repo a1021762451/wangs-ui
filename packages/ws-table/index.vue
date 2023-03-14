@@ -1,7 +1,14 @@
 <template>
   <div>
     <!-- 表格 -->
-    <el-form
+    <component
+      :is="
+        columns.some((item) => {
+          return item.required
+        })
+          ? 'el-form'
+          : 'div'
+      "
       :model="tableForm"
       ref="tableForm"
       label-width="80px"
@@ -10,6 +17,7 @@
       size="small"
       style="height: calc(100% - 35px)"
     >
+      <!-- 表格 -->
       <el-table
         border
         tooltip-effect="dark"
@@ -27,8 +35,7 @@
             width="55"
             align="center"
             v-if="fieldItem.type"
-            :type="fieldItem.type"
-            :label="fieldItem.label"
+            v-bind="fieldItem"
             :key="fieldItem.type"
           >
             <template v-if="fieldItem.slotName" v-slot="scope">
@@ -51,12 +58,11 @@
         </template>
         <!-- 操作列 -->
         <el-table-column
-          align="center"
-          label="操作"
-          key="operation"
-          :fixed="operationFixed ? 'right' : undefined"
-          :width="tableButtons.length * 70"
           v-if="tableButtons.length"
+          align="center"
+          key="operation"
+          v-bind="operationColumn"
+          :width="tableButtons.length * 70"
         >
           <template v-slot="{ row, column, $index }">
             <ws-buttons
@@ -74,7 +80,7 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-form>
+    </component>
     <!-- 分页 -->
     <el-pagination
       v-if="showPagination"
@@ -145,10 +151,14 @@ export default {
       type: Boolean,
       default: true
     },
-    // 操作列是否固定
-    operationFixed: {
-      type: Boolean,
-      default: true
+    operationColumn: {
+      default() {
+        return {
+          label: '操作',
+          fixed: 'right'
+        }
+      },
+      type: Object
     },
     // 加载样式
     loading: {
@@ -226,15 +236,6 @@ export default {
       })
       return obj
     }
-  },
-  created() {
-    // 处理tableColumns
-    // this.tableColumns.forEach(fieldItem => {
-    //   // 过滤器进行绑定vue实例
-    //   if(fieldItem.formatter) {
-    //     fieldItem.formatter = fieldItem.formatter.bind(this)
-    //   }
-    // })
   },
   methods: {
     // 监听转发事件

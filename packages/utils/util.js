@@ -56,12 +56,12 @@ export function getAttrs(
   globalMaxDate
 ) {
   const allTypes = commonAttrs[fieldItem.component] || {}
-  const attrs = fieldItem.attrs || {}
-  const type = attrs.type
+  const componentAttrs = fieldItem.componentAttrs || {}
+  const type = componentAttrs.type
   const obj = {
     ...globalAttrs,
     ...(allTypes[type] || allTypes.default || {}),
-    ...attrs
+    ...componentAttrs
   }
   obj.placeholder = obj.disabled ? '' : obj.placeholder
   if (
@@ -210,8 +210,8 @@ export function judgeTimeType(limit) {
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData, globalMinDate, globalMaxDate) {
   // console.log(formData, 'formData')
-  const attrs = fieldItem.attrs || {}
-  const type = attrs.type
+  const componentAttrs = fieldItem.componentAttrs || {}
+  const type = componentAttrs.type
   const timeType = type || judgeTimeType(fieldItem.valueFormat)
   // 单独处理日月年限制
   const minField = fieldItem.minTime

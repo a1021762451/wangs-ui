@@ -43,7 +43,7 @@ export const formConfigList = [
     component: 'el-input',
     prop: 'protectContent',
     label: '检修内容',
-    attrs: {
+    componentAttrs: {
       type: 'textarea'
     }
   },
@@ -53,7 +53,7 @@ export const formConfigList = [
     label: '竣工日期小',
     required: true,
     maxTime: 'endTime_max',
-    attrs: {
+    componentAttrs: {
       type: 'date',
       'value-format': 'yyyy-MM-dd'
     }
@@ -64,7 +64,7 @@ export const formConfigList = [
     label: '竣工日期大',
     required: true,
     minTime: 'endTime_min',
-    attrs: {
+    componentAttrs: {
       type: 'date',
       'value-format': 'yyyy-MM-dd'
     }
@@ -117,7 +117,7 @@ export const allOptions = {
   testSelect: [
     { label: '苹果', value: '苹果' },
     { label: '香蕉', value: '香蕉' }
-  ],
+  ]
 }
 
 // 表格列配置
@@ -165,7 +165,6 @@ export const tableColumns = [
     prop: 'testFormatter',
     label: '测试过滤',
     formatter: function (row, column, cellValue, index) {
-      console.log(row, column, cellValue, index, 'formatter');
       return cellValue
     },
     'show-overflow-tooltip': true
@@ -213,7 +212,7 @@ export const tableColumns = [
     component: 'el-date-picker',
     maxTime: 'testMaxDatetime',
     required: true,
-    attrs: {
+    componentAttrs: {
       type: 'datetime',
       'value-format': 'yyyy-MM-dd HH:mm',
       format: 'yyyy-MM-dd HH:mm'
@@ -226,7 +225,7 @@ export const tableColumns = [
     component: 'el-date-picker',
     minTime: 'testMinDatetime',
     required: true,
-    attrs: {
+    componentAttrs: {
       type: 'datetime',
       'value-format': 'yyyy-MM-dd HH:mm',
       format: 'yyyy-MM-dd HH:mm'
@@ -239,7 +238,7 @@ export const tableColumns = [
     component: 'el-time-select',
     valueFormat: 'HH:mm',
     required: true,
-    attrs: {
+    componentAttrs: {
       'value-format': 'HH:mm'
     }
   }

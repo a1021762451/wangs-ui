@@ -26,8 +26,7 @@
           :key="fieldItem.prop"
         >
           <el-form-item
-            :label="fieldItem.label"
-            :prop="fieldItem.prop"
+            v-bind="fieldItem"
             :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
             :style="{
               marginBottom: isSearchList

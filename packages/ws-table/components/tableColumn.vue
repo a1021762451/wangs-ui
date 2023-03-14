@@ -1,4 +1,6 @@
 <template>
+  <!-- 有childrens -->
+  <!-- 迭代tableColumn组件，实现多级表头 -->
   <el-table-column :label="fieldItem.label" v-if="fieldItem.childrens">
     <tableColumn
       v-for="(column, index) in fieldItem.childrens"
@@ -12,7 +14,9 @@
     >
     </tableColumn>
   </el-table-column>
+  <!-- 没有有childrens -->
   <el-table-column v-else align="center" resizable v-bind="fieldItem">
+    <!-- 表头插槽 -->
     <template v-slot:header="scope">
       <slot
         :name="fieldItem.headerSlotName"
@@ -26,13 +30,16 @@
         <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
       </template>
     </template>
+    <!-- 内容插槽 -->
     <template v-slot="{ row, column, $index }">
+      <!-- 判断是否是el-form-item元素 -->
       <component
         :is="fieldItem.required ? 'el-form-item' : 'div'"
         :class="{ overflow_tip: fieldItem['show-overflow-tooltip'] }"
         :prop="`tableData.${$index}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
+        <!-- 命名插槽 -->
         <template v-if="fieldItem.slotName">
           <slot
             :name="fieldItem.slotName"
@@ -54,17 +61,21 @@
           >
             {{ row[fieldItem.prop] }}
           </div>
-          <template v-else>
-            <el-input
-              v-if="fieldItem.allowToggle"
-              size="mini"
-              v-focus
-              :value="row[fieldItem.prop]"
-              @blur="handleBlur(row, fieldItem)"
-              @input="handleInput($event, row, fieldItem)"
-            ></el-input>
-          </template>
+          <component
+            v-else
+            size="mini"
+            :is="fieldItem.component"
+            :disabled="row[fieldItem.disabledKey]"
+            v-bind="getAttrs(fieldItem, row, globalMinDate, globalMaxDate)"
+            v-focus
+            :value="row[fieldItem.prop]"
+            @change="fieldItemChange(fieldItem, row)"
+            @blur="handleBlur(row, fieldItem)"
+            @input="handleInput($event, row, fieldItem)"
+          >
+          </component>
         </template>
+        <!-- 表单元素模式 -->
         <component
           v-if="fieldItem.component"
           size="mini"
@@ -83,9 +94,11 @@
             ></el-option>
           </template>
         </component>
+        <!-- 格式化 -->
         <template v-else-if="fieldItem.formatter">{{
           fieldItem.formatter(row, column, row[fieldItem.prop], $index)
         }}</template>
+        <!-- 默认 -->
         <template v-else>{{ row[fieldItem.prop] }}</template>
       </component>
     </template>
