@@ -110,7 +110,13 @@
 </template>
 
 <script>
-import { deepClone, getPicker, getAttrs } from '../utils/util'
+import {
+  deepClone,
+  getPicker,
+  getAttrs,
+  getMaxValidator,
+  getMinValidator
+} from '../utils/util'
 import wsButtons from '../componentes/ws-buttons.vue'
 export default {
   name: 'ws-form',
@@ -283,42 +289,37 @@ export default {
     rules() {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
-      this.formConfigList.forEach((item) => {
-        if (item.required && !item.disabled) {
-          obj[item.prop] = [
+      this.formConfigList.forEach((fieldItem) => {
+        if (fieldItem.required && !fieldItem.disabled) {
+          obj[fieldItem.prop] = [
             {
               required: true,
-              message: `请输入${item.label}`,
-              trigger: blurEletypes.includes(item.component) ? 'blur' : 'change'
+              message: `请输入${fieldItem.label}`,
+              trigger: blurEletypes.includes(fieldItem.component)
+                ? 'blur'
+                : 'change'
             }
           ]
         }
-        const params = item.params
-        if (params && params.minTime && !item.disabled) {
-          const minField = params.minTime
-          obj[item.prop].push({
-            validator: (rule, value, callback) => {
-              if (+new Date(value) <= +new Date(this.form[minField])) {
-                callback(new Error('请注意时间先后'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          })
-        }
-        if (params && params.maxTime && !item.disabled) {
-          const maxField = params.maxTime
-          obj[item.prop].push({
-            validator: (rule, value, callback) => {
-              if (+new Date(value) >= +new Date(this.form[maxField])) {
-                callback(new Error('请注意时间先后'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          })
+        if (
+          fieldItem.component === 'el-date-picker' ||
+          fieldItem.component === 'el-time-select' ||
+          fieldItem.component === 'el-time-picker'
+        ) {
+          if (fieldItem.required && fieldItem.minTime && !fieldItem.disabled) {
+            const minField = fieldItem.minTime
+            obj[fieldItem.prop].push({
+              validator: getMinValidator(fieldItem, this.formData[minField]),
+              trigger: 'blur'
+            })
+          }
+          if (fieldItem.required && fieldItem.maxTime && !fieldItem.disabled) {
+            const maxField = fieldItem.maxTime
+            obj[fieldItem.prop].push({
+              validator: getMaxValidator(fieldItem, this.formData[maxField]),
+              trigger: 'blur'
+            })
+          }
         }
       })
       return obj

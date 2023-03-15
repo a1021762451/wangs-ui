@@ -106,7 +106,13 @@
 </template>
 
 <script>
-import { deepClone, getPicker, getAttrs } from '../../utils/util'
+import {
+  deepClone,
+  getPicker,
+  getAttrs,
+  getMaxValidator,
+  getMinValidator
+} from '../../utils/util'
 export default {
   name: 'tableColumn',
   props: {
@@ -154,32 +160,20 @@ export default {
       let rules = deepClone(this.rules[fieldItem.prop])
       if (
         fieldItem.component === 'el-date-picker' ||
-        fieldItem.component === 'el-time-select'
+        fieldItem.component === 'el-time-select' ||
+        fieldItem.component === 'el-time-picker'
       ) {
-        const params = fieldItem
-        if (params.minTime && !row[fieldItem.disabledKey]) {
-          const minField = params.minTime
+        if (fieldItem.minTime && !row[fieldItem.disabledKey]) {
+          const minField = fieldItem.minTime
           rules.push({
-            validator: (rule, value, callback) => {
-              if (+new Date(value) < +new Date(row[minField])) {
-                callback(new Error('请注意时间先后'))
-              } else {
-                callback()
-              }
-            },
+            validator: getMinValidator(fieldItem, row[minField]),
             trigger: 'blur'
           })
         }
-        if (params.maxTime && !row[fieldItem.disabledKey]) {
-          const maxField = params.maxTime
+        if (fieldItem.maxTime && !row[fieldItem.disabledKey]) {
+          const maxField = fieldItem.maxTime
           rules.push({
-            validator: (rule, value, callback) => {
-              if (+new Date(value) > +new Date(row[maxField])) {
-                callback(new Error('请注意时间先后'))
-              } else {
-                callback()
-              }
-            },
+            validator: getMaxValidator(fieldItem, row[maxField]),
             trigger: 'blur'
           })
         }

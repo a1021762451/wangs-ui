@@ -40,6 +40,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/ws-checkbox-test.vue')
   },
   {
+    path: '/ws-tooltip',
+    name: 'ws-tooltip',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ws-tooltip-test.vue')
+  },
+  {
     path: '/test',
     name: 'test',
     component: () => import(/* webpackChunkName: "about" */ '../views/test.vue')

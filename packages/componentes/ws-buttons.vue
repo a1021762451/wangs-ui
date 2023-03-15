@@ -1,6 +1,6 @@
 <template>
   <div class="button-col">
-    <template v-for="buttonItem in buttonConfigList">
+    <template v-for="buttonItem in buttonsList">
       <slot
         v-if="buttonItem.slotName"
         :name="buttonItem.slotName"
@@ -8,22 +8,20 @@
       ></slot>
       <el-link
         v-else-if="isLinkButton"
-        type="primary"
         class="button-item"
         :size="size"
-        :key="buttonItem.name"
         :underline="false"
+        :key="buttonItem.name"
+        v-bind="buttonItem"
         @click="$emit('happenEvent', buttonItem)"
         >{{ buttonItem.label }}</el-link
       >
       <el-button
         v-else
-        :key="buttonItem.label"
-        :type="buttonItem.type || 'primary'"
         class="button-item"
+        :key="buttonItem.label"
         :size="size"
-        :loading="buttonItem.loading"
-        :icon="buttonItem.icon"
+        v-bind="buttonItem"
         @click="$emit('happenEvent', buttonItem)"
         >{{ buttonItem.label }}</el-button
       >
@@ -33,6 +31,7 @@
 </template>
 
 <script>
+import { deepClone } from '../utils/util'
 export default {
   name: 'ws-buttons',
   props: {
@@ -52,6 +51,15 @@ export default {
     size: {
       default: 'small',
       type: String
+    }
+  },
+  computed: {
+    buttonsList() {
+      const arr = deepClone(this.buttonConfigList)
+      arr.forEach((item) => {
+        item.type = item.type || 'primary'
+      })
+      return arr
     }
   }
 }

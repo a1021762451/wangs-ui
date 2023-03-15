@@ -1,12 +1,14 @@
 <template>
-  <div>
-    <el-button @click="toggleStr" type="primary" style="margin-bottom: 20px">切换文字长度</el-button>
-    <ws-tooltip :content="flag ? overStr :str" overflow>
-      <div class="box">
-        {{ flag ? overStr :str  }}
-      </div>
-    </ws-tooltip>
-  </div>
+  <el-time-picker
+    v-model="value"
+    :picker-options="{
+      selectableRange: '09:30:00 - 12:00:00'
+    }"
+    value-format="HH:mm"
+    format="HH:mm"
+    placeholder="任意时间点"
+  >
+  </el-time-picker>
 </template>
 
 <script>
@@ -14,18 +16,7 @@ export default {
   name: 'test',
   data() {
     return {
-      str: '文字正常长度',
-      overStr: '文字超出文字超出文字超出文字超出文字超出文字超出',
-      flag: false
-    }
-  },
-  methods: {
-    toggleStr() {
-      this.flag = !this.flag
-      this.str =
-        this.str === '文字正常长度'
-          ? '文字超出文字超出文字超出文字超出文字超出文字超出'
-          : '文字正常'
+      value: ''
     }
   }
 }
@@ -33,7 +24,10 @@ export default {
 
 <style lang="less" scoped>
 .box {
-  width: 200px;
+  // border: 1px solid red;
+  background: red;
+  height: 30px;
+  width: 100px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

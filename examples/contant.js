@@ -5,6 +5,7 @@ export const list = [
   'ws-tree',
   'ws-echarts',
   'ws-checkbox',
+  'ws-tooltip',
   'test'
 ]
 // 按钮组配置同tableButtons
@@ -55,7 +56,7 @@ export const formConfigList = [
     maxTime: 'endTime_max',
     componentAttrs: {
       type: 'date',
-      'value-format': 'yyyy-MM-dd'
+      valueFormat: 'yyyy-MM-dd'
     }
   },
   {
@@ -66,7 +67,7 @@ export const formConfigList = [
     minTime: 'endTime_min',
     componentAttrs: {
       type: 'date',
-      'value-format': 'yyyy-MM-dd'
+      valueFormat: 'yyyy-MM-dd'
     }
   },
   {
@@ -129,7 +130,7 @@ export const tableColumns = [
     slotName: 'plantName',
     prop: 'plantName',
     label: '测试插槽',
-    'show-overflow-tooltip': true
+    showOverflowTooltip: true
   },
   // 过滤举例
   {
@@ -138,7 +139,7 @@ export const tableColumns = [
     formatter: function (row, column, cellValue, index) {
       return cellValue
     },
-    'show-overflow-tooltip': true
+    showOverflowTooltip: true
   },
   // 宽度自调节举例
   { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
@@ -185,7 +186,7 @@ export const tableColumns = [
     required: true,
     componentAttrs: {
       type: 'datetime',
-      'value-format': 'yyyy-MM-dd HH:mm',
+      valueFormat: 'yyyy-MM-dd HH:mm',
       format: 'yyyy-MM-dd HH:mm'
     }
   },
@@ -196,21 +197,46 @@ export const tableColumns = [
     component: 'el-date-picker',
     minTime: 'testMinDatetime',
     required: true,
+    // minAllowEqual: false, // 不允许和对应的小时间相等
+    // maxAllowEqual: false, // 不允许和对应的大时间相等
     componentAttrs: {
       type: 'datetime',
-      'value-format': 'yyyy-MM-dd HH:mm',
+      valueFormat: 'yyyy-MM-dd HH:mm',
       format: 'yyyy-MM-dd HH:mm'
     }
   },
+  // {
+  //   prop: 'testMinDatetime',
+  //   label: '测试时间框小',
+  //   width: 200,
+  //   component: 'el-time-picker',
+  //   maxTime: 'testMaxDatetime',
+  //   required: true,
+  //   componentAttrs: {
+  //     valueFormat: 'HH:mm',
+  //     format: 'HH:mm'
+  //   }
+  // },
+  // {
+  //   prop: 'testMaxDatetime',
+  //   label: '测试时间框大',
+  //   width: 200,
+  //   component: 'el-time-picker',
+  //   minTime: 'testMinDatetime',
+  //   required: true,
+  //   componentAttrs: {
+  //     valueFormat: 'HH:mm',
+  //     format: 'HH:mm'
+  //   }
+  // },
   {
     prop: 'testTime',
     label: '测试时间框(time)',
     width: 200,
     component: 'el-time-select',
-    valueFormat: 'HH:mm',
     required: true,
     componentAttrs: {
-      'value-format': 'HH:mm'
+      valueFormat: 'HH:mm'
     }
   }
 ]
