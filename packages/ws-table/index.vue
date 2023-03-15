@@ -47,8 +47,6 @@
           <tableColumn
             v-else
             :key="fieldItem.prop"
-            :globalMinDate="globalMinDate"
-            :globalMaxDate="globalMaxDate"
             :fieldItem="fieldItem"
             :rules="rules"
             :allOptions="allOptions"
@@ -164,16 +162,6 @@ export default {
     loading: {
       type: Boolean,
       default: false
-    },
-    // 全局最小时间
-    globalMinDate: {
-      default: 0,
-      type: String | Number
-    },
-    // 全局最大时间
-    globalMaxDate: {
-      default: 0,
-      type: String | Number
     },
     // 下拉框选项配置数组
     allOptions: {

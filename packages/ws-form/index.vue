@@ -50,7 +50,7 @@
               v-if="fieldItem.component"
               :is="fieldItem.component"
               v-bind="
-                getAttrs(fieldItem, formData, globalMinDate, globalMaxDate)
+                getAttrs(fieldItem, formData)
               "
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
@@ -183,16 +183,6 @@ export default {
       default: false,
       type: Boolean
     },
-    // 全局最小时间
-    globalMinDate: {
-      default: 0,
-      type: String | Number
-    },
-    // 全局最大时间
-    globalMaxDate: {
-      default: 0,
-      type: String | Number
-    },
     // 按钮组尺寸
     buttonSize: {
       default: 'small',
@@ -306,15 +296,15 @@ export default {
           fieldItem.component === 'el-time-select' ||
           fieldItem.component === 'el-time-picker'
         ) {
-          if (fieldItem.required && fieldItem.minTime && !fieldItem.disabled) {
-            const minField = fieldItem.minTime
+          if (fieldItem.required && fieldItem.minTimeProp && !fieldItem.disabled) {
+            const minField = fieldItem.minTimeProp
             obj[fieldItem.prop].push({
               validator: getMinValidator(fieldItem, this.formData[minField]),
               trigger: 'blur'
             })
           }
-          if (fieldItem.required && fieldItem.maxTime && !fieldItem.disabled) {
-            const maxField = fieldItem.maxTime
+          if (fieldItem.required && fieldItem.maxTimeProp && !fieldItem.disabled) {
+            const maxField = fieldItem.maxTimeProp
             obj[fieldItem.prop].push({
               validator: getMaxValidator(fieldItem, this.formData[maxField]),
               trigger: 'blur'

@@ -34,8 +34,6 @@
       :tableColumns="tableColumns"
       :tableButtons="tableButtons"
       :allOptions="allOptions"
-      globalMinDate="2022-01-22"
-      globalMaxDate="2024-01-22"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
       ref="wsTable"

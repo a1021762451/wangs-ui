@@ -1,3 +1,11 @@
+<!--
+ * @Author: wanns 1021762451@qq.com
+ * @Date: 2023-03-15 19:36:28
+ * @LastEditors: wanns 1021762451@qq.com
+ * @LastEditTime: 2023-03-15 19:54:58
+ * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 <template>
   <div class="button-col">
     <template v-for="buttonItem in buttonsList">
@@ -11,7 +19,7 @@
         class="button-item"
         :size="size"
         :underline="false"
-        :key="buttonItem.name"
+        :key="buttonItem.method"
         v-bind="buttonItem"
         @click="$emit('happenEvent', buttonItem)"
         >{{ buttonItem.label }}</el-link

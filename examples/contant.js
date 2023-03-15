@@ -53,7 +53,7 @@ export const formConfigList = [
     prop: 'endTime_min',
     label: '竣工日期小',
     required: true,
-    maxTime: 'endTime_max',
+    maxTimeProp: 'endTime_max',
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd'
@@ -64,7 +64,7 @@ export const formConfigList = [
     prop: 'endTime_max',
     label: '竣工日期大',
     required: true,
-    minTime: 'endTime_min',
+    minTimeProp: 'endTime_min',
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd'
@@ -177,58 +177,61 @@ export const tableColumns = [
     required: true
   },
   // 测试时间框模式
-  {
-    prop: 'testMinDatetime',
-    label: '测试时间框小',
-    width: 200,
-    component: 'el-date-picker',
-    maxTime: 'testMaxDatetime',
-    required: true,
-    componentAttrs: {
-      type: 'datetime',
-      valueFormat: 'yyyy-MM-dd HH:mm',
-      format: 'yyyy-MM-dd HH:mm'
-    }
-  },
-  {
-    prop: 'testMaxDatetime',
-    label: '测试时间框大',
-    width: 200,
-    component: 'el-date-picker',
-    minTime: 'testMinDatetime',
-    required: true,
-    // minAllowEqual: false, // 不允许和对应的小时间相等
-    // maxAllowEqual: false, // 不允许和对应的大时间相等
-    componentAttrs: {
-      type: 'datetime',
-      valueFormat: 'yyyy-MM-dd HH:mm',
-      format: 'yyyy-MM-dd HH:mm'
-    }
-  },
   // {
   //   prop: 'testMinDatetime',
   //   label: '测试时间框小',
   //   width: 200,
-  //   component: 'el-time-picker',
-  //   maxTime: 'testMaxDatetime',
+  //   component: 'el-date-picker',
+  //   maxTimeProp: 'testMaxDatetime',
+  //   minTime: '2022-01-01',
+  //   maxTime: '2024-01-01',
   //   required: true,
   //   componentAttrs: {
-  //     valueFormat: 'HH:mm',
-  //     format: 'HH:mm'
+  //     type: 'datetime',
+  //     valueFormat: 'yyyy-MM-dd HH:mm',
+  //     format: 'yyyy-MM-dd HH:mm'
   //   }
   // },
   // {
   //   prop: 'testMaxDatetime',
   //   label: '测试时间框大',
   //   width: 200,
-  //   component: 'el-time-picker',
-  //   minTime: 'testMinDatetime',
+  //   component: 'el-date-picker',
+  //   minTimeProp: 'testMinDatetime',
   //   required: true,
+  //   // minAllowEqual: false, // 不允许和对应的小时间相等
+  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
   //   componentAttrs: {
-  //     valueFormat: 'HH:mm',
-  //     format: 'HH:mm'
+  //     type: 'datetime',
+  //     valueFormat: 'yyyy-MM-dd HH:mm',
+  //     format: 'yyyy-MM-dd HH:mm'
   //   }
   // },
+  {
+    prop: 'testMinDatetime',
+    label: '测试时间框小',
+    width: 200,
+    component: 'el-time-select',
+    maxTimeProp: 'testMaxDatetime',
+    // maxAllowEqual: false,
+    required: true,
+    // componentAttrs: {
+    //   valueFormat: 'HH:mm',
+    //   format: 'HH:mm'
+    // }
+  },
+  {
+    prop: 'testMaxDatetime',
+    label: '测试时间框大',
+    width: 200,
+    component: 'el-time-select',
+    minTimeProp: 'testMinDatetime',
+    required: true,
+    // componentAttrs: {
+    //   valueFormat: 'HH:mm',
+    //   format: 'HH:mm'
+    // }
+  },
   {
     prop: 'testTime',
     label: '测试时间框(time)',

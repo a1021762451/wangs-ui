@@ -134,8 +134,8 @@ const tableColumns = [
     label: '测试时间框小',
     width: 200,
     component: 'el-date-picker',
-    // maxTime/minTime 指定互相限制的时间字段
-    maxTime: 'testMaxDatetime',
+    // maxTimeProp/minTimeProp 指定互相限制的时间字段
+    maxTimeProp: 'testMaxDatetime',
     required: true,
     componentAttrs: {
       type: 'datetime',
@@ -148,7 +148,7 @@ const tableColumns = [
     label: '测试时间框大',
     width: 200,
     component: 'el-date-picker',
-    minTime: 'testMinDatetime',
+    minTimeProp: 'testMinDatetime',
     required: true,
     componentAttrs: {
       type: 'datetime',
@@ -208,8 +208,8 @@ const allOptions = {
 | blurHandler    | el-input 组件失焦时值过滤 | Function | -      | -      |
 | inputHandler   | el-input 组件输入时值过滤 | Function | -      | -      |
 | required       | 是否必填                  | Boolean  | -      | false  |
-| maxTime        | 时间组件最大值对应的字段  | String   | -      | -      |
-| minTime        | 时间组件最小值对应的字段  | String   | -      | -      |
+| maxTimeProp        | 时间组件最大值对应的字段  | String   | -      | -      |
+| minTimeProp        | 时间组件最小值对应的字段  | String   | -      | -      |
 | componentAttrs | 组件对应的属性            | Object   | -      | -      |
 
 - tableButtons 内部属性(兼容 el-button 自带的属性， 不另作说明)

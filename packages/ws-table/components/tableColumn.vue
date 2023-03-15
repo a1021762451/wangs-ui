@@ -7,8 +7,6 @@
       :key="index"
       :fieldItem="column"
       :rules="rules"
-      :globalMinDate="globalMinDate"
-      :globalMaxDate="globalMaxDate"
       :allOptions="allOptions"
       @happenEvent="(params) => $emit('happenEvent', params)"
     >
@@ -66,7 +64,7 @@
             size="mini"
             :is="fieldItem.component"
             :disabled="row[fieldItem.disabledKey]"
-            v-bind="getAttrs(fieldItem, row, globalMinDate, globalMaxDate)"
+            v-bind="getAttrs(fieldItem, row)"
             v-focus
             :value="row[fieldItem.prop]"
             @change="fieldItemChange(fieldItem, row)"
@@ -81,7 +79,7 @@
           size="mini"
           :is="fieldItem.component"
           :disabled="row[fieldItem.disabledKey]"
-          v-bind="getAttrs(fieldItem, row, globalMinDate, globalMaxDate)"
+          v-bind="getAttrs(fieldItem, row)"
           v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
         >
@@ -128,16 +126,6 @@ export default {
       },
       type: Object
     },
-    // 全局最小时间
-    globalMinDate: {
-      default: 0,
-      type: String | Number
-    },
-    // 全局最大时间
-    globalMaxDate: {
-      default: 0,
-      type: String | Number
-    },
     // 下拉框选项配置数组
     allOptions: {
       default() {
@@ -163,15 +151,15 @@ export default {
         fieldItem.component === 'el-time-select' ||
         fieldItem.component === 'el-time-picker'
       ) {
-        if (fieldItem.minTime && !row[fieldItem.disabledKey]) {
-          const minField = fieldItem.minTime
+        if (fieldItem.minTimeProp && !row[fieldItem.disabledKey]) {
+          const minField = fieldItem.minTimeProp
           rules.push({
             validator: getMinValidator(fieldItem, row[minField]),
             trigger: 'blur'
           })
         }
-        if (fieldItem.maxTime && !row[fieldItem.disabledKey]) {
-          const maxField = fieldItem.maxTime
+        if (fieldItem.maxTimeProp && !row[fieldItem.disabledKey]) {
+          const maxField = fieldItem.maxTimeProp
           rules.push({
             validator: getMaxValidator(fieldItem, row[maxField]),
             trigger: 'blur'
