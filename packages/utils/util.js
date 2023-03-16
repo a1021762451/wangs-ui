@@ -1,23 +1,26 @@
+// 全局属性
 const globalAttrs = {
-  clearable: true
+  clearable: true,
 }
+
+// 组件和通用的属性映射
 const commonAttrs = {
   'el-select': {
     default: {
       filterable: true,
-      placeholder: '请选择'
-    }
+      placeholder: '请选择',
+    },
   },
   'el-input': {
     default: {
-      placeholder: '请输入'
+      placeholder: '请输入',
     },
     textarea: {
       'show-word-limit': true,
       maxlength: 1000,
       placeholder: '请输入',
-      rows: 2
-    }
+      rows: 2,
+    },
   },
   'el-input-number': {
     default: {
@@ -26,33 +29,35 @@ const commonAttrs = {
       min: 1,
       max: 100,
       step: 1,
-      precision: 0
-    }
+      precision: 0,
+    },
   },
   'el-date-picker': {
     default: {
-      placeholder: '选择时间'
-    }
+      placeholder: '选择时间',
+    },
   },
   'el-time-picker': {
     default: {
-      placeholder: '选择时间'
-    }
+      placeholder: '选择时间',
+    },
   },
   'el-time-select': {
     default: {
-      placeholder: '选择时间'
-    }
+      placeholder: '选择时间',
+    },
   },
   'el-checkbox': {
     default: {
       'true-label': '1',
-      'false-label': '0'
-    }
-  }
+      'false-label': '0',
+    },
+  },
 }
 let getAttrsCount = 0
 let getPickerCount = 0
+
+// 获取所有的配置属性
 export function getAttrs(fieldItem, formData = {}) {
   getAttrsCount += 1
   // console.log(getAttrsCount, 'getAttrsCount');
@@ -71,7 +76,7 @@ export function getAttrs(fieldItem, formData = {}) {
     ...obj,
     ...globalAttrs,
     ...(allTypes[type] || allTypes.default || {}),
-    ...componentAttrs
+    ...componentAttrs,
   }
   obj.placeholder = obj.disabled ? '' : obj.placeholder
   return obj
@@ -114,7 +119,7 @@ export const getObjType = (obj) => {
     '[object RegExp]': 'regExp',
     '[object Undefined]': 'undefined',
     '[object Null]': 'null',
-    '[object Object]': 'object'
+    '[object Object]': 'object',
   }
   if (obj instanceof Element) {
     return 'element'
@@ -209,78 +214,87 @@ export function judgeTimeType(limit) {
 
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData) {
-  getPickerCount += 1
+  // getPickerCount += 1
   // console.log(getPickerCount, 'getPickerCount');
-  // console.log(formData, 'formData')'
+
+  // 初始化参数
   let {
     component,
     minAllowEqual = true,
     maxAllowEqual = true,
+    timeDisabled,
     minTime = 0,
     maxTime = 0,
+    minDate = 0,
+    maxDate = 0,
     minTimeProp,
     maxTimeProp,
-    step
+    step,
   } = fieldItem
   const componentAttrs = fieldItem.componentAttrs || {}
   const { type, isRange, valueFormat } = componentAttrs
+
   // 如果是范围选择则 不进行限制
   if (/range/i.test(type) || isRange) return {}
-  // 单独处理日月年限制
   const minValue = formData[minTimeProp] || 0
   const maxValue = formData[maxTimeProp] || 0
-  // console.log(minTime, maxTime, 'minTime, maxTime')
-  // 单独处理分秒限制 --- 此方案还有瑕疵，目前用rules控制。
-  // let selectableRange = ''
-  // let minRange = '00:00:00'
-  // let maxRange = '23:59:59'
-  // if (minValue && formData[fieldItem.prop]) {
-  //   const isSameDay =
-  //     new Date(minValue).toDateString() ===
-  //     new Date(formData[fieldItem.prop]).toDateString()
-  //   if (isSameDay) {
-  //     const HH = new Date(minValue).getHours()
-  //     const mm = new Date(minValue).getMinutes()
-  //     const ss = new Date(minValue).getSeconds()
-  //     minRange = HH + ':' + mm + ':' + ss
-  //   }
-  // }
-  // if (maxValue && formData[fieldItem.prop]) {
-  //   const isSameDay =
-  //     new Date(maxValue).toDateString() ===
-  //     new Date(formData[fieldItem.prop]).toDateString()
-  //   if (isSameDay) {
-  //     const HH = new Date(maxValue).getHours()
-  //     const mm = new Date(maxValue).getMinutes()
-  //     const ss = new Date(maxValue).getSeconds()
-  //     maxRange = HH + ':' + mm + ':' + ss
-  //   }
-  // }
-  // selectableRange = minRange + '-' + maxRange
+
+  // el-date-picker组件
   if (component === 'el-date-picker') {
+    // 单独处理日月年限制
     const minTimeValue = () =>
       +new Date(format(new Date(minValue), 'yyyy-MM-DD'))
     const maxTimeValue = () =>
       +new Date(format(new Date(maxValue), 'yyyy-MM-DD'))
-    minTime = minValue ? minTimeValue() : +new Date(minTime)
-    maxTime = maxValue ? maxTimeValue() : +new Date(maxTime)
+    minDate = minValue ? minTimeValue() : +new Date(minDate)
+    maxDate = maxValue ? maxTimeValue() : +new Date(maxDate)
+    let selectableRange = ''
+    // timeDisabled控制是否禁用精度到时分秒，副作用时此刻按钮隐藏
+    if (timeDisabled) {
+      minTime = minTime || '00:00:00'
+      maxTime = maxTime || '23:59:59'
+      if (minValue && formData[fieldItem.prop]) {
+        const isSameDay =
+          new Date(minValue).toDateString() ===
+          new Date(formData[fieldItem.prop]).toDateString()
+        if (isSameDay) {
+          const HH = new Date(minValue).getHours()
+          const mm = new Date(minValue).getMinutes()
+          const ss = new Date(minValue).getSeconds()
+          minTime = HH + ':' + mm + ':' + ss
+        }
+      }
+      if (maxValue && formData[fieldItem.prop]) {
+        const isSameDay =
+          new Date(maxValue).toDateString() ===
+          new Date(formData[fieldItem.prop]).toDateString()
+        if (isSameDay) {
+          const HH = new Date(maxValue).getHours()
+          const mm = new Date(maxValue).getMinutes()
+          const ss = new Date(maxValue).getSeconds()
+          maxTime = HH + ':' + mm + ':' + ss
+        }
+      }
+      selectableRange = minTime + '-' + maxTime
+    }
     return {
       disabledDate(time) {
         time = +new Date(format(new Date(time), 'yyyy-MM-DD'))
         let minCondition = false
         let maxCondition = false
-        minCondition = minAllowEqual ? minTime <= time : minTime < time
-        maxCondition = maxAllowEqual ? time <= maxTime : time < maxTime
-        // console.log(minAllowEqual, maxAllowEqual, 'minAllowEqual, maxAllowEqual');
-        if (maxTime) {
+        minCondition = minAllowEqual ? minDate <= time : minTime < time
+        maxCondition = maxAllowEqual ? time <= maxDate : time < maxDate
+        if (maxDate) {
           return !(minCondition && maxCondition)
         } else {
           return !minCondition
         }
-      }
-      // selectableRange,
+      },
+      selectableRange,
     }
+    // el-time-select组件
   } else if (component === 'el-time-select') {
+    // minTime/start maxTime/end 限制重复，只用一种即可
     minTime = minValue || minTime || '00:00'
     maxTime = maxValue || maxTime || '23:59'
     return {
@@ -290,46 +304,53 @@ export function getPicker(fieldItem, formData) {
       // minTime: minValue,
       // maxTime: maxValue
     }
+
+    // el-time-picker组件
   } else if (component === 'el-time-picker') {
     // 秒级别控制不了
     let selectableRange = ''
+    // 处理minTime
     minTime = minValue || minTime || '00:00:00'
     minTime =
-      getObjType(minTime) === 'date' ? format(minTime, 'HH:mm:ss') : minTime
+      typeof minTime === 'string' ? minTime : format(minTime, 'HH:mm:ss')
+    const minO = decodeFormatTime(minTime, valueFormat || 'HH:mm:ss')
+    minTime = encodeFormatTime(minO, 'HH:mm:ss')
+    // 处理maxTime
     maxTime = maxValue || maxTime || '23:59:59'
     maxTime =
-      getObjType(maxTime) === 'date' ? format(maxTime, 'HH:mm:ss') : maxTime
-    if (minTime) {
-      const minO = decodeFormatTime(minTime, valueFormat || 'HH:mm:ss')
-      minTime = encodeFormatTime(minO, 'HH:mm:ss')
-    }
-    if (maxTime) {
-      const maxO = decodeFormatTime(maxTime, valueFormat || 'HH:mm:ss')
-      maxTime = encodeFormatTime(maxO, 'HH:mm:ss')
-    }
+      typeof maxTime === 'string' ? maxTime : format(maxTime, 'HH:mm:ss')
+    const maxO = decodeFormatTime(maxTime, valueFormat || 'HH:mm:ss')
+    maxTime = encodeFormatTime(maxO, 'HH:mm:ss')
     selectableRange = minTime + '-' + maxTime
-    console.log(minValue, maxValue, 'minValue, maxValue')
-    console.log('selectableRange', selectableRange)
     return {
-      selectableRange
+      selectableRange,
     }
   }
 }
-
-export function getMinValidator(fieldItem, minValue) {
+// 获取最大时间校验
+export function getMinValidator(fieldItem, min) {
   const { minAllowEqual = true } = fieldItem
-  return function (rule, value, callback) {
-    value = value || 0
-    minValue = minValue || 0
-    if (fieldItem.component !== 'el-date-picker' && minValue) {
+  return function (rule, val, callback) {
+    let value = val || 0
+    let minValue = min || 0
+    if (
+      fieldItem.component !== 'el-date-picker' &&
+      minValue &&
+      typeof minValue === 'string'
+    ) {
       minValue = `1998-06-12 ${minValue}`
     }
-    if (fieldItem.component !== 'el-date-picker' && value) {
+    if (
+      fieldItem.component !== 'el-date-picker' &&
+      value &&
+      typeof value === 'string'
+    ) {
       value = `1998-06-12 ${value}`
     }
     let minCondition = minAllowEqual
       ? +new Date(value) < +new Date(minValue)
       : +new Date(value) <= +new Date(minValue)
+    // console.log(value, minValue, +new Date(value), +new Date(minValue), minCondition, 'minCondition');
     if (minCondition) {
       callback(new Error('请注意时间先后'))
     } else {
@@ -337,22 +358,31 @@ export function getMinValidator(fieldItem, minValue) {
     }
   }
 }
-
-export function getMaxValidator(fieldItem, maxValue) {
+// 获取最小时间校验
+export function getMaxValidator(fieldItem, max) {
   const { maxAllowEqual = true } = fieldItem
-  return function (rule, value, callback) {
-    value = value || 0
-    maxValue = maxValue || 0
-    if (fieldItem.component !== 'el-date-picker' && maxValue) {
+  return function (rule, val, callback) {
+    let value = val || 0
+    let maxValue = max || 0
+    if (
+      fieldItem.component !== 'el-date-picker' &&
+      maxValue &&
+      typeof maxValue === 'string'
+    ) {
       maxValue = `1998-06-12 ${maxValue}`
     }
-    if (fieldItem.component !== 'el-date-picker' && value) {
+    if (
+      fieldItem.component !== 'el-date-picker' &&
+      value &&
+      typeof value === 'string'
+    ) {
       value = `1998-06-12 ${value}`
     }
     let maxCondition = maxAllowEqual
       ? +new Date(value) > +new Date(maxValue)
       : +new Date(value) >= +new Date(maxValue)
     maxCondition = maxValue && maxCondition
+    // console.log(value, maxValue, +new Date(value), +new Date(maxValue), maxCondition, 'maxCondition');
     if (maxCondition) {
       callback(new Error('请注意时间先后'))
     } else {
@@ -361,6 +391,7 @@ export function getMaxValidator(fieldItem, maxValue) {
   }
 }
 
+// 根据时间对象和格式，转换时间
 export function format(date, fmt = 'yyyy-MM-DD') {
   var o = {
     'M+': date.getMonth() + 1, //月份
@@ -369,7 +400,7 @@ export function format(date, fmt = 'yyyy-MM-DD') {
     'm+': date.getMinutes(), //分
     's+': date.getSeconds(), //秒
     'q+': Math.floor((date.getMonth() + 3) / 3), //季度
-    S: date.getMilliseconds() //毫秒
+    S: date.getMilliseconds(), //毫秒
   }
   let match
   if ((match = fmt.match(/(y+)/)))
@@ -388,6 +419,7 @@ export function format(date, fmt = 'yyyy-MM-DD') {
   return fmt
 }
 
+// 根据时间和对应的格式，解码成对象
 export function decodeFormatTime(date, fmt) {
   var o = {
     'y+': '2000',
@@ -397,7 +429,7 @@ export function decodeFormatTime(date, fmt) {
     'm+': '00', //分
     's+': '00', //秒
     'q+': '01', //季度
-    S: '001' //毫秒
+    S: '001', //毫秒
   }
   let match
   for (var k in o)
@@ -409,6 +441,7 @@ export function decodeFormatTime(date, fmt) {
   return o
 }
 
+// 根据对象和对应的格式， 转换成对应的格式
 export function encodeFormatTime(o, fmt) {
   let match
   if ((match = fmt.match(/(y+)/)))

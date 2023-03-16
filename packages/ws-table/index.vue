@@ -22,12 +22,12 @@
         border
         tooltip-effect="dark"
         style="width: 100%"
+        height="100%"
         :header-cell-style="{ background: '#f3f3f3' }"
         :data="tableForm.tableData"
         v-loading="loading"
         v-bind="$attrs"
         v-on="$listeners"
-        height="100%"
       >
         <template v-for="fieldItem in columns">
           <!-- 特殊列，如复选框，序号列 -->

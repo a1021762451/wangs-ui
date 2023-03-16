@@ -6,18 +6,18 @@ export const list = [
   'ws-echarts',
   'ws-checkbox',
   'ws-tooltip',
-  'test'
+  'test',
 ]
 // 按钮组配置同tableButtons
 export const buttonConfigList = [
   {
     method: 'export',
     label: '导出EXCEL',
-    icon: 'el-icon-setting'
+    icon: 'el-icon-setting',
   },
   {
-    slotName: 'download'
-  }
+    slotName: 'download',
+  },
 ]
 
 // 表单配置
@@ -26,27 +26,27 @@ export const formConfigList = [
     component: 'el-select',
     prop: 'applyComId',
     label: '申请单位申请单位申请单位',
-    required: true
+    required: true,
   },
   {
     component: 'el-input',
     prop: 'equipName',
     label: '停电设备',
-    required: true
+    required: true,
   },
   {
     component: 'el-input-number',
     prop: 'equipNum',
     label: '设备数量',
-    required: true
+    required: true,
   },
   {
     component: 'el-input',
     prop: 'protectContent',
     label: '检修内容',
     componentAttrs: {
-      type: 'textarea'
-    }
+      type: 'textarea',
+    },
   },
   {
     component: 'el-date-picker',
@@ -54,10 +54,11 @@ export const formConfigList = [
     label: '竣工日期小',
     required: true,
     maxTimeProp: 'endTime_max',
+    timeDisabled: true,
     componentAttrs: {
       type: 'date',
-      valueFormat: 'yyyy-MM-dd'
-    }
+      valueFormat: 'yyyy-MM-dd',
+    },
   },
   {
     component: 'el-date-picker',
@@ -67,15 +68,15 @@ export const formConfigList = [
     minTimeProp: 'endTime_min',
     componentAttrs: {
       type: 'date',
-      valueFormat: 'yyyy-MM-dd'
-    }
+      valueFormat: 'yyyy-MM-dd',
+    },
   },
   {
     slotName: 'lightOut',
     prop: 'lightOut',
     label: '光年之外',
-    required: true
-  }
+    required: true,
+  },
 ]
 
 // 下拉框选项
@@ -84,12 +85,12 @@ export const allOptions = {
     { label: '南昌', value: '南昌' },
     { label: '宁波', value: '宁波' },
     { label: '鹰潭', value: '鹰潭' },
-    { label: '上饶', value: '上饶' }
+    { label: '上饶', value: '上饶' },
   ],
   testSelect: [
     { label: '苹果', value: '苹果' },
-    { label: '香蕉', value: '香蕉' }
-  ]
+    { label: '香蕉', value: '香蕉' },
+  ],
 }
 
 // 表格列配置
@@ -103,26 +104,26 @@ export const tableColumns = [
     childrens: [
       {
         prop: 'name',
-        label: '姓名'
+        label: '姓名',
       },
       {
         prop: 'age',
-        label: '年龄'
+        label: '年龄',
       },
       {
         label: '测试多级表头-1',
         childrens: [
           {
             prop: 'adress',
-            label: '地址'
+            label: '地址',
           },
           {
             prop: 'work',
-            label: '工作'
-          }
-        ]
-      }
-    ]
+            label: '工作',
+          },
+        ],
+      },
+    ],
   },
   // 自定义表头，内容
   {
@@ -130,7 +131,7 @@ export const tableColumns = [
     slotName: 'plantName',
     prop: 'plantName',
     label: '测试插槽',
-    showOverflowTooltip: true
+    showOverflowTooltip: true,
   },
   // 过滤举例
   {
@@ -139,7 +140,7 @@ export const tableColumns = [
     formatter: function (row, column, cellValue, index) {
       return cellValue
     },
-    showOverflowTooltip: true
+    showOverflowTooltip: true,
   },
   // 宽度自调节举例
   { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
@@ -160,13 +161,13 @@ export const tableColumns = [
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
     },
     width: 200,
-    required: true
+    required: true,
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
     prop: 'testCheckBox',
     label: '测试复选框',
-    component: 'el-checkbox'
+    component: 'el-checkbox',
   },
   // 测试下拉框
   {
@@ -174,64 +175,69 @@ export const tableColumns = [
     label: '测试下拉框',
     component: 'el-select',
     width: 200,
-    required: true
+    required: true,
   },
-  // 测试时间框模式
-  // {
-  //   prop: 'testMinDatetime',
-  //   label: '测试时间框小',
-  //   width: 200,
-  //   component: 'el-date-picker',
-  //   maxTimeProp: 'testMaxDatetime',
-  //   minTime: '2022-01-01',
-  //   maxTime: '2024-01-01',
-  //   required: true,
-  //   componentAttrs: {
-  //     type: 'datetime',
-  //     valueFormat: 'yyyy-MM-dd HH:mm',
-  //     format: 'yyyy-MM-dd HH:mm'
-  //   }
-  // },
-  // {
-  //   prop: 'testMaxDatetime',
-  //   label: '测试时间框大',
-  //   width: 200,
-  //   component: 'el-date-picker',
-  //   minTimeProp: 'testMinDatetime',
-  //   required: true,
-  //   // minAllowEqual: false, // 不允许和对应的小时间相等
-  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
-  //   componentAttrs: {
-  //     type: 'datetime',
-  //     valueFormat: 'yyyy-MM-dd HH:mm',
-  //     format: 'yyyy-MM-dd HH:mm'
-  //   }
-  // },
+  // // 测试时间框模式
   {
     prop: 'testMinDatetime',
     label: '测试时间框小',
     width: 200,
-    component: 'el-time-select',
+    component: 'el-date-picker',
     maxTimeProp: 'testMaxDatetime',
-    // maxAllowEqual: false,
+    minDate: '2022-01-01',
+    maxDate: '2024-01-01',
     required: true,
-    // componentAttrs: {
-    //   valueFormat: 'HH:mm',
-    //   format: 'HH:mm'
-    // }
+    // timeDisabled: true,
+    componentAttrs: {
+      type: 'datetime',
+      valueFormat: 'yyyy-MM-dd HH:mm',
+      format: 'yyyy-MM-dd HH:mm'
+    }
   },
   {
     prop: 'testMaxDatetime',
     label: '测试时间框大',
     width: 200,
-    component: 'el-time-select',
+    component: 'el-date-picker',
     minTimeProp: 'testMinDatetime',
     required: true,
-    // componentAttrs: {
-    //   valueFormat: 'HH:mm',
-    //   format: 'HH:mm'
-    // }
+    // timeDisabled: true,
+    // minAllowEqual: false, // 不允许和对应的小时间相等
+    // maxAllowEqual: false, // 不允许和对应的大时间相等
+    componentAttrs: {
+      type: 'datetime',
+      valueFormat: 'yyyy-MM-dd HH:mm',
+      format: 'yyyy-MM-dd HH:mm'
+    }
   },
+  // {
+  //   prop: 'testMinDatetime',
+  //   label: '测试时间框小',
+  //   width: 200,
+  //   component: 'el-time-picker',
+  //   maxTimeProp: 'testMaxDatetime',
+  //   // minAllowEqual: false, // 不允许和对应的小时间相等
+  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
+  //   required: true,
+  //   // componentAttrs: {
+  //   //   valueFormat: 'HH:mm',
+  //   //   format: 'HH:mm'
+  //   // }
+  // },
+  // {
+  //   prop: 'testMaxDatetime',
+  //   label: '测试时间框大',
+  //   width: 200,
+  //   component: 'el-time-picker',
+  //   minTimeProp: 'testMinDatetime',
+  //   // minAllowEqual: false, // 不允许和对应的小时间相等
+  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
+  //   required: true,
+  //   // componentAttrs: {
+  //   //   valueFormat: 'HH:mm',
+  //   //   format: 'HH:mm'
+  //   // }
+  // },
   {
     prop: 'testTime',
     label: '测试时间框(time)',
@@ -239,21 +245,21 @@ export const tableColumns = [
     component: 'el-time-select',
     required: true,
     componentAttrs: {
-      valueFormat: 'HH:mm'
-    }
-  }
+      valueFormat: 'HH:mm',
+    },
+  },
 ]
 
 // 按钮组配置同tableButtons
 export const tableButtons = [
   {
     method: 'viewDetail',
-    label: '查看'
+    label: '查看',
   },
   {
     method: 'edit',
-    label: '编辑'
-  }
+    label: '编辑',
+  },
 ]
 
 // 触发事件

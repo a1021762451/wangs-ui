@@ -9,14 +9,15 @@
       :style="{
         transform: isFold
           ? `translateY(-100%) translateY(${colHeight + 1}px)`
-          : undefined
+          : undefined,
       }"
       ref="formRef"
       label-width="auto"
       :model="formData"
       :rules="rules"
       :validate-on-rule-change="false"
-      :size="size"
+      v-bind="$attrs"
+      v-on="$listeners"
     >
       <el-row :gutter="12" type="flex">
         <!-- 表单元素 -->
@@ -26,15 +27,15 @@
           :key="fieldItem.prop"
         >
           <el-form-item
-            v-bind="fieldItem"
             :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
             :style="{
               marginBottom: isSearchList
                 ? Object.keys(rules).length
                   ? '18px'
                   : '5px'
-                : undefined
+                : undefined,
             }"
+            v-bind="fieldItem"
           >
             <template v-slot:label>
               <slot
@@ -49,9 +50,8 @@
             <component
               v-if="fieldItem.component"
               :is="fieldItem.component"
-              v-bind="
-                getAttrs(fieldItem, formData)
-              "
+              :popper-class="fieldItem.timeDisabled ? 'hideCurrent' : ''"
+              v-bind="getAttrs(fieldItem, formData)"
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
             >
@@ -111,11 +111,12 @@
 
 <script>
 import {
+  deepMerge,
   deepClone,
   getPicker,
   getAttrs,
   getMaxValidator,
-  getMinValidator
+  getMinValidator,
 } from '../utils/util'
 import wsButtons from '../componentes/ws-buttons.vue'
 export default {
@@ -129,7 +130,7 @@ export default {
       exceedOneRow: false,
       buttonsList: [],
       configList: [],
-      colHeight: '50'
+      colHeight: '50',
     }
   },
   props: {
@@ -138,61 +139,44 @@ export default {
       default() {
         return []
       },
-      type: Array
+      type: Array,
     },
     // 下拉框选项配置数组
     allOptions: {
       default() {
         return {}
       },
-      type: Object
-    },
-    // 详情数据，覆盖form
-    fatherForm: {
-      default() {
-        return {}
-      },
-      type: Object
-    },
-    // 按钮分割距离
-    buttonsCol: {
-      default: 24,
-      type: Number
-    },
-    // 按钮组配置
-    buttonConfigList: {
-      default() {
-        return []
-      },
-      type: Array
-    },
-    // 表单尺寸
-    size: {
-      default: 'medium',
-      type: String
+      type: Object,
     },
     // 表单默认值
     defaultForm: {
       default() {
         return {}
       },
-      type: Object
-    },
-    // 是否是搜索控件
-    isSearchList: {
-      default: false,
-      type: Boolean
-    },
-    // 按钮组尺寸
-    buttonSize: {
-      default: 'small',
-      type: String
+      type: Object,
     },
     // 标签后面是否有冒号
     colon: {
       default: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
+    // 是否是搜索控件
+    isSearchList: {
+      default: false,
+      type: Boolean,
+    },
+    // 按钮组配置
+    buttonConfigList: {
+      default() {
+        return []
+      },
+      type: Array,
+    },
+    // 按钮组尺寸
+    buttonSize: {
+      default: 'small',
+      type: String,
+    },
   },
   //自定义指令
   directives: {
@@ -213,8 +197,8 @@ export default {
       },
       unbind(el) {
         clearInterval(el.__vueReize__)
-      }
-    }
+      },
+    },
   },
   watch: {
     formConfigList: {
@@ -230,25 +214,18 @@ export default {
             this.$set(item, 'isSide', true)
             remain = newRemain
           }
-          if (!this.isDetail) {
-            if (this.defaultForm[item.prop] !== undefined) {
-              this.$set(this.formData, item.prop, this.defaultForm[item.prop])
-            } else {
-              this.$set(this.formData, item.prop, '')
-            }
-          }
+          this.$set(this.formData, item.prop, '')
         })
         this.configList = configList
       },
-      immediate: true
+      immediate: true,
     },
-    fatherForm: {
+    defaultForm: {
       handler() {
-        if (Object.keys(this.fatherForm).length) {
-          this.formData = this.fatherForm
-        }
+        const obj = deepMerge(this.formData, this.defaultForm)
+        this.formData = deepClone(obj)
       },
-      immediate: true
+      immediate: true,
     },
     buttonConfigList: {
       handler() {
@@ -256,26 +233,23 @@ export default {
           this.buttonsList = [
             {
               method: 'search',
-              label: '查看'
+              label: '查看',
             },
             {
               method: 'reset',
               label: '重置',
-              type: 'plain'
+              type: 'plain',
             },
-            ...this.buttonConfigList
+            ...this.buttonConfigList,
           ]
         } else {
           this.buttonsList = [...this.buttonConfigList]
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   computed: {
-    isDetail() {
-      return Object.keys(this.fatherForm).length
-    },
     rules() {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
@@ -287,8 +261,8 @@ export default {
               message: `请输入${fieldItem.label}`,
               trigger: blurEletypes.includes(fieldItem.component)
                 ? 'blur'
-                : 'change'
-            }
+                : 'change',
+            },
           ]
         }
         if (
@@ -296,18 +270,26 @@ export default {
           fieldItem.component === 'el-time-select' ||
           fieldItem.component === 'el-time-picker'
         ) {
-          if (fieldItem.required && fieldItem.minTimeProp && !fieldItem.disabled) {
+          if (
+            fieldItem.required &&
+            fieldItem.minTimeProp &&
+            !fieldItem.disabled
+          ) {
             const minField = fieldItem.minTimeProp
             obj[fieldItem.prop].push({
               validator: getMinValidator(fieldItem, this.formData[minField]),
-              trigger: 'blur'
+              trigger: 'change',
             })
           }
-          if (fieldItem.required && fieldItem.maxTimeProp && !fieldItem.disabled) {
+          if (
+            fieldItem.required &&
+            fieldItem.maxTimeProp &&
+            !fieldItem.disabled
+          ) {
             const maxField = fieldItem.maxTimeProp
             obj[fieldItem.prop].push({
               validator: getMaxValidator(fieldItem, this.formData[maxField]),
-              trigger: 'blur'
+              trigger: 'change',
             })
           }
         }
@@ -316,7 +298,7 @@ export default {
     },
     showButtons() {
       return this.configList.length > 0
-    }
+    },
   },
   mounted() {
     this.$nextTick(this.judgeOneRow)
@@ -334,7 +316,7 @@ export default {
       this.$emit('happenEvent', {
         method: 'fieldItemChange',
         fieldItem,
-        row
+        row,
       })
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
@@ -357,13 +339,13 @@ export default {
       }
       this.$emit('happenEvent', {
         ...buttonItem,
-        formData: this.formData
+        formData: this.formData,
       })
     },
     handleSearch() {
       this.$emit('happenEvent', {
         method: 'search',
-        formData: this.formData
+        formData: this.formData,
       })
     },
     // 下拉框变更
@@ -375,11 +357,18 @@ export default {
       let res = null
       res = this.allOptions[prop]
       return res
-    }
-  }
+    },
+  },
 }
 </script>
 
+<style lang="less">
+.el-picker-panel.hideCurrent {
+  .el-button--text.el-picker-panel__link-btn {
+    display: none;
+  }
+}
+</style>
 <style lang="less" scoped>
 .searchMode {
   /deep/ .el-form-item {

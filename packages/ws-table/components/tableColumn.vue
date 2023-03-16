@@ -79,6 +79,7 @@
           size="mini"
           :is="fieldItem.component"
           :disabled="row[fieldItem.disabledKey]"
+          :popper-class="fieldItem.timeDisabled ? 'hideCurrent' : ''"
           v-bind="getAttrs(fieldItem, row)"
           v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
@@ -109,7 +110,7 @@ import {
   getPicker,
   getAttrs,
   getMaxValidator,
-  getMinValidator
+  getMinValidator,
 } from '../../utils/util'
 export default {
   name: 'tableColumn',
@@ -118,25 +119,25 @@ export default {
       default() {
         return {}
       },
-      type: Object
+      type: Object,
     },
     rules: {
       default() {
         return {}
       },
-      type: Object
+      type: Object,
     },
     // 下拉框选项配置数组
     allOptions: {
       default() {
         return {}
       },
-      type: Object
-    }
+      type: Object,
+    },
   },
   data() {
     return {
-      temRow: {}
+      temRow: {},
     }
   },
   methods: {
@@ -155,14 +156,14 @@ export default {
           const minField = fieldItem.minTimeProp
           rules.push({
             validator: getMinValidator(fieldItem, row[minField]),
-            trigger: 'blur'
+            trigger: 'change',
           })
         }
         if (fieldItem.maxTimeProp && !row[fieldItem.disabledKey]) {
           const maxField = fieldItem.maxTimeProp
           rules.push({
             validator: getMaxValidator(fieldItem, row[maxField]),
-            trigger: 'blur'
+            trigger: 'change',
           })
         }
       }
@@ -205,13 +206,20 @@ export default {
       this.$emit('happenEvent', {
         method: 'fieldItemChange',
         fieldItem,
-        row
+        row,
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
+<style lang="less">
+.el-picker-panel.hideCurrent {
+  .el-button--text.el-picker-panel__link-btn {
+    display: none;
+  }
+}
+</style>
 <style lang="less" scoped>
 /deep/ .el-table tr input[type='checkbox'] {
   cursor: pointer;

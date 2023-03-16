@@ -14,25 +14,27 @@
         :name="buttonItem.slotName"
         :buttonItem="buttonItem"
       ></slot>
-      <el-link
-        v-else-if="isLinkButton"
-        class="button-item"
-        :size="size"
-        :underline="false"
-        :key="buttonItem.method"
-        v-bind="buttonItem"
-        @click="$emit('happenEvent', buttonItem)"
-        >{{ buttonItem.label }}</el-link
-      >
-      <el-button
-        v-else
-        class="button-item"
-        :key="buttonItem.label"
-        :size="size"
-        v-bind="buttonItem"
-        @click="$emit('happenEvent', buttonItem)"
-        >{{ buttonItem.label }}</el-button
-      >
+      <template v-else>
+        <el-link
+          v-if="buttonItem.component === 'el-link' || isLinkButton"
+          class="button-item"
+          :size="size"
+          :underline="false"
+          :key="buttonItem.method"
+          v-bind="buttonItem"
+          @click="$emit('happenEvent', buttonItem)"
+          >{{ buttonItem.label }}</el-link
+        >
+        <el-button
+          v-if="buttonItem.component === 'el-button' || !isLinkButton"
+          class="button-item"
+          :key="buttonItem.label"
+          :size="size"
+          v-bind="buttonItem"
+          @click="$emit('happenEvent', buttonItem)"
+          >{{ buttonItem.label }}</el-button
+        >
+      </template>
     </template>
     <slot></slot>
   </div>
@@ -50,7 +52,7 @@ export default {
         return []
       }
     },
-    // 判断按钮模式，el-link / el-button
+    // 判断按钮模式，el-link / el-button   优先级没有component属性高
     isLinkButton: {
       type: Boolean,
       default: false
