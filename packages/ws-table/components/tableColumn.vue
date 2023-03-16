@@ -33,7 +33,7 @@
       <!-- 判断是否是el-form-item元素 -->
       <component
         :is="fieldItem.required ? 'el-form-item' : 'div'"
-        :class="{ overflow_tip: fieldItem['show-overflow-tooltip'] }"
+        :class="{ overflow_tip: fieldItem.showOverflowTooltip }"
         :prop="`tableData.${$index}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >

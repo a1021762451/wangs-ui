@@ -6,6 +6,7 @@ export const list = [
   'ws-echarts',
   'ws-checkbox',
   'ws-tooltip',
+  'ws-select',
   'test',
 ]
 // 按钮组配置同tableButtons

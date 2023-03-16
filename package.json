@@ -3,10 +3,15 @@
   "version": "1.0.7",
   "private": false,
   "description": "基于element-ui封装的组件",
-  "author": {"name":"wangshuai"},
+  "author": {
+    "name": "wangshuai"
+  },
   "license": "MIT",
   "main": "lib/wangs-ui.umd.min.js",
-  "keywords": ["vue","element-ui"],
+  "keywords": [
+    "vue",
+    "element-ui"
+  ],
   "scripts": {
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",

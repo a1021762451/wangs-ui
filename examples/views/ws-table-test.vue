@@ -122,7 +122,7 @@ export default {
     const wsTable = this.$refs.wsTable
     const formData = wsForm.formData
     const pageInfo = wsTable.pageInfo
-    console.log(formData, pageInfo, 'formData, pageInfo');
+    // console.log(formData, pageInfo, 'formData, pageInfo');
     setTimeout(() => {
       this.tableData.push({
         plantName: '四号机组',
