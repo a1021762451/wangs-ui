@@ -5,13 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    allOptions: {},
   },
-  getters: {
-  },
+  getters: {},
   mutations: {
+    setAllOptions(state, { prop, options }) {
+      state.allOptions = {
+        ...state.allOptions,
+        [prop]: options,
+      }
+    },
   },
-  actions: {
-  },
-  modules: {
-  }
+  modules: {},
 })

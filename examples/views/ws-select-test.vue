@@ -9,6 +9,7 @@
     <el-form-item label="测试ws-select" prop="testvalue">
       <!-- :defaultOptions="defaultOptions" -->
       <ws-select
+        prop="testvalue"
         :request="request"
         v-model="form.testvalue"
         :requestHandler="requestHandler"

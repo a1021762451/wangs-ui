@@ -3,7 +3,10 @@
 2.无默认值，无默认选项，则懒加载获取选项
 3.可以根据搜索值本地过滤选项，也可以根据搜索值实时接口过滤选项
 4.兼容el-form组件
-5.兼容el-select组件原有属性和事件 -->
+5.兼容el-select组件原有属性和事件
+6.选项存入vuex中，通过prop字段取值，实现选项接口调用一次功能
+ -->
+
 <template>
   <el-select
     v-model="ownValue"
@@ -44,23 +47,28 @@ export default {
     requestHandler: {
       type: Function,
     },
-    // 请求参数，包括接口路径，请求方式等
+    // 接口配置
     requestConfig: {
       default() {
-        return {}
+        return {
+          url:'',
+          method: 'get',
+          params: {},
+          data: {}
+        }
       },
-      type: Object,
+      type: Object
     },
     // 默认值
     value: {
       default: '',
       type: String | Number | Array,
     },
-    // 使用options第几个作为默认数据
-    // defaultIndex: {
-    //   type: Number | String,
-    //   default: ''
-    // },
+    // 使用options第几个作为默认数据 -- 非必传
+    defaultIndex: {
+      type: Number | String,
+      default: -1,
+    },
     // 默认选项，有则不使用接口
     defaultOptions: {
       type: Array,
@@ -81,6 +89,11 @@ export default {
     isActualTime: {
       default: false,
       type: Boolean,
+    },
+    // vuex allOptions取值键名
+    prop: {
+      type: String,
+      default: '',
     },
   },
   watch: {
@@ -117,27 +130,39 @@ export default {
         (!Array.isArray(this.value) && this.value)
       )
     },
-    // 有没有默认选项
-    hasDefaultOptions() {
-      return this.defaultOptions.length
+    allOptions() {
+      return this.$store.state.allOptions
     },
   },
   methods: {
     // 初始化选项
-    init() {
+    async init() {
+      const hasOptions = this.options.length
       // 实时则清空选项
       if (this.isActualTime) {
         this.options = []
         return
       }
+      // state中allOptions有，则使用
+      if (this.allOptions[this.prop] && !hasOptions) {
+        this.options = this.allOptions[this.prop]
+      }
+      // 有默认值索引，，按索引取默认值
+      if (this.defaultIndex !== -1) {
+        if (!hasOptions) await this.getOpitons()
+        this.ownValue = this.options[this.defaultIndex]
+          ? this.options[this.defaultIndex].value
+          : ''
+        this.$emit('change', this.ownValue)
+      }
       // 有默认值并且没有选项，则获取远程选项
-      if (this.hasDefaultValue && !this.hasDefaultOptions) this.getOpitons()
+      if (this.hasDefaultValue && !hasOptions) this.getOpitons()
     },
     // 获取选项的接口调用
-    async getOpitons(query) {
+    async getOpitons() {
       this.loading = true
       const { label: labelField, value: valueField } = this.props
-      // 获取request,没有直接返回【
+      // 获取request,没有直接返回
       const request = window.request || this.request
       if (!request) return []
       let arr = []
@@ -149,7 +174,7 @@ export default {
           url: this.url,
           method: 'get',
           params: {
-            query,
+            query
           },
         })
         const data = res.data
@@ -163,6 +188,12 @@ export default {
       this.loading = false
       this.options = arr
       this.cloneOptions = deepClone(arr)
+      this.$store.commit('setAllOptions', {
+        prop: this.prop,
+        options: deepClone(arr),
+      })
+      return arr
+      // this.$store.setAllOptions()
     },
     // 远程搜索
     async remoteMethod(query) {
