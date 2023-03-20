@@ -10,6 +10,7 @@ import WSUI from '@'
 Vue.use(WSUI)
 import * as echarts from 'echarts'
 Vue.prototype.$echarts = echarts
+
 new Vue({
   router,
   store,

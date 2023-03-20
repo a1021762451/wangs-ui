@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wanns 1021762451@qq.com
- * @LastEditTime: 2023-03-15 22:44:50
+ * @LastEditTime: 2023-03-21 00:05:42
  * @FilePath: \ws-ui\examples\views\test.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -32,13 +32,13 @@
 
 <script>
 export default {
-  name: "test",
+  name: 'test',
   data() {
     return {
-      value: "",
-    };
+      value: '',
+    }
   },
-};
+}
 </script>
 
 <style lang="less" scoped>
