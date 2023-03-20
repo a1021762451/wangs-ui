@@ -1,6 +1,6 @@
 {
   "name": "wangs-ui",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": false,
   "description": "基于element-ui封装的组件",
   "author": {
