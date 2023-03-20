@@ -97,7 +97,7 @@
 
 <script>
 import { deepClone } from '../utils/util'
-import wsButtons from '../componentes/ws-buttons.vue'
+import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
 export default {
   name: 'ws-table',

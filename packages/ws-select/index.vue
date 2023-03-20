@@ -51,13 +51,13 @@ export default {
     requestConfig: {
       default() {
         return {
-          url:'',
+          url: '',
           method: 'get',
           params: {},
-          data: {}
+          data: {},
         }
       },
-      type: Object
+      type: Object,
     },
     // 默认值
     value: {
@@ -110,6 +110,13 @@ export default {
       },
       immediate: true,
     },
+    // 请求变更，重新初始化
+    requestConfig: {
+      handler(newValue) {
+        this.options = []
+      },
+      deep: true,
+    },
   },
   data() {
     return {
@@ -159,7 +166,7 @@ export default {
       if (this.hasDefaultValue && !hasOptions) this.getOpitons()
     },
     // 获取选项的接口调用
-    async getOpitons() {
+    async getOpitons(query) {
       this.loading = true
       const { label: labelField, value: valueField } = this.props
       // 获取request,没有直接返回
@@ -168,15 +175,14 @@ export default {
       let arr = []
       // 优先使用接口处理逻辑
       if (this.requestHandler) {
-        arr = await this.requestHandler(this.url, query, labelField, valueField)
+        arr = await this.requestHandler(
+          this.requestConfig,
+          query,
+          labelField,
+          valueField
+        )
       } else {
-        const res = await this.request({
-          url: this.url,
-          method: 'get',
-          params: {
-            query
-          },
-        })
+        const res = await request(this.requestConfig)
         const data = res.data
         arr = data.map((item) => {
           return {
@@ -199,6 +205,7 @@ export default {
     async remoteMethod(query) {
       const { label: labelField } = this.props
       if (this.isActualTime) {
+        this.$emit('queryChange', query)
         // 实时状态远程过滤
         if (!query) {
           this.options = []

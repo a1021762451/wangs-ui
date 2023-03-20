@@ -118,7 +118,7 @@ import {
   getMaxValidator,
   getMinValidator,
 } from '../utils/util'
-import wsButtons from '../componentes/ws-buttons.vue'
+import wsButtons from '../ws-buttons/index.vue'
 export default {
   name: 'ws-form',
   components: { wsButtons },

@@ -12,7 +12,9 @@
         prop="testvalue"
         :request="request"
         v-model="form.testvalue"
-        :requestHandler="requestHandler"
+        @queryChange="queryChange"
+        :requestConfig="requestConfig"
+        isActualTime
       >
       </ws-select>
     </el-form-item>
@@ -38,15 +40,23 @@ export default {
         ],
       },
       defaultOptions: [
-        {label: '默认1',value: '1'},
-        {label: '默认2',value: '2'},
-        {label: '默认3',value: '3'}
-      ]
+        { label: '默认1', value: '1' },
+        { label: '默认2', value: '2' },
+        { label: '默认3', value: '3' },
+      ],
+      requestConfig: {
+        method: 'get',
+        params: {
+          test: '1',
+        },
+      },
     }
   },
   methods: {
-    async requestHandler(url, query, labelField, valueField) {
-      console.log('requestHandler')
+    queryChange(query) {
+      this.$set(this.requestConfig.params, 'query', query)
+    },
+    async requestHandler(requestConfig, query, labelField, valueField) {
       let arr = []
       const res = await this.request(query)
       const data = res.data

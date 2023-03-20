@@ -15,18 +15,18 @@
 
 <script>
 import { buttonConfigList, happenEvent } from '../contant'
-import wsButtons from '@/componentes/ws-buttons'
+import wsButtons from '@/ws-buttons/index.vue'
 export default {
   name: 'ws-buttons-test',
   components: { wsButtons },
   data() {
     return {
-      buttonConfigList
+      buttonConfigList,
     }
   },
   methods: {
-    happenEvent
-  }
+    happenEvent,
+  },
 }
 </script>
 

@@ -5,7 +5,8 @@
 //   timeout: 1000
 // })
 
-const instance = function (query) {
+const instance = function (requestConfig) {
+  const {params: {query}} = requestConfig
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       console.log('调用接口');
