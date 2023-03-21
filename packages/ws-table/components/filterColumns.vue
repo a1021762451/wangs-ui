@@ -1,11 +1,16 @@
 <template>
-  <el-dialog title="" :visible.sync="dialogVisable" width="30%" @close="">
+  <el-dialog title="显示的列" :visible.sync="dialogVisable">
     <ws-checkbox
       :defaultCheckedData="defaultCheckedData"
       :checkboxData="checkboxData"
-      :span="6"
+      :span="8"
+      allowControl
       ref="wsCheckbox"
     ></ws-checkbox>
+    <div class="operation">
+      <el-button type="primary" size="mini" @click="confirm">确认</el-button>
+      <el-button size="mini" @click="cancel">取消</el-button>
+    </div>
   </el-dialog>
 </template>
 
@@ -20,20 +25,18 @@ export default {
     return {
       checkboxData: [
         {
+          name: '全选',
           data: [],
         },
       ],
       defaultCheckedData: [],
+      dialogVisable: false,
     }
   },
   created() {
     this.init()
   },
   props: {
-    dialogVisable: {
-      default: false,
-      type: Boolean,
-    },
     columns: {
       default() {
         return []
@@ -50,54 +53,70 @@ export default {
   methods: {
     // 初始化
     init() {
-      let data = []
+      this.checkboxData[0].data = this.handleData(this.tableColumns)
+      this.defaultCheckedData = this.handleData(this.columns, '', true)
+    },
+    // 迭代处理列数据
+    handleData(dataList, fatherLabel = '', isGetValue = false) {
+      fatherLabel = fatherLabel ? `${fatherLabel}-` : ''
       const typeLableMap = {
         selection: '勾选列',
         index: '索引列',
-        selection: '折叠功能',
+        expand: '折叠功能',
         operation: '操作列',
       }
-      console.log(data, 'data')
-      data = this.handleData()
-      this.checkboxData[0].data = data
-      console.log(data, 'data')
-    },
-    // 迭代处理列数据
-    handleData() {
-      this.tableColumns
-        .filter((item) => {
-          // return item.type === 'operation' || !item.type
-          return true
-        })
-        .map((item) => {
-          const { type, label, prop } = item
-          if (type) {
-            return {
-              label: typeLableMap[type],
-              id: `type_${type}`,
-              disabled: item.display,
-            }
-          }
-          if (label) {
-            return {
-              label,
-              id: prop,
-              disabled: item.display,
-            }
-          }
-        })
-      this.defaultCheckedData = this.columns.map((item) => {
-        const { type, label, prop } = item
-        if (type) {
-          return `type_${type}`
+      const arr = []
+      const specialArr = []
+      dataList.forEach((item) => {
+        const { type, label, prop, childrens } = item
+        if (childrens) {
+          arr.push(
+            ...this.handleData(childrens, `${fatherLabel}` + label, isGetValue)
+          )
+          return
         }
-        if (label) {
-          return prop
+        if (type) {
+          const value = isGetValue
+            ? `type_${type}`
+            : {
+                label: typeLableMap[type],
+                value: `type_${type}`,
+                disabled: item.display,
+              }
+          specialArr.push(value)
+          return
+        }
+        if (prop) {
+          const value = isGetValue
+            ? prop
+            : {
+                label: `${fatherLabel}` + label,
+                value: prop,
+                disabled: item.display,
+              }
+          arr.push(value)
+          return
         }
       })
+      return [...specialArr, ...arr]
+    },
+    // 确认
+    confirm() {
+      const wsCheckbox = this.$refs.wsCheckbox
+      const values = wsCheckbox.getAllCheckedValues()
+      this.$emit('filterColumnsConfirm', values)
+    },
+    // 取消
+    cancel() {
+      this.dialogVisable = false
     },
   },
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.operation {
+  display: flex;
+  justify-content: center;
+}
+</style>

@@ -194,8 +194,8 @@ export const tableColumns = [
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
-      format: 'yyyy-MM-dd HH:mm'
-    }
+      format: 'yyyy-MM-dd HH:mm',
+    },
   },
   {
     prop: 'testMaxDatetime',
@@ -210,8 +210,8 @@ export const tableColumns = [
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
-      format: 'yyyy-MM-dd HH:mm'
-    }
+      format: 'yyyy-MM-dd HH:mm',
+    },
   },
   // {
   //   prop: 'testMinDatetime',
@@ -250,6 +250,19 @@ export const tableColumns = [
     componentAttrs: {
       valueFormat: 'HH:mm',
     },
+  },
+  {
+    type: 'operation',
+    tableButtons: [
+      {
+        method: 'viewDetail',
+        label: '查看',
+      },
+      {
+        method: 'edit',
+        label: '编辑',
+      },
+    ],
   },
 ]
 

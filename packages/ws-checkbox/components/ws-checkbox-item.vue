@@ -10,31 +10,30 @@
           :indeterminate="isIndeterminate"
           v-model="checkAll"
           @change="handleCheckAllChange"
-          :disabled="disabled"
         ></el-checkbox>
       </div>
       <el-checkbox-group v-model="checkedData" @change="handleCheckedChange">
         <el-row :gutter="10">
-          <el-col :span="span" v-for="option in data" :key="option.id">
+          <el-col :span="span" v-for="option in data" :key="option[valueField]">
             <el-checkbox-button
               v-if="isCheckboxButton"
               :disabled="option.disabled"
               :border="border"
-              :label="option.id"
+              :label="option[valueField]"
             >
               <ws-tooltip
-                :content="option.label"
+                :content="option[labelField]"
                 overflow
                 placement="top-start"
               >
                 <div class="el-checkbox-tooltip">
-                  {{ option.label }}
+                  {{ option[labelField] }}
                 </div>
               </ws-tooltip>
             </el-checkbox-button>
 
             <ws-tooltip
-              :content="option.label"
+              :content="option[labelField]"
               overflow
               placement="top-start"
               v-else
@@ -42,9 +41,9 @@
               <el-checkbox
                 :disabled="option.disabled"
                 :border="border"
-                :label="option.id"
+                :label="option[valueField]"
               >
-                {{ option.label }}
+                {{ option[labelField] }}
               </el-checkbox>
             </ws-tooltip>
           </el-col>
@@ -60,13 +59,13 @@ import wsTooltip from '../../ws-tooltip'
 export default {
   name: 'ws-checkbox-item',
   components: {
-    wsTooltip
+    wsTooltip,
   },
   data() {
     return {
       checkAll: false,
       isIndeterminate: false,
-      checkedData: []
+      checkedData: [],
     }
   },
   props: {
@@ -75,63 +74,73 @@ export default {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     // 复选框组名称
     name: {
       type: String,
-      default: ''
+      default: '',
     },
     // 是否可以全选
     allowControl: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 总的数据
     data: {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     // 分割
     span: {
       default: 6,
-      type: Number
-    },
-    // 全选禁用：
-    disabled: {
-      type: Boolean,
-      default: false
+      type: Number,
     },
     // 是否是按钮checkbox
     isCheckboxButton: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 带有边框
     border: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+    // label和value字段在数据中的映射字段
+    props: {
+      default() {
+        return {
+          label: 'label',
+          value: 'value',
+        }
+      },
+    },
   },
   watch: {
     // 根据被勾选的数据判断
     defaultCheckedData() {
       this.init()
-    }
+    },
   },
   computed: {
     allId() {
-      return this.data.map((item) => item.id)
-    }
+      return this.data.map((item) => item[this.valueField])
+    },
+    labelField() {
+      return this.props.label
+    },
+    valueField() {
+      return this.props.value
+    },
   },
   created() {
     this.init()
   },
   methods: {
     init() {
-      const arr = this.judgeArrayContain(this.defaultCheckedData, this.allId)
+      const arr = this.judgeArrayContain(deepClone(this.defaultCheckedData), this.allId)
       this.checkedData = arr
       this.judgeIsIndeterminate()
     },
@@ -165,8 +174,8 @@ export default {
         return son.includes(item)
       })
       return arr
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -179,13 +188,14 @@ export default {
   margin-bottom: 5px;
 }
 
-/deep/ .el-checkbox-group .el-checkbox{
+/deep/ .el-checkbox-group .el-checkbox {
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/deep/ .el-checkbox-group .el-checkbox-button__inner, .el-checkbox-group .el-checkbox-button  {
+/deep/ .el-checkbox-group .el-checkbox-button__inner,
+.el-checkbox-group .el-checkbox-button {
   width: 100%;
 }
 .el-checkbox-tooltip {

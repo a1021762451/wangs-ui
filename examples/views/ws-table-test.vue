@@ -8,7 +8,7 @@
       buttonSize="small"
       isSearchList
       @happenEvent="happenEvent"
-      style="margin-bottom: 20px"
+      style="margin-bottom: 10px"
       ref="wsForm"
     >
       <!-- 指向ws-form组件的插槽 -->
@@ -120,7 +120,6 @@ export default {
   },
   mounted() {
     this.getInitParams()
-    // console.log(formData, pageInfo, 'formData, pageInfo');
     setTimeout(() => {
       this.tableData.push({
         plantName: '四号机组',

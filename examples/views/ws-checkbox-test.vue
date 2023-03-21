@@ -1,15 +1,34 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-03-10 10:25:35
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-03-21 10:30:50
+-->
 <template>
   <div>
-    <el-button type="primary" size="default" @click="getChecked(1)">getChecked(1)</el-button>
-    <el-button type="primary" size="default" @click="getChecked(2)">getChecked(2)</el-button>
-    <el-button type="primary" size="default" @click="getChecked(3)">getChecked(3)</el-button>
-    <el-button type="primary" size="default" @click="getChecked(4)">getChecked(4)</el-button>
+    <el-button type="primary" size="default" @click="getChecked(1)"
+      >getChecked(1)</el-button
+    >
+    <el-button type="primary" size="default" @click="getChecked(2)"
+      >getChecked(2)</el-button
+    >
+    <el-button type="primary" size="default" @click="getChecked(3)"
+      >getChecked(3)</el-button
+    >
+    <el-button type="primary" size="default" @click="getChecked(4)"
+      >getChecked(4)</el-button
+    >
     <ws-checkbox
       allowControl
       selectAllMode="checkbox"
       :checkboxData="checkboxData"
       :span="6"
       ref="wsCheckbox"
+      :props="{
+        label: 'label',
+        value: 'id',
+      }"
     ></ws-checkbox>
   </div>
 </template>
@@ -25,7 +44,7 @@ export default {
           data: Array.from(new Array(20)).map((item, index) => {
             return {
               label: `一组${index}号`,
-              id: `一组${index}号 - id`
+              id: `一组${index}号 - id`,
             }
           }),
         },
@@ -34,33 +53,33 @@ export default {
           data: Array.from(new Array(30)).map((item, index) => {
             return {
               label: `二组${index}号`,
-              id: `二组${index}号 - id`
+              id: `二组${index}号 - id`,
             }
-          })
+          }),
         },
-      ]
+      ],
     }
   },
   methods: {
     getChecked(type) {
       switch (type) {
         case 1:
-          console.log(this.$refs.wsCheckbox.getAllCheckedIds());
-          break;
+          console.log(this.$refs.wsCheckbox.getAllCheckedValues())
+          break
         case 2:
-          console.log(this.$refs.wsCheckbox.getAllCheckedItems());
-          break;
+          console.log(this.$refs.wsCheckbox.getAllCheckedItems())
+          break
         case 3:
-          console.log(this.$refs.wsCheckbox.getAllCheckedIdsByGroup());
-          break;
+          console.log(this.$refs.wsCheckbox.getAllCheckedValuesByGroup())
+          break
         case 4:
-          console.log(this.$refs.wsCheckbox.getAllCheckedItemsByGroup());
-          break;
+          console.log(this.$refs.wsCheckbox.getAllCheckedItemsByGroup())
+          break
         default:
-          break;
+          break
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

@@ -1,9 +1,15 @@
 <template>
   <div>
     <div class="talbe-utils">
-      <el-button type="primary" size="mini" @click="filterColumnsVisable = true"
+      <!-- <el-button
+        type="primary"
+        size="mini"
+        @click="$refs.filterColumns.dialogVisable = true"
         >列勾选</el-button
-      >
+      > -->
+      <el-tooltip content="列设置" placement="top">
+        <i class="el-icon-setting icon-setting" @click="$refs.filterColumns.dialogVisable = true"></i>
+      </el-tooltip>
     </div>
     <!-- 表格 -->
     <component
@@ -26,6 +32,7 @@
     >
       <!-- 表格 -->
       <el-table
+        :key="getRandomId()"
         border
         tooltip-effect="dark"
         style="width: 100%"
@@ -37,13 +44,40 @@
         v-on="$listeners"
       >
         <template v-for="fieldItem in columns">
+          <!-- 操作列 -->
+          <el-table-column
+            v-if="fieldItem.type === 'operation'"
+            align="center"
+            :width="(fieldItem.tableButtons || []).length * 70"
+            label="操作"
+            fixed="right"
+            v-bind="fieldItem"
+            :key="fieldItem.type"
+          >
+            <template v-slot="{ row, column, $index }">
+              <ws-buttons
+                isLinkButton
+                :buttonConfigList="
+                  filterButtons(row, fieldItem.tableButtons || [])
+                "
+                @happenEvent="happenEvent($event, { row, column, $index })"
+              >
+                <template
+                  v-for="(index, name) in $scopedSlots"
+                  v-slot:[name]="scope"
+                >
+                  <slot :name="name" v-bind="scope"></slot>
+                </template>
+              </ws-buttons>
+            </template>
+          </el-table-column>
           <!-- 特殊列，如复选框，序号列 -->
           <el-table-column
             width="55"
             align="center"
-            v-if="fieldItem.type"
+            v-else-if="fieldItem.type"
             v-bind="fieldItem"
-            :key="fieldItem.type"
+            :key="fieldItem.type + 'special'"
           >
             <template v-if="fieldItem.slotName" v-slot="scope">
               <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }">
@@ -53,7 +87,7 @@
           <!-- 内容列 -->
           <tableColumn
             v-else
-            :key="fieldItem.prop"
+            :key="fieldItem.prop || fieldItem.label"
             :fieldItem="fieldItem"
             :rules="rules"
             :allOptions="allOptions"
@@ -61,29 +95,6 @@
           >
           </tableColumn>
         </template>
-        <!-- 操作列 -->
-        <el-table-column
-          v-if="tableButtons.length"
-          align="center"
-          key="operation"
-          v-bind="operationColumn"
-          :width="tableButtons.length * 70"
-        >
-          <template v-slot="{ row, column, $index }">
-            <ws-buttons
-              isLinkButton
-              :buttonConfigList="filterButtons(row, tableButtons)"
-              @happenEvent="happenEvent($event, { row, column, $index })"
-            >
-              <template
-                v-for="(index, name) in $scopedSlots"
-                v-slot:[name]="scope"
-              >
-                <slot :name="name" v-bind="scope"></slot>
-              </template>
-            </ws-buttons>
-          </template>
-        </el-table-column>
       </el-table>
     </component>
     <!-- 分页 -->
@@ -103,14 +114,14 @@
     <filterColumns
       :tableColumns="tableColumns"
       :columns="columns"
-      :dialogVisable="filterColumnsVisable"
-      @close="filterColumnsVisable = false"
+      @filterColumnsConfirm="filterColumnsConfirm"
+      ref="filterColumns"
     ></filterColumns>
   </div>
 </template>
 
 <script>
-import { deepClone } from '../utils/util'
+import { deepClone, getRandomId } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
 import filterColumns from './components/filterColumns'
@@ -128,14 +139,6 @@ export default {
     },
     // 表格数据
     tableData: {
-      default() {
-        return []
-      },
-      type: Array,
-    },
-    // 非必传
-    // 表格按钮
-    tableButtons: {
       default() {
         return []
       },
@@ -197,6 +200,7 @@ export default {
   data() {
     return {
       columns: deepClone(this.tableColumns), // 列数据
+      cloneColunms: [], // 复制列数据，用于列筛选
       pageInfo: this.defaultPageInfo, // 分页数据
       // 用于表格input组件
       property: '',
@@ -218,6 +222,7 @@ export default {
           if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
         })
         this.tableForm.tableData = this.tableData
+        this.cloneColunms = deepClone(this.columns)
       },
       immediate: true,
     },
@@ -242,10 +247,8 @@ export default {
       return obj
     },
   },
-  // created() {
-  //   this.handleSearch()
-  // },
   methods: {
+    getRandomId,
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
       // const valid = await this.validateRow($index)
@@ -326,11 +329,51 @@ export default {
         })
       })
     },
+    // 列勾选确认
+    filterColumnsConfirm(values) {
+      this.columns = this.iterateColumns(deepClone(this.cloneColunms), values)
+      this.$refs.filterColumns.dialogVisable = false
+    },
+    iterateColumns(dataList, values) {
+      const arr = []
+      dataList.forEach((item) => {
+        const { type, prop, childrens } = item
+        if (childrens) {
+          const newChildrens = this.iterateColumns(childrens, values)
+          if (newChildrens.length) {
+            item.childrens = newChildrens
+            arr.push(item)
+          }
+          return
+        }
+        if (type) {
+          const newType = `type_${type}`
+          if (values.includes(newType)) arr.push(item)
+          return
+        }
+        if (prop) {
+          if (values.includes(prop)) arr.push(item)
+          return
+        }
+      })
+      return arr
+    },
+    // 迭代确认勾选列
   },
 }
 </script>
 
 <style lang="less" scoped>
+.talbe-utils {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  padding-right: 20px;
+  .icon-setting {
+    font-size: 20px;
+    cursor: pointer;
+  }
+}
 .common-table-pagination {
   text-align: right;
   margin: 10px 0;

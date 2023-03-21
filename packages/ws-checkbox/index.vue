@@ -17,14 +17,15 @@
       ></el-checkbox>
     </div>
     <wsCheckboxItem
-      v-for="item in checkboxData"
-      :key="item.name || 'noNameForOne'"
-      :defaultCheckedData="defaultCheckedDataAfter"
-      :name="item.name || ''"
-      :data="item.data"
-      :disabled="item.disabled"
+      v-for="(item, index) in checkboxData"
+      :key="index"
+      :defaultCheckedData="defaultCheckedData"
+      :props="props"
       @change="handleChange"
-      v-bind="$attrs"
+      v-bind="{
+        ...item,
+        ...$attrs,
+      }"
     ></wsCheckboxItem>
   </div>
 </template>
@@ -40,7 +41,7 @@ export default {
       allCheckedData: [],
       defaultCheckedDataAfter: [],
       isIndeterminate: false,
-      checkAll: false
+      checkAll: false,
     }
   },
   props: {
@@ -49,26 +50,35 @@ export default {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     // 初始化数据
     defaultCheckedData: {
       type: Array,
       default() {
         return []
-      }
+      },
     },
     // 全选方式
     selectAllMode: {
       default: '',
-      type: String
-    }
+      type: String,
+    },
+    // label和value字段在数据中的映射字段
+    props: {
+      default() {
+        return {
+          label: 'label',
+          value: 'value',
+        }
+      },
+    },
   },
   watch: {
     // 根据被勾选的数据判断
     defaultCheckedData() {
       this.init()
-    }
+    },
   },
   created() {
     this.init()
@@ -78,15 +88,20 @@ export default {
       const ids = []
       this.checkboxData.forEach((item) => {
         item.data.forEach((nextitem) => {
-          ids.push(nextitem.id)
+          ids.push(nextitem[this.valueField])
         })
       })
       return ids
-    }
+    },
+    labelField() {
+      return this.props.label
+    },
+    valueField() {
+      return this.props.value
+    },
   },
   methods: {
     init() {
-      this.defaultCheckedDataAfter = deepClone(this.defaultCheckedData)
       this.allCheckedData = deepClone(this.defaultCheckedData)
       let checkedCount = this.allCheckedData.length
       this.checkAll = checkedCount === this.allId.length
@@ -112,7 +127,7 @@ export default {
       this.judgeIsIndeterminate()
       this.$emit('handleChange', {
         checkAll: this.checkAll,
-        isIndeterminate: this.isIndeterminate
+        isIndeterminate: this.isIndeterminate,
       })
     },
     // 是否全选
@@ -122,7 +137,7 @@ export default {
       this.isIndeterminate = false
     },
     // 获取勾选id
-    getAllCheckedIds() {
+    getAllCheckedValues() {
       return this.allCheckedData
     },
     // 获取勾选项
@@ -130,7 +145,7 @@ export default {
       const arr = []
       this.checkboxData.forEach((item) => {
         item.data.forEach((nextitem) => {
-          if (this.allCheckedData.includes(nextitem.id)) {
+          if (this.allCheckedData.includes(nextitem[this.valueField])) {
             arr.push(nextitem)
           }
         })
@@ -138,25 +153,25 @@ export default {
       return arr
     },
     // 按组获取勾选id
-    getAllCheckedIdsByGroup(isIds = true) {
+    getAllCheckedValuesByGroup(isIds = true) {
       const groub = []
       this.checkboxData.forEach((item) => {
         const items = []
         item.data.forEach((nextitem) => {
-          if (this.allCheckedData.includes(nextitem.id)) {
-            items.push(isIds ? nextitem.id : nextitem)
+          if (this.allCheckedData.includes(nextitem[this.valueField])) {
+            items.push(isIds ? nextitem[this.valueField] : nextitem)
           }
         })
         groub.push({
           name: item.name,
-          data: items
+          data: items,
         })
       })
       return groub
     },
     // 按组获取勾选项
     getAllCheckedItemsByGroup() {
-      return this.getAllCheckedIdsByGroup(false)
+      return this.getAllCheckedValuesByGroup(false)
     },
     // 判断全选状态
     judgeIsIndeterminate() {
@@ -164,8 +179,8 @@ export default {
       this.checkAll = checkedCount === this.allId.length
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.allId.length
-    }
-  }
+    },
+  },
 }
 </script>
 

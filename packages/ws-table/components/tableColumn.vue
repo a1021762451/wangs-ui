@@ -1,10 +1,10 @@
 <template>
   <!-- 有childrens -->
   <!-- 迭代tableColumn组件，实现多级表头 -->
-  <el-table-column :label="fieldItem.label" v-if="fieldItem.childrens">
+  <el-table-column v-if="fieldItem.childrens">
     <tableColumn
-      v-for="(column, index) in fieldItem.childrens"
-      :key="index"
+      v-for="column in fieldItem.childrens"
+      :key="column.prop || column.label"
       :fieldItem="column"
       :rules="rules"
       :allOptions="allOptions"
@@ -111,6 +111,7 @@ import {
   getAttrs,
   getMaxValidator,
   getMinValidator,
+  getRandomId,
 } from '../../utils/util'
 export default {
   name: 'tableColumn',
@@ -143,6 +144,7 @@ export default {
   methods: {
     getPicker,
     getAttrs,
+    getRandomId,
     // 动态获取校验
     getRules(fieldItem, row) {
       if (!fieldItem.required) return
