@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div class="talbe-utils">
+      <el-button type="primary" size="mini" @click="filterColumnsVisable = true"
+        >列勾选</el-button
+      >
+    </div>
     <!-- 表格 -->
     <component
       :is="
@@ -94,6 +99,13 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="pageInfo.total"
     ></el-pagination>
+    <!-- 列展示选择 -->
+    <filterColumns
+      :tableColumns="tableColumns"
+      :columns="columns"
+      :dialogVisable="filterColumnsVisable"
+      @close="filterColumnsVisable = false"
+    ></filterColumns>
   </div>
 </template>
 
@@ -101,9 +113,10 @@
 import { deepClone } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
+import filterColumns from './components/filterColumns'
 export default {
   name: 'ws-table',
-  components: { wsButtons, tableColumn },
+  components: { wsButtons, tableColumn, filterColumns },
   props: {
     // 必传,
     // 表格列
@@ -191,6 +204,7 @@ export default {
       tableForm: {
         tableData: [],
       },
+      filterColumnsVisable: false, // 列勾选弹窗
     }
   },
   watch: {
