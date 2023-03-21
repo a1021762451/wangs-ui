@@ -15,7 +15,9 @@
       :validate-on-rule-change="false"
       inline
       size="small"
-      style="height: calc(100% - 35px)"
+      :style="{
+        height: showPagination ? 'calc(100% - 35px)' : 'calc(100%)',
+      }"
     >
       <!-- 表格 -->
       <el-table
@@ -109,14 +111,14 @@ export default {
       default() {
         return []
       },
-      type: Array
+      type: Array,
     },
     // 表格数据
     tableData: {
       default() {
         return []
       },
-      type: Array
+      type: Array,
     },
     // 非必传
     // 表格按钮
@@ -124,14 +126,14 @@ export default {
       default() {
         return []
       },
-      type: Array
+      type: Array,
     },
     // 过滤表格操作按钮
     filterButtons: {
       default(row, tableButtons) {
         return tableButtons
       },
-      type: Function
+      type: Function,
     },
     // 默认分页配置
     defaultPageInfo: {
@@ -139,45 +141,45 @@ export default {
         return {
           size: 10,
           current: 1,
-          total: 0
+          total: 0,
         }
       },
-      type: Object
+      type: Object,
     },
     // 展示分页组件
     showPagination: {
       type: Boolean,
-      default: true
+      default: true,
     },
     operationColumn: {
       default() {
         return {
           label: '操作',
-          fixed: 'right'
+          fixed: 'right',
         }
       },
-      type: Object
+      type: Object,
     },
     // 加载样式
     loading: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 下拉框选项配置数组
     allOptions: {
       default() {
         return {}
       },
-      type: Object
-    }
+      type: Object,
+    },
   },
   //自定义指令
   directives: {
     focus: {
       inserted: function (el) {
         el.querySelector('input').focus()
-      }
-    }
+      },
+    },
   },
   data() {
     return {
@@ -187,8 +189,8 @@ export default {
       property: '',
       index: '',
       tableForm: {
-        tableData: []
-      }
+        tableData: [],
+      },
     }
   },
   watch: {
@@ -203,8 +205,8 @@ export default {
         })
         this.tableForm.tableData = this.tableData
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   computed: {
     rules() {
@@ -216,13 +218,15 @@ export default {
             {
               required: true,
               message: `请输入${item.label}`,
-              trigger: blurEletypes.includes(item.component) ? 'blur' : 'change'
-            }
+              trigger: blurEletypes.includes(item.component)
+                ? 'blur'
+                : 'change',
+            },
           ]
         }
       })
       return obj
-    }
+    },
   },
   // created() {
   //   this.handleSearch()
@@ -235,7 +239,7 @@ export default {
       // console.log('xxxxxxxxxxxxxxx', valid)
       this.$emit('happenEvent', {
         ...buttonItem,
-        row
+        row,
       })
     },
     // 分页操作
@@ -307,8 +311,8 @@ export default {
           resolve(valid)
         })
       })
-    }
-  }
+    },
+  },
 }
 </script>
 

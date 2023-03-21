@@ -64,7 +64,6 @@ import {
   allOptions,
   tableColumns,
   tableButtons,
-  happenEvent
 } from '../contant'
 export default {
   name: 'ws-table-test',
@@ -101,7 +100,7 @@ export default {
           testTime: '',
           testFormatter: '内容',
           adress: '北京',
-          work: '程序员'
+          work: '程序员',
         },
         {
           plantName: '二号机组',
@@ -111,17 +110,16 @@ export default {
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
-          testFormatter: '内容'
-        }
+          testFormatter: '内容',
+        },
       ],
-      loading: false
+      loading: false,
+      formData: {},
+      pageInfo: {},
     }
   },
   mounted() {
-    const wsForm = this.$refs.wsForm
-    const wsTable = this.$refs.wsTable
-    const formData = wsForm.formData
-    const pageInfo = wsTable.pageInfo
+    this.getInitParams()
     // console.log(formData, pageInfo, 'formData, pageInfo');
     setTimeout(() => {
       this.tableData.push({
@@ -132,17 +130,31 @@ export default {
         testMinDatetime: '',
         testMaxDatetime: '',
         testTime: '',
-        testFormatter: '内容'
+        testFormatter: '内容',
       })
     }, '1000')
   },
   methods: {
-    happenEvent,
+    // 获取初始化的参数
+    getInitParams() {
+      const wsForm = this.$refs.wsForm
+      const wsTable = this.$refs.wsTable
+      const formData = wsForm.formData
+      const pageInfo = wsTable.pageInfo
+      this.formData = formData
+      this.pageInfo = pageInfo
+    },
+    // 触发事件
+    happenEvent(eventData) {
+      console.log(eventData, 'eventData')
+      const { method } = eventData
+      this[method] && this[method](eventData)
+    },
     // 勾选操作
     selectionChange(selection) {
       this.selection = selection
-    }
-  }
+    },
+  },
 }
 </script>
 

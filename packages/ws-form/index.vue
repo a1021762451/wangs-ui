@@ -117,6 +117,7 @@ import {
   getAttrs,
   getMaxValidator,
   getMinValidator,
+  format,
 } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
 export default {
@@ -214,6 +215,17 @@ export default {
             this.$set(item, 'isSide', true)
             remain = newRemain
           }
+          if (item.isShowCurrent) {
+            const { componentAttrs = {} } = item
+            this.$set(
+              this.formData,
+              item.prop,
+              componentAttrs.valueFormat
+                ? format(new Date(), componentAttrs.valueFormat)
+                : new Date()
+            )
+            return
+          }
           this.$set(this.formData, item.prop, '')
         })
         this.configList = configList
@@ -233,7 +245,7 @@ export default {
           this.buttonsList = [
             {
               method: 'search',
-              label: '查看',
+              label: '查询',
             },
             {
               method: 'reset',
