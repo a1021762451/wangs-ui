@@ -117,6 +117,27 @@ export default {
         }
       },
     },
+    // 不允许变更的已勾选数据
+    noChangeCheckedValues: {
+      default() {
+        return []
+      },
+      type: Array,
+    },
+    // 不允许变更的未勾选数据
+    noChangeNoCheckedValues: {
+      default() {
+        return []
+      },
+      type: Array,
+    },
+    // 允许变更的数据
+    allowChangeValues: {
+      default() {
+        return []
+      },
+      type: Array,
+    },
   },
   watch: {
     // 根据被勾选的数据判断
@@ -140,7 +161,10 @@ export default {
   },
   methods: {
     init() {
-      const arr = this.judgeArrayContain(deepClone(this.defaultCheckedData), this.allId)
+      const arr = this.judgeArrayContain(
+        deepClone(this.defaultCheckedData),
+        this.allId
+      )
       this.checkedData = arr
       this.judgeIsIndeterminate()
     },
@@ -153,8 +177,14 @@ export default {
     },
     // 全选
     handleCheckAllChange(val) {
-      const checkedData = val ? deepClone(this.allId) : []
-      const notCheckedData = val ? [] : deepClone(this.allId)
+      // const checkedData = val ? deepClone(this.allId) : []
+      // const notCheckedData = val ? [] : deepClone(this.allId)
+      const checkedData = val
+        ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
+        : this.noChangeCheckedValues
+      const notCheckedData = val
+        ? this.noChangeNoCheckedValues
+        : [...this.noChangeNoCheckedValues, ...this.allowChangeValues]
       this.$emit('change', checkedData, notCheckedData)
       this.checkedData = checkedData
       this.isIndeterminate = false

@@ -19,8 +19,11 @@
     <wsCheckboxItem
       v-for="(item, index) in checkboxData"
       :key="index"
-      :defaultCheckedData="defaultCheckedData"
+      :defaultCheckedData="defaultCheckedDataAfter"
       :props="props"
+      :noChangeCheckedValues="getNoChangeCheckedValues(item.data)"
+      :noChangeNoCheckedValues="getNoChangeNoCheckedValues(item.data)"
+      :allowChangeValues="getAllowChangeValues(item.data)"
       @change="handleChange"
       v-bind="{
         ...item,
@@ -84,29 +87,36 @@ export default {
     this.init()
   },
   computed: {
-    allId() {
-      const ids = []
-      this.checkboxData.forEach((item) => {
-        item.data.forEach((nextitem) => {
-          ids.push(nextitem[this.valueField])
-        })
-      })
-      return ids
-    },
     labelField() {
       return this.props.label
     },
     valueField() {
       return this.props.value
     },
+    // 不允许变更的已勾选数据
+    noChangeCheckedValues() {
+      const arr = []
+      this.checkboxData.forEach((item) => {
+        const subarr = this.getNoChangeCheckedValues(item.data)
+        arr.push(...subarr)
+      })
+      return arr
+    },
+    // 允许变更的数据
+    allowChangeValues() {
+      const arr = []
+      this.checkboxData.forEach((item) => {
+        const subarr = this.getAllowChangeValues(item.data)
+        arr.push(...subarr)
+      })
+      return arr
+    },
   },
   methods: {
     init() {
+      this.defaultCheckedDataAfter = deepClone(this.defaultCheckedData)
       this.allCheckedData = deepClone(this.defaultCheckedData)
-      let checkedCount = this.allCheckedData.length
-      this.checkAll = checkedCount === this.allId.length
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.allId.length
+      this.judgeIsIndeterminate()
     },
     // 处理变更
     handleChange(checkedData, notCheckedData) {
@@ -132,7 +142,9 @@ export default {
     },
     // 是否全选
     toggleAllSelection(state) {
-      this.allCheckedData = state ? deepClone(this.allId) : []
+      this.allCheckedData = state
+        ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
+        : this.noChangeCheckedValues
       this.defaultCheckedDataAfter = deepClone(this.allCheckedData)
       this.isIndeterminate = false
     },
@@ -176,9 +188,48 @@ export default {
     // 判断全选状态
     judgeIsIndeterminate() {
       let checkedCount = this.allCheckedData.length
-      this.checkAll = checkedCount === this.allId.length
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.allId.length
+      const needCount = [
+        ...this.noChangeCheckedValues,
+        ...this.allowChangeValues,
+      ].length
+      this.checkAll = checkedCount === needCount
+      this.isIndeterminate = checkedCount > 0 && checkedCount < needCount
+    },
+    // 获取不允许变更的已勾选数据
+    getNoChangeCheckedValues(data) {
+      return data
+        .filter((item) => {
+          return (
+            item.disabled &&
+            this.defaultCheckedData.includes(item[this.valueField])
+          )
+        })
+        .map((item) => {
+          return item[this.valueField]
+        })
+    },
+    // 获取不允许变更的未勾选数据
+    getNoChangeNoCheckedValues(data) {
+      return data
+        .filter((item) => {
+          return (
+            item.disabled &&
+            !this.defaultCheckedData.includes(item[this.valueField])
+          )
+        })
+        .map((item) => {
+          return item[this.valueField]
+        })
+    },
+    // 获取允许变更的数据
+    getAllowChangeValues(data) {
+      return data
+        .filter((item) => {
+          return !item.disabled
+        })
+        .map((item) => {
+          return item[this.valueField]
+        })
     },
   },
 }

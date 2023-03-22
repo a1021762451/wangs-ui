@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-10 10:25:35
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-03-21 10:30:50
+ * @LastEditTime: 2023-03-22 10:44:01
 -->
 <template>
   <div>
@@ -22,6 +22,7 @@
     <ws-checkbox
       allowControl
       selectAllMode="checkbox"
+      :defaultCheckedData="defaultCheckedData"
       :checkboxData="checkboxData"
       :span="6"
       ref="wsCheckbox"
@@ -45,6 +46,7 @@ export default {
             return {
               label: `一组${index}号`,
               id: `一组${index}号 - id`,
+              disabled: index % 2 === 0,
             }
           }),
         },
@@ -54,10 +56,12 @@ export default {
             return {
               label: `二组${index}号`,
               id: `二组${index}号 - id`,
+              disabled: index % 2 === 1,
             }
           }),
         },
       ],
+      defaultCheckedData: ['一组3号 - id', '一组4号 - id', '一组10号 - id','一组15号 - id', '二组3号 - id', '二组4号 - id', '二组10号 - id','二组15号 - id'],
     }
   },
   methods: {

@@ -1,7 +1,13 @@
 <template>
   <!-- 有childrens -->
   <!-- 迭代tableColumn组件，实现多级表头 -->
-  <el-table-column v-if="fieldItem.childrens">
+  <el-table-column
+    v-if="fieldItem.childrens"
+    :label="fieldItem.label"
+    align="center"
+    resizable
+    v-bind="fieldItem"
+  >
     <tableColumn
       v-for="column in fieldItem.childrens"
       :key="column.prop || column.label"

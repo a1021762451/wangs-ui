@@ -67,6 +67,7 @@ export default {
       }
       const arr = []
       const specialArr = []
+      const displayArr = []
       dataList.forEach((item) => {
         const { type, label, prop, childrens } = item
         if (childrens) {
@@ -94,11 +95,11 @@ export default {
                 value: prop,
                 disabled: item.display,
               }
-          arr.push(value)
+          item.display ? displayArr.push(value) : arr.push(value)
           return
         }
       })
-      return [...specialArr, ...arr]
+      return [...specialArr, ...displayArr, ...arr]
     },
     // 确认
     confirm() {
