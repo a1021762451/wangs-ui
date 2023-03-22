@@ -170,10 +170,12 @@ export default {
     },
     // 判断全选状态
     judgeIsIndeterminate() {
-      let checkedCount = this.checkedData.length
-      this.checkAll = checkedCount === this.allId.length
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.allId.length
+      let checkedCount = this.checkedData.filter((item) => {
+        return this.allowChangeValues.includes(item)
+      }).length
+      const needCount = this.allowChangeValues.length
+      this.checkAll = checkedCount === needCount
+      this.isIndeterminate = checkedCount > 0 && checkedCount < needCount
     },
     // 全选
     handleCheckAllChange(val) {

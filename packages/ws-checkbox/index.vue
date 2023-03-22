@@ -41,7 +41,7 @@ export default {
   components: { wsCheckboxItem },
   data() {
     return {
-      allCheckedData: [],
+      checkedData: [],
       defaultCheckedDataAfter: [],
       isIndeterminate: false,
       checkAll: false,
@@ -115,24 +115,24 @@ export default {
   methods: {
     init() {
       this.defaultCheckedDataAfter = deepClone(this.defaultCheckedData)
-      this.allCheckedData = deepClone(this.defaultCheckedData)
+      this.checkedData = deepClone(this.defaultCheckedData)
       this.judgeIsIndeterminate()
     },
     // 处理变更
     handleChange(checkedData, notCheckedData) {
       // 需要添加的
       checkedData.forEach((item) => {
-        const findInd = this.allCheckedData.findIndex(
+        const findInd = this.checkedData.findIndex(
           (nextitem) => item === nextitem
         )
-        findInd == -1 && this.allCheckedData.push(item)
+        findInd == -1 && this.checkedData.push(item)
       })
       // 需要删除的
       notCheckedData.forEach((item) => {
-        const findInd = this.allCheckedData.findIndex(
+        const findInd = this.checkedData.findIndex(
           (nextitem) => item === nextitem
         )
-        findInd !== -1 && this.allCheckedData.splice(findInd, 1)
+        findInd !== -1 && this.checkedData.splice(findInd, 1)
       })
       this.judgeIsIndeterminate()
       this.$emit('handleChange', {
@@ -142,22 +142,22 @@ export default {
     },
     // 是否全选
     toggleAllSelection(state) {
-      this.allCheckedData = state
+      this.checkedData = state
         ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
         : this.noChangeCheckedValues
-      this.defaultCheckedDataAfter = deepClone(this.allCheckedData)
+      this.defaultCheckedDataAfter = deepClone(this.checkedData)
       this.isIndeterminate = false
     },
     // 获取勾选id
     getAllCheckedValues() {
-      return this.allCheckedData
+      return this.checkedData
     },
     // 获取勾选项
     getAllCheckedItems() {
       const arr = []
       this.checkboxData.forEach((item) => {
         item.data.forEach((nextitem) => {
-          if (this.allCheckedData.includes(nextitem[this.valueField])) {
+          if (this.checkedData.includes(nextitem[this.valueField])) {
             arr.push(nextitem)
           }
         })
@@ -170,7 +170,7 @@ export default {
       this.checkboxData.forEach((item) => {
         const items = []
         item.data.forEach((nextitem) => {
-          if (this.allCheckedData.includes(nextitem[this.valueField])) {
+          if (this.checkedData.includes(nextitem[this.valueField])) {
             items.push(isIds ? nextitem[this.valueField] : nextitem)
           }
         })
@@ -187,45 +187,42 @@ export default {
     },
     // 判断全选状态
     judgeIsIndeterminate() {
-      let checkedCount = this.allCheckedData.length
-      const needCount = [
-        ...this.noChangeCheckedValues,
-        ...this.allowChangeValues,
-      ].length
+      let checkedCount = this.checkedData.filter((item) => {
+        return this.allowChangeValues.includes(item)
+      }).length
+      const needCount = this.allowChangeValues.length
       this.checkAll = checkedCount === needCount
       this.isIndeterminate = checkedCount > 0 && checkedCount < needCount
     },
     // 获取不允许变更的已勾选数据
     getNoChangeCheckedValues(data) {
-      return data
-        .filter((item) => {
-          return (
-            item.disabled &&
-            this.defaultCheckedData.includes(item[this.valueField])
-          )
-        })
-        .map((item) => {
-          return item[this.valueField]
-        })
+      if (!this.defaultCheckedData.length) return []
+      return this.getValues(
+        data,
+        (item) =>
+          item.disabled &&
+          this.defaultCheckedData.includes(item[this.valueField])
+      )
     },
     // 获取不允许变更的未勾选数据
     getNoChangeNoCheckedValues(data) {
-      return data
-        .filter((item) => {
-          return (
-            item.disabled &&
-            !this.defaultCheckedData.includes(item[this.valueField])
-          )
-        })
-        .map((item) => {
-          return item[this.valueField]
-        })
+      if (!this.defaultCheckedData.length) return []
+      return this.getValues(
+        data,
+        (item) =>
+          item.disabled &&
+          !this.defaultCheckedData.includes(item[this.valueField])
+      )
     },
     // 获取允许变更的数据
     getAllowChangeValues(data) {
+      return this.getValues(data, (item) => !item.disabled)
+    },
+    // 获取data中的值
+    getValues(data, conditionFn) {
       return data
         .filter((item) => {
-          return !item.disabled
+          return conditionFn(item)
         })
         .map((item) => {
           return item[this.valueField]

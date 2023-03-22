@@ -1,14 +1,21 @@
 <template>
   <div>
-    <div class="talbe-utils">
+    <div class="talbe-utils" v-if="utilsList.length">
       <!-- <el-button
         type="primary"
         size="mini"
         @click="$refs.filterColumns.dialogVisable = true"
         >列勾选</el-button
       > -->
-      <el-tooltip content="列设置" placement="top">
-        <i class="el-icon-setting icon-setting" @click="$refs.filterColumns.dialogVisable = true"></i>
+      <el-tooltip
+        content="列设置"
+        placement="top"
+        v-if="utilsList.includes('setColumms')"
+      >
+        <i
+          class="el-icon-setting icon-setting"
+          @click="$refs.filterColumns.dialogVisable = true"
+        ></i>
       </el-tooltip>
     </div>
     <!-- 表格 -->
@@ -37,7 +44,6 @@
         tooltip-effect="dark"
         style="width: 100%"
         height="100%"
-        :header-cell-style="{ background: '#f3f3f3' }"
         :data="tableForm.tableData"
         v-loading="loading"
         v-bind="$attrs"
@@ -112,6 +118,7 @@
     ></el-pagination>
     <!-- 列展示选择 -->
     <filterColumns
+      v-if="utilsList.includes('setColumms')"
       :tableColumns="tableColumns"
       :columns="columns"
       @filterColumnsConfirm="filterColumnsConfirm"
@@ -132,6 +139,13 @@ export default {
     // 必传,
     // 表格列
     tableColumns: {
+      default() {
+        return []
+      },
+      type: Array,
+    },
+    // 工具箱
+    utilsList: {
       default() {
         return []
       },
@@ -199,7 +213,7 @@ export default {
   },
   data() {
     return {
-      columns: deepClone(this.tableColumns), // 列数据
+      columns: [], // 列数据
       cloneColunms: [], // 复制列数据，用于列筛选
       pageInfo: this.defaultPageInfo, // 分页数据
       // 用于表格input组件
@@ -226,6 +240,12 @@ export default {
       },
       immediate: true,
     },
+    tableColumns: {
+      handler(newData) {
+        this.columns = deepClone(newData)
+      },
+      immediate: true,
+    },
   },
   computed: {
     rules() {
@@ -237,9 +257,10 @@ export default {
             {
               required: true,
               message: `请输入${item.label}`,
-              trigger: blurEletypes.includes(item.component)
-                ? 'blur'
-                : 'change',
+              trigger: 'change',
+              // trigger: blurEletypes.includes(item.component)
+              //   ? 'blur'
+              //   : 'change',
             },
           ]
         }

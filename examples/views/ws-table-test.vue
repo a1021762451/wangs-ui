@@ -34,6 +34,8 @@
       :tableColumns="tableColumns"
       :tableButtons="tableButtons"
       :allOptions="allOptions"
+      :utilsList="['setColumms']"
+      :header-cell-style="{ background: '#f3f3f3' }"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
       ref="wsTable"

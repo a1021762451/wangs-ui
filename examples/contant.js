@@ -1,5 +1,4 @@
 export const list = [
-  'ws-buttons',
   'ws-form',
   'ws-table',
   'ws-tree',

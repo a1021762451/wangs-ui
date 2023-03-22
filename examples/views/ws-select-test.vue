@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-03-17 08:59:05
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-03-22 16:43:54
+-->
 <template>
   <el-form
     :model="form"
@@ -18,6 +25,9 @@
       >
       </ws-select>
     </el-form-item>
+    <el-form-item label="地点" prop="city">
+      <el-input v-model="form.city" clearable></el-input>
+    </el-form-item>
   </el-form>
 </template>
 
@@ -29,13 +39,20 @@ export default {
     return {
       request,
       // testvalue: 'Arkansas_value',
-      form: { testvalue: '' },
+      form: { testvalue: '', city: '南昌' },
       rules: {
         testvalue: [
           {
             required: true,
             message: `请输入测试ws-select`,
             trigger: 'change',
+          },
+        ],
+        city: [
+          {
+            required: true,
+            message: `请输入地点`,
+            trigger: 'blur',
           },
         ],
       },

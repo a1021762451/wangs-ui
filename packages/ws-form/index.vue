@@ -36,6 +36,7 @@
                 : undefined,
             }"
             v-bind="fieldItem"
+            :required="undefined"
           >
             <template v-slot:label>
               <slot
@@ -271,9 +272,10 @@ export default {
             {
               required: true,
               message: `请输入${fieldItem.label}`,
-              trigger: blurEletypes.includes(fieldItem.component)
-                ? 'blur'
-                : 'change',
+              trigger: 'change',
+              // trigger: blurEletypes.includes(fieldItem.component)
+              //   ? 'blur'
+              //   : 'change',
             },
           ]
         }
