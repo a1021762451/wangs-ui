@@ -1,8 +1,15 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-03-16 09:03:42
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-03-22 17:06:24
+-->
 <template>
   <div>
     <ws-form
       :formConfigList="formConfigList"
-      :buttonConfigList="buttonConfigList"
+      :formButtons="formButtons"
       :allOptions="allOptions"
       isSearchList
       @happenEvent="happenEvent"
@@ -31,7 +38,7 @@
 
 <script>
 import {
-  buttonConfigList,
+  formButtons,
   formConfigList,
   allOptions,
   happenEvent
@@ -40,7 +47,7 @@ export default {
   name: 'renderSearch-test',
   data() {
     return {
-      buttonConfigList,
+      formButtons,
       formConfigList,
       allOptions
     }

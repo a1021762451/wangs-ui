@@ -9,11 +9,12 @@ export const list = [
   'test',
 ]
 // 按钮组配置同tableButtons
-export const buttonConfigList = [
+export const formButtons = [
   {
     method: 'export',
     label: '导出EXCEL',
     icon: 'el-icon-setting',
+    loading: false,
   },
   {
     slotName: 'download',
@@ -107,7 +108,7 @@ export const tableColumns = [
       {
         prop: 'name',
         label: '姓名',
-        display: true
+        alwaysVisible: true
       },
       {
         prop: 'age',
@@ -171,7 +172,7 @@ export const tableColumns = [
     prop: 'testCheckBox',
     label: '测试复选框',
     component: 'el-checkbox',
-    display: true
+    alwaysVisible: true
   },
   // 测试下拉框
   {
@@ -248,7 +249,7 @@ export const tableColumns = [
     width: 200,
     component: 'el-time-select',
     required: true,
-    display: true,
+    alwaysVisible: true,
     componentAttrs: {
       valueFormat: 'HH:mm',
     },

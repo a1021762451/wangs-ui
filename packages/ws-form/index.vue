@@ -168,7 +168,7 @@ export default {
       type: Boolean,
     },
     // 按钮组配置
-    buttonConfigList: {
+    formButtons: {
       default() {
         return []
       },
@@ -240,7 +240,7 @@ export default {
       },
       immediate: true,
     },
-    buttonConfigList: {
+    formButtons: {
       handler() {
         if (this.isSearchList) {
           this.buttonsList = [
@@ -253,10 +253,10 @@ export default {
               label: '重置',
               type: 'plain',
             },
-            ...this.buttonConfigList,
+            ...this.formButtons,
           ]
         } else {
-          this.buttonsList = [...this.buttonConfigList]
+          this.buttonsList = [...this.formButtons]
         }
       },
       immediate: true,
@@ -328,7 +328,7 @@ export default {
     // 表格内复选框变更
     fieldItemChange(fieldItem, row) {
       this.$emit('happenEvent', {
-        method: 'fieldItemChange',
+        buttonItem: { method: 'fieldItemChange' },
         fieldItem,
         row,
       })
@@ -352,13 +352,13 @@ export default {
         return
       }
       this.$emit('happenEvent', {
-        ...buttonItem,
+        buttonItem,
         formData: this.formData,
       })
     },
     handleSearch() {
       this.$emit('happenEvent', {
-        method: 'search',
+        buttonItem: { method: 'search' },
         formData: this.formData,
       })
     },

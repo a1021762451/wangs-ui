@@ -49,20 +49,58 @@
         v-on="$listeners"
         ref="el-table"
       >
-        <!-- 列遍历， 可实现嵌套 -->
-        <tableColumn
-          v-for="fieldItem in columns"
-          :key="fieldItem.prop || fieldItem.label"
-          :fieldItem="fieldItem"
-          :rules="rules"
-          :allOptions="allOptions"
-          @happenEvent="(params) => $emit('happenEvent', params)"
-        >
-          <!-- 将父组件插槽内容转发给子组件 -->
-          <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
-            <slot :name="name" v-bind="scope"></slot>
-          </template>
-        </tableColumn>
+        <template v-for="fieldItem in columns">
+          <!-- 操作列 -->
+          <el-table-column
+            v-if="fieldItem.type === 'operation' && fieldItem.visible"
+            align="center"
+            :width="(fieldItem.tableButtons || []).length * 70"
+            label="操作"
+            fixed="right"
+            v-bind="fieldItem"
+            :key="fieldItem.type"
+          >
+            <template v-slot="{ row, column, $index }">
+              <ws-buttons
+                isLinkButton
+                :buttonConfigList="
+                  filterButtons(row, fieldItem.tableButtons || [])
+                "
+                @happenEvent="happenEvent($event, { row, column, $index })"
+              >
+                <template
+                  v-for="(index, name) in $scopedSlots"
+                  v-slot:[name]="scope"
+                >
+                  <slot :name="name" v-bind="scope"></slot>
+                </template>
+              </ws-buttons>
+            </template>
+          </el-table-column>
+          <!-- 特殊列，如复选框，序号列 -->
+          <el-table-column
+            width="55"
+            align="center"
+            v-else-if="fieldItem.type && fieldItem.visible"
+            v-bind="fieldItem"
+            :key="fieldItem.type + 'special'"
+          >
+            <template v-if="fieldItem.slotName" v-slot="scope">
+              <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }">
+              </slot>
+            </template>
+          </el-table-column>
+          <!-- 内容列 -->
+          <tableColumn
+            v-else-if="!fieldItem.type"
+            :key="fieldItem.prop || fieldItem.label"
+            :fieldItem="fieldItem"
+            :rules="rules"
+            :allOptions="allOptions"
+            @happenEvent="(params) => $emit('happenEvent', params)"
+          >
+          </tableColumn>
+        </template>
       </el-table>
     </component>
     <!-- 分页 -->
@@ -119,6 +157,13 @@ export default {
         return []
       },
       type: Array,
+    },
+    // 过滤表格操作按钮
+    filterButtons: {
+      default(row, tableButtons) {
+        return tableButtons
+      },
+      type: Function,
     },
     // 默认分页配置
     defaultPageInfo: {
@@ -196,8 +241,10 @@ export default {
     },
     tableColumns: {
       handler(newData) {
-        this.columns = deepClone(newData)
-        this.cloneColunms = deepClone(newData)
+        const columns = deepClone(newData)
+        this.iterateAddVisible(columns)
+        this.columns = columns
+        this.cloneColunms = deepClone(this.columns)
       },
       immediate: true,
     },
@@ -224,6 +271,16 @@ export default {
     },
   },
   methods: {
+    // 监听转发事件
+    async happenEvent(buttonItem, { row, column, $index }) {
+      // const valid = await this.validateRow($index)
+      // const valid = await this.validateAll()
+      // console.log('xxxxxxxxxxxxxxx', valid)
+      this.$emit('happenEvent', {
+        buttonItem,
+        row,
+      })
+    },
     // 分页操作
     handleCurrentChange(val) {
       this.handleSearch()
@@ -236,6 +293,13 @@ export default {
       this.$emit('happenEvent', {
         buttonItem: { method: 'pageChange' },
         pageInfo: this.pageInfo,
+      })
+    },
+    // 迭代添加visible属性
+    iterateAddVisible(columns) {
+      columns.forEach((item) => {
+        if (item.childrens) this.iterateAddVisible(item.childrens)
+        else item.visible = true
       })
     },
     // 遍历列的所有内容，获取最宽一列的宽度
@@ -294,12 +358,46 @@ export default {
         })
       })
     },
+    // // 列勾选确认
+    // filterColumnsConfirm(values) {
+    //   this.$set(this, 'columns', [])
+    //   this.$nextTick(() => {
+    //     this.$set(
+    //       this,
+    //       'columns',
+    //       this.iterateColumns(deepClone(this.cloneColunms), values)
+    //     )
+    //   })
+    //   this.$refs.filterColumns.dialogVisable = false
+    // },
+    // // 迭代确认勾选列
+    // iterateColumns(dataList, values) {
+    //   const arr = []
+    //   dataList.forEach((item) => {
+    //     const { type, prop, childrens } = item
+    //     if (childrens) {
+    //       const newChildrens = this.iterateColumns(childrens, values)
+    //       if (newChildrens.length) {
+    //         item.childrens = newChildrens
+    //         arr.push(item)
+    //       }
+    //       return
+    //     }
+    //     if (type) {
+    //       const newType = `type_${type}`
+    //       if (values.includes(newType)) arr.push(item)
+    //       return
+    //     }
+    //     if (prop) {
+    //       if (values.includes(prop)) arr.push(item)
+    //       return
+    //     }
+    //   })
+    //   return arr
+    // },
     // 列勾选确认
     filterColumnsConfirm(values) {
-      this.columns = []
-      this.$nextTick(() => {
-        this.columns = this.iterateColumns(deepClone(this.cloneColunms), values)
-      })
+      this.iterateColumns(this.columns, values)
       this.$refs.filterColumns.dialogVisable = false
     },
     // 迭代确认勾选列
@@ -308,20 +406,16 @@ export default {
       dataList.forEach((item) => {
         const { type, prop, childrens } = item
         if (childrens) {
-          const newChildrens = this.iterateColumns(childrens, values)
-          if (newChildrens.length) {
-            item.childrens = newChildrens
-            arr.push(item)
-          }
+          this.iterateColumns(childrens, values)
           return
         }
         if (type) {
           const newType = `type_${type}`
-          if (values.includes(newType)) arr.push(item)
+          item.visible = values.includes(newType)
           return
         }
         if (prop) {
-          if (values.includes(prop)) arr.push(item)
+          item.visible = values.includes(prop)
           return
         }
       })

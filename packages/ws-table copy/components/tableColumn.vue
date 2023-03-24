@@ -2,7 +2,7 @@
   <!-- 有childrens -->
   <!-- 迭代tableColumn组件，实现多级表头 -->
   <el-table-column
-    v-if="fieldItem.childrens"
+    v-if="fieldItem.childrens && judgeChildrensVisible(fieldItem.childrens)"
     :label="fieldItem.label"
     align="center"
     resizable
@@ -16,48 +16,15 @@
       :allOptions="allOptions"
       @happenEvent="(params) => $emit('happenEvent', params)"
     >
-      <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
-        <slot :name="name" v-bind="scope"></slot>
-      </template>
     </tableColumn>
   </el-table-column>
   <!-- 没有有childrens -->
-  <!-- 操作列 -->
   <el-table-column
-    v-else-if="fieldItem.type === 'operation'"
+    v-else-if="!fieldItem.childrens && fieldItem.visible"
     align="center"
-    :width="(fieldItem.tableButtons || []).length * 70"
-    label="操作"
-    fixed="right"
+    resizable
     v-bind="fieldItem"
-    :key="fieldItem.type"
   >
-    <template v-slot="{ row, column, $index }">
-      <ws-buttons
-        isLinkButton
-        :buttonConfigList="filterButtons(row, fieldItem.tableButtons || [])"
-        @happenEvent="happenEvent($event, { row, column, $index })"
-      >
-        <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
-          <slot :name="name" v-bind="scope"></slot>
-        </template>
-      </ws-buttons>
-    </template>
-  </el-table-column>
-  <!-- 特殊列，如复选框，序号列 -->
-  <el-table-column
-    width="55"
-    align="center"
-    v-else-if="fieldItem.type"
-    v-bind="fieldItem"
-    :key="fieldItem.type + 'special'"
-  >
-    <template v-if="fieldItem.slotName" v-slot="scope">
-      <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }"> </slot>
-    </template>
-  </el-table-column>
-  <!-- 内容列 -->
-  <el-table-column v-else align="center" resizable v-bind="fieldItem">
     <!-- 表头插槽 -->
     <template v-slot:header="scope">
       <slot
@@ -179,13 +146,6 @@ export default {
       },
       type: Object,
     },
-    // 过滤表格操作按钮
-    filterButtons: {
-      default(row, tableButtons) {
-        return tableButtons
-      },
-      type: Function,
-    },
   },
   data() {
     return {
@@ -196,12 +156,15 @@ export default {
     getPicker,
     getAttrs,
     getRandomId,
-    // 监听转发事件
-    async happenEvent(buttonItem, { row, column, $index }) {
-      this.$emit('happenEvent', {
-        buttonItem,
-        row,
+    // 判断childrens里面是否存在visible为true
+    judgeChildrensVisible(childrens) {
+      let flag = false
+      childrens.forEach((item) => {
+        if (item.childrens && this.judgeChildrensVisible(item.childrens))
+          flag = true
+        if (item.visible) flag = true
       })
+      return flag
     },
     // 动态获取校验
     getRules(fieldItem, row) {

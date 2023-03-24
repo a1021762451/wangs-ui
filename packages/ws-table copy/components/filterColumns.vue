@@ -53,28 +53,30 @@ export default {
   methods: {
     // 初始化
     init() {
-      let data = this.handleData(this.tableColumns)
+      // let data = this.handleData(this.this.tableColumns)
+      let data = this.handleData(this.columns)
       data = this.sortData(data)
       this.checkboxData[0].data = data
+      // this.defaultCheckedData = this.handleData(this.columns, '', true)
       this.defaultCheckedData = this.handleData(this.columns, '', true)
     },
     // 数据排序
     sortData(data) {
       const arr = []
       const specialArr = []
-      const alwaysVisibleArr = []
+      const displayArr = []
       data.forEach((item) => {
         if (/type_(.*)/.test(item.value)) {
           specialArr.push(item)
           return
         }
         if (item.disabled) {
-          alwaysVisibleArr.push(item)
+          displayArr.push(item)
           return
         }
         arr.push(item)
       })
-      return [...specialArr, ...alwaysVisibleArr, ...arr]
+      return [...specialArr, ...displayArr, ...arr]
     },
     // 迭代处理列数据
     handleData(dataList, fatherLabel = '', isGetValue = false) {
@@ -86,8 +88,6 @@ export default {
         operation: '操作列',
       }
       const arr = []
-      const specialArr = []
-      const alwaysVisibleArr = []
       dataList.forEach((item) => {
         const { type, label, prop, childrens } = item
         if (childrens) {
@@ -104,7 +104,7 @@ export default {
                 value: `type_${type}`,
                 disabled: item.alwaysVisible,
               }
-          specialArr.push(value)
+          item.visible && arr.push(value)
           return
         }
         if (prop) {
@@ -115,11 +115,11 @@ export default {
                 value: prop,
                 disabled: item.alwaysVisible,
               }
-          item.alwaysVisible ? alwaysVisibleArr.push(value) : arr.push(value)
+          item.visible && arr.push(value)
           return
         }
       })
-      return [...specialArr, ...alwaysVisibleArr, ...arr]
+      return arr
     },
     // 确认
     confirm() {

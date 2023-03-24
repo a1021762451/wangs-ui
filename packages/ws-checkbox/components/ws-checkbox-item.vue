@@ -183,9 +183,9 @@ export default {
       // const notCheckedData = val ? [] : deepClone(this.allId)
       const checkedData = val
         ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
-        : this.noChangeCheckedValues
+        : [...this.noChangeCheckedValues]
       const notCheckedData = val
-        ? this.noChangeNoCheckedValues
+        ? [...this.noChangeNoCheckedValues]
         : [...this.noChangeNoCheckedValues, ...this.allowChangeValues]
       this.$emit('change', checkedData, notCheckedData)
       this.checkedData = checkedData

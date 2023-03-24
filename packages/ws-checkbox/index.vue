@@ -144,7 +144,7 @@ export default {
     toggleAllSelection(state) {
       this.checkedData = state
         ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
-        : this.noChangeCheckedValues
+        : [...this.noChangeCheckedValues]
       this.defaultCheckedDataAfter = deepClone(this.checkedData)
       this.isIndeterminate = false
     },

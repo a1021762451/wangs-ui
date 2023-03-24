@@ -2,7 +2,7 @@
   <div>
     <ws-form
       :formConfigList="formConfigList"
-      :buttonConfigList="buttonConfigList"
+      :formButtons="formButtons"
       :allOptions="allOptions"
       :defaultForm="defaultForm"
       buttonSize="small"
@@ -32,7 +32,6 @@
       :loading="loading"
       :tableData="tableData"
       :tableColumns="tableColumns"
-      :tableButtons="tableButtons"
       :allOptions="allOptions"
       :utilsList="['setColumms']"
       :header-cell-style="{ background: '#f3f3f3' }"
@@ -61,21 +60,19 @@
 
 <script>
 import {
-  buttonConfigList,
+  formButtons,
   formConfigList,
   allOptions,
   tableColumns,
-  tableButtons,
 } from '../contant'
 export default {
   name: 'ws-table-test',
   data() {
     return {
-      buttonConfigList,
+      formButtons,
       formConfigList,
       allOptions,
       tableColumns,
-      tableButtons,
       defaultForm: { applyComId: '南昌', equipName: '4号' },
       selection: [],
       tableData: [
@@ -147,9 +144,18 @@ export default {
     },
     // 触发事件
     happenEvent(eventData) {
-      console.log(eventData, 'eventData')
-      const { method } = eventData
+      const {
+        buttonItem: { method },
+      } = eventData
       this[method] && this[method](eventData)
+    },
+    export(eventData) {
+      // console.log('export');
+      const { buttonItem } = eventData
+      buttonItem.loading = true
+
+      // findItem.loading = true
+      // this.$set(buttonItem, 'loading', true)
     },
     // 勾选操作
     selectionChange(selection) {
