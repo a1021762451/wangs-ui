@@ -92,28 +92,16 @@
 </template>
 
 <script>
-import { deepClone, dynamicImport } from '../utils/util'
+import { deepClone } from '../utils/util'
 import { allUtils } from './contant.js'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
-// import filterColumns from './components/filterColumns'
-// import { ElMapExportTable } from 'table-excel'
-// const ElMapExportTable = dynamicImport('table-excel', 'package')
-// const ElMapExportTable = require('table-excel').ElMapExportTable
-// console.log(ElMapExportTable, '.ElMapExportTable');
-const filterColumns = () => {
-  try {
-    import('./components/filterColumns.vue')
-  } catch (error) {
-    console.log('没有找到filterColumns组件');
-  }
-}
 export default {
   name: 'ws-table',
   components: {
     wsButtons,
     tableColumn,
-    filterColumns
+    filterColumns: () => import('./components/filterColumns'),
   },
   props: {
     // 必传,
@@ -394,12 +382,12 @@ export default {
         }
         data = this.selection
       } else data = deepClone(this.tableData)
-      console.log(column, data, 'column, data')
       data.forEach((item) => {
         formatterArr.forEach(({ prop, formatter }) => {
           item[prop] = formatter(item[prop])
         })
       })
+      const ElMapExportTable = require('table-excel').ElMapExportTable
       const instance = new ElMapExportTable(
         { column, data }
         // { progress: (progress) => console.log(progress) } // 进度条回调
