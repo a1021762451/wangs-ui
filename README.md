@@ -69,7 +69,7 @@ const tableColumns = [
   // 测试多级表头
   {
     label: '测试多级表头',
-    childrens: [
+    children: [
       {
         prop: 'name',
         label: '姓名'
@@ -201,7 +201,7 @@ const allOptions = {
 | -------------- | ------------------------- | -------- | ------ | ------ |
 | slotName       | 对应列插槽名              | String   | -      | -      |
 | headerSlotName | 对应列表头插槽名          | String   | -      | -      |
-| childrens      | 多级表头配置              | Array    | -      | -      |
+| children      | 多级表头配置              | Array    | -      | -      |
 | formatter      | 同 el-table formatter     | Function | -      | -      |
 | selfAdjust     | 列宽根据内容自调节        | Boolean  | -      | false  |
 | component      | 组件名，用于表单组件      | String   | -      | -      |

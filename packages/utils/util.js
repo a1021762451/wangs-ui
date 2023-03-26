@@ -456,3 +456,18 @@ export function encodeFormatTime(o, fmt) {
       )
   return fmt
 }
+// 动态引入
+export function dynamicImport(path, type = 'component') {
+  console.log(path, type, 'path, type')
+  try {
+    if (type === 'component') {
+      console.log(() => import(`${path}`), 'import')
+      return () => import(`${path}`)
+    }
+    if (type === 'package') {
+      return () => require(`${path}`)
+    }
+  } catch (error) {
+    console.log('没有找到')
+  }
+}

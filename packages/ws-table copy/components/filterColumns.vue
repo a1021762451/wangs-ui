@@ -89,10 +89,10 @@ export default {
       }
       const arr = []
       dataList.forEach((item) => {
-        const { type, label, prop, childrens } = item
-        if (childrens) {
+        const { type, label, prop, children } = item
+        if (children) {
           arr.push(
-            ...this.handleData(childrens, `${fatherLabel}` + label, isGetValue)
+            ...this.handleData(children, `${fatherLabel}` + label, isGetValue)
           )
           return
         }

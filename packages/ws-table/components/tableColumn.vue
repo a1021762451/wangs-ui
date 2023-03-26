@@ -2,14 +2,14 @@
   <!-- 有childrens -->
   <!-- 迭代tableColumn组件，实现多级表头 -->
   <el-table-column
-    v-if="fieldItem.childrens"
+    v-if="fieldItem.children"
     :label="fieldItem.label"
     align="center"
     resizable
     v-bind="fieldItem"
   >
     <tableColumn
-      v-for="column in fieldItem.childrens"
+      v-for="column in fieldItem.children"
       :key="column.prop || column.label"
       :fieldItem="column"
       :rules="rules"
@@ -139,7 +139,7 @@
         </component>
         <!-- 格式化 -->
         <template v-else-if="fieldItem.formatter">{{
-          fieldItem.formatter(row, column, row[fieldItem.prop], $index)
+          fieldItem.formatter(row[fieldItem.prop], row, column, $index)
         }}</template>
         <!-- 默认 -->
         <template v-else>{{ row[fieldItem.prop] }}</template>

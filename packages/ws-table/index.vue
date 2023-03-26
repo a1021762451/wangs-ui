@@ -8,13 +8,14 @@
         >列勾选</el-button
       > -->
       <el-tooltip
-        content="列设置"
         placement="top"
-        v-if="utilsList.includes('setColumms')"
+        v-for="util in utils"
+        :key="util.content"
+        :content="util.content"
       >
         <i
-          class="el-icon-setting icon-setting"
-          @click="$refs.filterColumns.dialogVisable = true"
+          :class="`${util.icon} icon-setting`"
+          @click="happenUtilEvent(util)"
         ></i>
       </el-tooltip>
     </div>
@@ -47,6 +48,7 @@
         v-loading="loading"
         v-bind="$attrs"
         v-on="$listeners"
+        @selection-change="selectionChange"
         ref="el-table"
       >
         <!-- 列遍历， 可实现嵌套 -->
@@ -90,13 +92,29 @@
 </template>
 
 <script>
-import { deepClone } from '../utils/util'
+import { deepClone, dynamicImport } from '../utils/util'
+import { allUtils } from './contant.js'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
-import filterColumns from './components/filterColumns'
+// import filterColumns from './components/filterColumns'
+// import { ElMapExportTable } from 'table-excel'
+// const ElMapExportTable = dynamicImport('table-excel', 'package')
+// const ElMapExportTable = require('table-excel').ElMapExportTable
+// console.log(ElMapExportTable, '.ElMapExportTable');
+const filterColumns = () => {
+  try {
+    import('./components/filterColumns.vue')
+  } catch (error) {
+    console.log('没有找到filterColumns组件');
+  }
+}
 export default {
   name: 'ws-table',
-  components: { wsButtons, tableColumn, filterColumns },
+  components: {
+    wsButtons,
+    tableColumn,
+    filterColumns
+  },
   props: {
     // 必传,
     // 表格列
@@ -136,15 +154,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    operationColumn: {
-      default() {
-        return {
-          label: '操作',
-          fixed: 'right',
-        }
-      },
-      type: Object,
-    },
     // 加载样式
     loading: {
       type: Boolean,
@@ -174,10 +183,12 @@ export default {
       // 用于表格input组件
       property: '',
       index: '',
+      // 用于el-from模式
       tableForm: {
         tableData: [],
       },
       filterColumnsVisable: false, // 列勾选弹窗
+      selection: [],
     }
   },
   watch: {
@@ -221,6 +232,12 @@ export default {
         }
       })
       return obj
+    },
+    utils() {
+      const utils = deepClone(allUtils)
+      return utils.filter((item) => {
+        return this.utilsList.includes(item.method)
+      })
     },
   },
   methods: {
@@ -306,11 +323,11 @@ export default {
     iterateColumns(dataList, values) {
       const arr = []
       dataList.forEach((item) => {
-        const { type, prop, childrens } = item
-        if (childrens) {
-          const newChildrens = this.iterateColumns(childrens, values)
+        const { type, prop, children } = item
+        if (children) {
+          const newChildrens = this.iterateColumns(children, values)
           if (newChildrens.length) {
-            item.childrens = newChildrens
+            item.children = newChildrens
             arr.push(item)
           }
           return
@@ -327,6 +344,68 @@ export default {
       })
       return arr
     },
+    // 勾选操作
+    selectionChange(selection) {
+      this.selection = selection
+      this.$emit('selection-change', selection)
+    },
+    // 处理工具箱点击事件
+    happenUtilEvent(util) {
+      const { method } = util
+      this[method]()
+    },
+    // 列选择工具
+    setColumms() {
+      this.$refs.filterColumns.dialogVisable = true
+    },
+    // 下载工具
+    download() {
+      const formatterArr = []
+      let hasSelection = false
+      function getcolumn(column) {
+        const arr = []
+        // const propMap = {}
+        column.forEach((item) => {
+          const obj = {}
+          if (!item.type) {
+            const { label, prop, children, formatter } = item
+            if (label) obj.title = label
+            if (prop) {
+              obj.dataIndex = prop
+              // propMap[prop] = item
+            }
+            if (formatter) formatterArr.push(item)
+            if (children) obj.children = getcolumn(children)
+
+            arr.push(obj)
+          }
+          if (item.type === 'selection') hasSelection = true
+        })
+        return arr
+      }
+      // 点击导出触发的函数
+      const column = getcolumn(deepClone(this.columns))
+      let data = []
+      if (hasSelection) {
+        const length = this.selection.length
+        if (!length) {
+          this.$message.warning('请先勾选需要导出的数据')
+          return
+        }
+        data = this.selection
+      } else data = deepClone(this.tableData)
+      console.log(column, data, 'column, data')
+      data.forEach((item) => {
+        formatterArr.forEach(({ prop, formatter }) => {
+          item[prop] = formatter(item[prop])
+        })
+      })
+      const instance = new ElMapExportTable(
+        { column, data }
+        // { progress: (progress) => console.log(progress) } // 进度条回调
+      )
+      instance.download('表格数据')
+    },
   },
 }
 </script>
@@ -336,10 +415,11 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
-  padding-right: 20px;
+  padding-right: 12px;
   .icon-setting {
     font-size: 20px;
     cursor: pointer;
+    margin-right: 8px;
   }
 }
 .common-table-pagination {

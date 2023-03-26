@@ -2,14 +2,14 @@
   <!-- 有childrens -->
   <!-- 迭代tableColumn组件，实现多级表头 -->
   <el-table-column
-    v-if="fieldItem.childrens && judgeChildrensVisible(fieldItem.childrens)"
+    v-if="fieldItem.children && judgeChildrensVisible(fieldItem.children)"
     :label="fieldItem.label"
     align="center"
     resizable
     v-bind="fieldItem"
   >
     <tableColumn
-      v-for="column in fieldItem.childrens"
+      v-for="column in fieldItem.children"
       :key="column.prop || column.label"
       :fieldItem="column"
       :rules="rules"
@@ -20,7 +20,7 @@
   </el-table-column>
   <!-- 没有有childrens -->
   <el-table-column
-    v-else-if="!fieldItem.childrens && fieldItem.visible"
+    v-else-if="!fieldItem.children && fieldItem.visible"
     align="center"
     resizable
     v-bind="fieldItem"
@@ -157,10 +157,10 @@ export default {
     getAttrs,
     getRandomId,
     // 判断childrens里面是否存在visible为true
-    judgeChildrensVisible(childrens) {
+    judgeChildrensVisible(children) {
       let flag = false
-      childrens.forEach((item) => {
-        if (item.childrens && this.judgeChildrensVisible(item.childrens))
+      children.forEach((item) => {
+        if (item.children && this.judgeChildrensVisible(item.children))
           flag = true
         if (item.visible) flag = true
       })

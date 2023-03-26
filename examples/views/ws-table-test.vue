@@ -33,7 +33,7 @@
       :tableData="tableData"
       :tableColumns="tableColumns"
       :allOptions="allOptions"
-      :utilsList="['setColumms']"
+      :utilsList="['setColumms', 'download']"
       :header-cell-style="{ background: '#f3f3f3' }"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
@@ -85,7 +85,7 @@ export default {
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
-          testFormatter: '内容内容内容内容',
+          testFormatter: '内容',
           name: '王',
           age: 18,
         },

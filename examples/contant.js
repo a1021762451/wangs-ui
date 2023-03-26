@@ -104,7 +104,7 @@ export const tableColumns = [
   // 测试多级表头
   {
     label: '测试多级表头',
-    childrens: [
+    children: [
       {
         prop: 'name',
         label: '姓名',
@@ -116,7 +116,7 @@ export const tableColumns = [
       },
       {
         label: '测试多级表头-1',
-        childrens: [
+        children: [
           {
             prop: 'adress',
             label: '地址',
@@ -141,8 +141,8 @@ export const tableColumns = [
   {
     prop: 'testFormatter',
     label: '测试过滤',
-    formatter: function (row, column, cellValue, index) {
-      return cellValue
+    formatter: function (cellValue, row, column, index) {
+      return cellValue + '-过滤'
     },
     showOverflowTooltip: true,
   },

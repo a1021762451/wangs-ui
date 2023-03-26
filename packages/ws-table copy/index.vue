@@ -298,7 +298,7 @@ export default {
     // 迭代添加visible属性
     iterateAddVisible(columns) {
       columns.forEach((item) => {
-        if (item.childrens) this.iterateAddVisible(item.childrens)
+        if (item.children) this.iterateAddVisible(item.children)
         else item.visible = true
       })
     },
@@ -374,11 +374,11 @@ export default {
     // iterateColumns(dataList, values) {
     //   const arr = []
     //   dataList.forEach((item) => {
-    //     const { type, prop, childrens } = item
-    //     if (childrens) {
-    //       const newChildrens = this.iterateColumns(childrens, values)
+    //     const { type, prop, children } = item
+    //     if (children) {
+    //       const newChildrens = this.iterateColumns(children, values)
     //       if (newChildrens.length) {
-    //         item.childrens = newChildrens
+    //         item.children = newChildrens
     //         arr.push(item)
     //       }
     //       return
@@ -404,9 +404,9 @@ export default {
     iterateColumns(dataList, values) {
       const arr = []
       dataList.forEach((item) => {
-        const { type, prop, childrens } = item
-        if (childrens) {
-          this.iterateColumns(childrens, values)
+        const { type, prop, children } = item
+        if (children) {
+          this.iterateColumns(children, values)
           return
         }
         if (type) {
