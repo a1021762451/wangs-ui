@@ -127,6 +127,16 @@
           v-bind="getAttrs(fieldItem, row)"
           v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
+          @blur="
+            fieldItem.component === 'el-input'
+              ? handleBlur(row, fieldItem)
+              : undefined
+          "
+          @input="
+            fieldItem.component === 'el-input'
+              ? handleInput($event, row, fieldItem)
+              : undefined
+          "
         >
           <template v-if="fieldItem.component === 'el-select'">
             <el-option

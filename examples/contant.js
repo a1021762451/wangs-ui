@@ -162,6 +162,7 @@ export const tableColumns = [
     },
     // 限制输入6位小数
     inputHandler: function (value) {
+      value = value.replace(/[^0-9.]/g, '')
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
     },
     width: 200,

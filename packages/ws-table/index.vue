@@ -1,12 +1,7 @@
 <template>
   <div>
+    <!-- 工具箱 -->
     <div class="talbe-utils" v-if="utilsList.length">
-      <!-- <el-button
-        type="primary"
-        size="mini"
-        @click="$refs.filterColumns.dialogVisable = true"
-        >列勾选</el-button
-      > -->
       <el-tooltip
         placement="top"
         v-for="util in utils"
@@ -387,12 +382,16 @@ export default {
           item[prop] = formatter(item[prop])
         })
       })
-      const ElMapExportTable = require('table-excel').ElMapExportTable
-      const instance = new ElMapExportTable(
-        { column, data }
-        // { progress: (progress) => console.log(progress) } // 进度条回调
-      )
-      instance.download('表格数据')
+      try {
+        const ElMapExportTable = require('table-excel').ElMapExportTable
+        const instance = new ElMapExportTable(
+          { column, data }
+          // { progress: (progress) => console.log(progress) } // 进度条回调
+        )
+        instance.download('表格数据')
+      } catch (error) {
+        console.log('没有找到包')
+      }
     },
   },
 }
