@@ -2,10 +2,10 @@ export default  [
   {
     "id": "1",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 0,
+      "x": 10,
       "y": 0
     },
     "label": "日志"
@@ -13,10 +13,10 @@ export default  [
   {
     "id": "2",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 280,
+      "x": 290,
       "y": 0
     },
     "label": "缺陷/消缺任务"
@@ -24,10 +24,10 @@ export default  [
   {
     "id": "2add",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 560,
+      "x": 570,
       "y": 0
     },
     "label": ""
@@ -35,10 +35,10 @@ export default  [
   {
     "id": "3",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 840,
+      "x": 850,
       "y": 0
     },
     "label": "检修"
@@ -46,10 +46,10 @@ export default  [
   {
     "id": "4",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 1120,
+      "x": 1130,
       "y": 0
     },
     "label": "工作票"
@@ -57,10 +57,10 @@ export default  [
   {
     "id": "4add",
     "shape": "lane",
-    "width": 280,
+    "width": 260,
     "height": 300,
     "position": {
-      "x": 1400,
+      "x": 1410,
       "y": 0
     },
     "label": "缺陷"
