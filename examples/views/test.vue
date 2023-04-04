@@ -124,8 +124,18 @@ export default {
         height: 60,
         attrs: {
           body: {
-            stroke: '#dddddd',
+            stroke: '#a2a2a2',
             fill: '#4795a2',
+            filter: {
+              name: 'dropShadow',
+              args: {
+                // dx: 2,
+                // dy: 2,
+                // blur: 3, 
+                // color: 'red',
+                opacity: 1,
+              },
+            },
           },
           text: {
             fontSize: 14,

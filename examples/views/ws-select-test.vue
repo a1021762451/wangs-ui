@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-03-22 16:43:54
+ * @LastEditTime: 2023-04-04 11:04:45
 -->
 <template>
   <el-form
@@ -24,9 +24,6 @@
         isActualTime
       >
       </ws-select>
-    </el-form-item>
-    <el-form-item label="地点" prop="city">
-      <el-input v-model="form.city" clearable></el-input>
     </el-form-item>
   </el-form>
 </template>
