@@ -1,8 +1,8 @@
 /*
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
- * @LastEditors: wanns 1021762451@qq.com
- * @LastEditTime: 2023-03-16 22:11:56
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-04-20 12:21:57
  * @FilePath: \ws-ui\packages\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -14,6 +14,7 @@ import wsCheckbox from './ws-checkbox'
 import wsTooltip from './ws-tooltip'
 import wsSelect from './ws-select'
 import wsButtons from './ws-buttons'
+import wsFold from './ws-fold'
 
 // 存储组件列表
 const components = [
@@ -25,6 +26,7 @@ const components = [
   wsTooltip,
   wsSelect,
   wsButtons,
+  wsFold
 ]
 // 定义 install 方法，接收 Vue 作为参数。如果使用 use 注册插件，则所有的组件都将被注册
 const install = function (Vue, opts) {
@@ -49,4 +51,5 @@ export default {
   wsTooltip,
   wsSelect,
   wsButtons,
+  wsFold
 }
