@@ -1,513 +1,178 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-04-20 12:15:36
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-04-25 14:55:11
+-->
 <template>
-  <div class="process" ref="process" v-loading="processLoading">
-    <div class="process_box">
-      <div style="width: 100%; height: 100%">
-        <div
-          class="graph"
-          style="margin: 0 auto; width: 100%; height: 100%"
-          ref="graph"
-        ></div>
-      </div>
-    </div>
-    <div class="process__legend">
-      <div class="legend" v-for="item in legend" :key="item.title">
-        <span class="legend__desc" :style="item.style"></span>
-        <span class="legend__title">{{ item.title }}</span>
-      </div>
-    </div>
+  <div class="ring">
+    <div
+      v-for="i in circleCount"
+      :key="i"
+      class="circle"
+      :style="getCircleStyle(i)"
+    ></div>
   </div>
 </template>
 
 <script>
-import { Graph } from '@antv/x6'
-import data from './workflow'
-
-const CELL_DEFAULT = 'default'
-const CELL_DONE = 'done'
-const CELL_DOING = 'doing'
-const NEED_HANDLE_SHARP = ['custom-polygon', 'lane-rect']
-
 export default {
-  name: 'WorKflow',
-  props: ['param', 'isTaskEnd'],
+  name: 'test',
   data() {
     return {
-      processLoading: false,
-      graph: null,
-      legend: [
-        {
-          title: '已完成',
-          style: {
-            color: '#16C123',
-            background: '#f6ffed',
-            border: '1px solid currentColor',
-          },
-        },
-        {
-          title: '进行中',
-          style: {
-            color: '#1c83f6',
-            background: '#f0f7ff',
-            border: '1px solid currentColor',
-          },
-        },
-        {
-          title: '未开始',
-          style: {
-            color: '#dddddd',
-            background: '#efefef',
-            border: '1px solid currentColor',
-          },
-        },
-      ],
-      cells: [],
-      // 保存原始的label
-      cellsOrginMap: new Map(),
+      circleCount: 4, // 小圆数量
+      circleRadius: 50, // 小圆半径
+      ringRadius: 250, // 圆环半径
+      centerX: 300, // 圆心X坐标
+      centerY: 300, // 圆心Y坐标
     }
   },
-  mounted() {
-    // lane
-    Graph.registerNode(
-      'lane',
-      {
-        inherit: 'rect',
-        markup: [
-          {
-            tagName: 'rect',
-            selector: 'body',
-          },
-          {
-            tagName: 'rect',
-            selector: 'name-rect',
-          },
-          {
-            tagName: 'text',
-            selector: 'name-text',
-          },
-        ],
-        attrs: {
-          body: {
-            fill: '#FFF',
-            stroke: '#D9D9D9',
-            strokeWidth: 1,
-          },
-          'name-rect': {
-            // width: 280,
-            refWidth: '100%',
-            paddingLeft: 2,
-            height: 30,
-            fill: '#EDEDED',
-            stroke: '#fff',
-            strokeWidth: 1,
-            x: -1,
-          },
-          'name-text': {
-            ref: 'name-rect',
-            refY: 0.5,
-            refX: 0.5,
-            textAnchor: 'middle',
-            fontWeight: 'bold',
-            fill: '#333',
-            fontSize: 12,
-          },
-        },
-      },
-      true
-    )
-
-    //lane-rect
-    Graph.registerNode(
-      'lane-rect',
-      {
-        inherit: 'rect',
-        width: 100,
-        height: 60,
-        attrs: {
-          body: {
-            stroke: '#a2a2a2',
-            fill: '#4795a2',
-            filter: {
-              name: 'dropShadow',
-              args: {
-                // dx: 2,
-                // dy: 2,
-                // blur: 3, 
-                // color: 'red',
-                opacity: 1,
-              },
-            },
-          },
-          text: {
-            fontSize: 14,
-            fill: '#fff',
-          },
-        },
-      },
-      true
-    )
-    // 边
-    Graph.registerEdge(
-      'lane-edge',
-      {
-        inherit: 'edge',
-        attrs: {
-          line: {
-            targetMarker: 'block',
-            stroke: '#5ab8f3',
-            strokeWidth: 1,
-          },
-        },
-        label: {
-          attrs: {
-            label: {
-              fill: '#979797',
-              fontSize: 12,
-            },
-          },
-        },
-      },
-      true
-    )
-    Graph.registerNode(
-      'custom-polygon',
-      {
-        inherit: 'polygon',
-        width: 100,
-        height: 50,
-        attrs: {
-          body: {
-            stroke: '#dddddd',
-            fill: '#4795a2',
-            refPoints: '0,10 10,0 20,10 10,20',
-          },
-          text: {
-            fontSize: 12,
-            fill: '#fff',
-          },
-        },
-      },
-      true
-    )
-
-    const graph = new Graph({
-      container: this.$refs.graph,
-      autoResize: true,
-      connecting: {
-        router: 'orth',
-      },
-      interacting: {
-        edgeMovable: false,
-        nodeMovable: false,
-      },
-      translating: {
-        restrict(cellView) {
-          const cell = cellView.cell
-          const parentId = cell.prop('parent')
-          if (parentId) {
-            const parentNode = graph.getCellById(parentId)
-            if (parentNode) {
-              return parentNode.getBBox().moveAndExpand({
-                x: 0,
-                y: 30,
-                width: 0,
-                height: -30,
-              })
-            }
-          }
-          return cell.getBBox()
-        },
-      },
-    })
-    this.graph = graph
-    const cells = []
-    data.forEach((item) => {
-      if (item.shape === 'lane-edge') {
-        cells.push(graph.createEdge(item))
-      } else {
-        cells.push(graph.createNode(item))
-      }
-    })
-    // 保存原有数据
-    this.cellsOrginMap = cells.reduce((pre, cur) => {
-      if (NEED_HANDLE_SHARP.includes(cur.shape)) {
-        const clone = cur.clone()
-        clone.id = cur.id
-        clone === cur.log
-        pre.set(clone.id, clone)
-      }
-      return pre
-    }, new Map())
-    this.cells = cells
-    this.graph.resetCells(cells)
-    const resize = () => {
-      console.count()
-      this.$nextTick(() => {
-        this.graph.zoomToFit({
-          preserveAspectRatio: false,
-          useCellGeometry: true,
-          padding: {
-            right: 20,
-          },
-        })
-      })
+  created() {
+    const leftIp = {
+      sourceStartIp: '13.17.10.9',
+      sourceEndIp: '13.17.10.11',
+      targetStartIp: '13.103.0.2',
+      targetEndIp: '13.103.0.2',
     }
-    const resizeObserver = new ResizeObserver((entries) => {
-      setTimeout(resize, 100)
-    })
-    resizeObserver.observe(this.$refs.process)
-    this.$once('hook:beforeDestroy', () => {
-      resizeObserver.unobserve(this.$refs.process)
-    })
+    const rightIp = {
+      sourceStartIp: '13.17.10.9',
+      sourceEndIp: '13.17.10.10',
+      targetStartIp: '13.103.0.1',
+      targetEndIp: '13.103.0.2',
+    }
+    this.compareIp(leftIp, rightIp)
   },
   methods: {
-    getDefectFlowTime(data) {
-      /*
-        日志：
-        finishedLog 已完成
-        unFinishedLog：未完成
-        缺陷：
-        startDefect 启动缺陷
-        defectConfirm 缺陷确认
-        defectHandle 缺陷处理
-        defectAcceptance 缺陷验收
-        检修
-        startRepair 启动检修
-        startedRepair 已开工
-        finishedRepair 已验收
-        工作票
-        createDefectTicket 缺陷生成工作票
-        createRepairTicket 检修生成工作票
-        startedTicket 已开工
-        finishedTicket 已完工
-       */
-      this.processLoading = true
-      getDefectFlowTime(data)
-        .then((res) => {
-          let data = res.data.data || []
-          const handleData = (data) => {
-            const createDefectTicket = data.find(
-              (item) => item['createDefectTicket']
-            )
-            const createRepairTicket = data.find(
-              (item) => item['createRepairTicket']
-            )
-
-            if (createDefectTicket || createRepairTicket) {
-              const createDefectTicketIndex = data.findIndex(
-                (item) => item['createDefectTicket']
-              )
-              const createRepairTicketIndex = data.findIndex(
-                (item) => item['createRepairTicket']
-              )
-              const index =
-                createDefectTicketIndex == -1
-                  ? createRepairTicketIndex
-                  : createDefectTicketIndex
-              data[index] = {
-                createTicket: createDefectTicket
-                  ? createDefectTicket['createDefectTicket']
-                  : createRepairTicket['createRepairTicket'],
-              }
-            }
-            return data
-          }
-          data = handleData(data)
-          this.graphFlowTime(data)
-        })
-        .finally(() => {
-          this.$nextTick(() => {
-            this.processLoading = false
-          })
-        })
+    circleClick(index) {
+      console.log(index)
     },
-    getDefectFlowCount(data) {
-      /*
-        日志：
-        finishedLog 已完成
-        unFinishedLog：未完成
-        缺陷：
-        startDefect 启动缺陷
-        defectConfirm 缺陷确认
-        defectHandle 缺陷处理
-        defectAcceptance 缺陷验收
-        检修
-        startRepair 启动检修
-        startedRepair 已开工
-        finishedRepair 已验收
-        工作票
-        createTicket 生成工作票
-        startedTicket 已开工
-        finishedTicket 已完工
-       */
-      this.processLoading = true
-      getDefectFlowCount(data)
-        .then((res) => {
-          const data = res.data.data || {}
-          this.graphFlowCount(data)
-        })
-        .finally(() => {
-          this.$nextTick(() => {
-            this.processLoading = false
-          })
-        })
-    },
-    graphFlowCount(data = {}) {
-      this.cells = this.cells.map((cell) => {
-        if (NEED_HANDLE_SHARP.includes(cell.shape)) {
-          const orginCell = this.cellsOrginMap.get(cell.id)
-          const orginLabel = orginCell.label
-          const counter = data[cell.id]
-          // debugger
-          if (counter || counter == 0) {
-            cell.label = `${orginLabel}(${counter})`
-            // debugger
-            this.changeCellStatus(cell)
-            this.resizeCell(cell)
-            return cell
-          } else {
-            // 其他单元恢复原有label
-            cell.label = orginLabel
-            this.changeCellStatus(cell)
-            this.resizeCell(cell)
-            return cell
-          }
-        } else {
-          return cell
-        }
-      })
-      this.graph.resetCells(this.cells)
-    },
-    changeCellStatus(cell, status = 'default') {
-      const statusStyle = {
-        done: {
-          stroke: '#16C123',
-        },
-        default: {
-          stroke: '#dddddd',
-        },
-        doing: {
-          stroke: '#1c83f6',
-        },
+    getCircleStyle(i) {
+      let angle = (i / this.circleCount) * 2 * Math.PI - Math.PI / 2
+      let x =
+        this.centerX + Math.cos(angle) * this.ringRadius - this.circleRadius
+      let y =
+        this.centerY + Math.sin(angle) * this.ringRadius - this.circleRadius
+      return {
+        left: `${x}px`,
+        top: `${y}px`,
       }
-      const { stroke } = statusStyle[status]
-      cell.addTools([
-        {
-          name: 'boundary',
-          args: {
-            padding: 3,
-            attrs: {
-              stroke,
-              'stroke-width': 2,
-            },
-          },
-        },
-      ])
-      // const statusStyle = {
-      //   done: {
-      //     fill: "#f6ffed",
-      //     stroke: "#16C123",
-      //   },
-      //   default: {
-      //     fill: "#efefef",
-      //     stroke: "#dddddd",
-      //     textFill: "#262626",
-      //   },
-      //   doing: {
-      //     fill: "#f0f7ff",
-      //     stroke: "#1c83f6",
-      //   },
-      // };
-      // const { fill, stroke, textFill } = statusStyle[status];
-      // cell.setAttrs({
-      //   body: { stroke, fill },
-      //   text: { fill: textFill || stroke },
-      // });
     },
-    resizeCell(cell, width = 133, height = 30) {
-      // const directionMap = {
-      //   defectAcceptance: "left",
-      //   ywg: "left",
-      //   finishedTicket: "left",
-      //   startedTicket: "left",
-      // };
-      // cell.resize(width, height, {
-      //   direction: directionMap[cell.id] || "right",
-      // });
-    },
-    graphFlowTime(data = {}) {
-      const lastestCell = data[data.length - 1]
-      this.cells = this.cells.map((cell) => {
-        if (NEED_HANDLE_SHARP.includes(cell.shape)) {
-          const orginCell = this.cellsOrginMap.get(cell.id)
-          const orginLabel = orginCell.label
-          const findData = data.find((item) => item[cell.id])
-          if (!findData) {
-            cell.label = orginLabel
-            this.resizeCell(cell)
-            this.changeCellStatus(cell)
-            return cell
-          }
-          let timerDesc = findData[cell.id]
-
-          if (timerDesc) {
-            cell.label = (orginLabel || cell.label) + `\n${timerDesc}`
-            if (lastestCell[cell.id] && !this.isTaskEnd) {
-              this.changeCellStatus(cell, CELL_DOING)
-            } else if (findData[cell.id]) {
-              this.changeCellStatus(cell, CELL_DONE)
-            } else {
-              this.changeCellStatus(cell)
-            }
-            this.resizeCell(cell, 133)
-            return cell
-          } else {
-            cell.label = orginLabel
-            this.changeCellStatus(cell)
-            this.resizeCell(cell)
-            // 其他单元恢复原有label
-            return cell
-          }
-        } else {
-          return cell
+    // 比较ip
+    compareIp(leftIp = {}, rightIp = {}) {
+      let leftCompareIp = []
+      let rightCompareIp = []
+      let leftList = this.getCompareIpList(leftIp)
+      let rightList = this.getCompareIpList(rightIp)
+      leftList.forEach((item) => {
+        leftCompareIp.push(item)
+        rightCompareIp.push(rightList.includes(item) ? item : '')
+      })
+      rightList.forEach((item, index) => {
+        if (!leftCompareIp.includes(item)) {
+          leftCompareIp.splice(index, 0, '')
+          rightCompareIp.splice(index, 0, item)
         }
       })
+      leftCompareIp = leftCompareIp.map((item, index) => {
+        return item.split('-')
+      })
+      rightCompareIp = rightCompareIp.map((item, index) => {
+        return item.split('-').reverse()
+      })
+      // console.log(leftList, rightList, 'leftList, rightList')
+      console.log(leftCompareIp, rightCompareIp, 'leftCompareIp')
     },
+    // 获取ip列表
+    getCompareIpList(ip) {
+      const list = []
+      const { sourceStartIp, sourceEndIp, targetStartIp, targetEndIp } = ip
+      const sourceStartIpArr = sourceStartIp.split('.').map(Number)
+      const sourceEndIpArr = sourceEndIp.split('.').map(Number)
+      const targetStartIpArr = targetStartIp.split('.').map(Number)
+      const targetEndIpArr = targetEndIp.split('.').map(Number)
+      for (let i = 0; i <= sourceStartIpArr.length - 1; i++) {}
+      for (let i = sourceStartIpArr[3]; i <= sourceEndIpArr[3]; i++) {
+        for (let j = targetStartIpArr[3]; j <= targetEndIpArr[3]; j++) {
+          list.push(
+            `${sourceStartIpArr[0]}.${sourceStartIpArr[1]}.${sourceStartIpArr[2]}.${i}-${targetStartIpArr[0]}.${targetStartIpArr[1]}.${targetStartIpArr[2]}.${j}`
+          )
+        }
+      }
+      return list
+    },
+    // getCompareIpList(ip) {
+    //   const parseIp = (ip) => {
+    //     return ip.split('.').map(Number)
+    //   }
+
+    //   const result = []
+
+    //   const sourceStartIp = parseIp(ip.sourceStartIp)
+    //   const sourceEndIp = parseIp(ip.sourceEndIp)
+    //   const targetStartIp = parseIp(ip.targetStartIp)
+    //   const targetEndIp = parseIp(ip.targetEndIp)
+
+    //   const compareIp = (ip1, ip2, depth = 0) => {
+    //     if (depth === ip1.length) {
+    //       return 0
+    //     } else if (ip1[depth] < ip2[depth]) {
+    //       return -1
+    //     } else if (ip1[depth] > ip2[depth]) {
+    //       return 1
+    //     } else {
+    //       return compareIp(ip1, ip2, depth + 1)
+    //     }
+    //   }
+
+    //   const traverseIp = (startIp, endIp, callback, depth = 0, ip = []) => {
+    //     if (depth === startIp.length) {
+    //       callback(ip)
+    //     } else if (startIp[depth] === endIp[depth]) {
+    //       ip.push(startIp[depth])
+    //       traverseIp(startIp, endIp, callback, depth + 1, ip)
+    //       ip.pop()
+    //     } else {
+    //       for (let i = startIp[depth]; i <= endIp[depth]; i++) {
+    //         ip.push(i)
+    //         traverseIp(startIp, endIp, callback, depth + 1, ip)
+    //         ip.pop()
+    //       }
+    //     }
+    //   }
+
+    //   traverseIp(sourceStartIp, sourceEndIp, (sourceIp) => {
+    //     traverseIp(targetStartIp, targetEndIp, (targetIp) => {
+    //       if (compareIp(sourceIp, targetIp) === -1) {
+    //         result.push(`${ipToString(sourceIp)}-${ipToString(targetIp)}`)
+    //       }
+    //     })
+    //   })
+
+    //   const ipToString = (ip) => {
+    //     return ip.join('.')
+    //   }
+
+    //   console.log(result)
+    // },
   },
 }
 </script>
 
 <style scoped lang="less">
-.process {
+.ring {
   position: relative;
-  background-color: #ffffff;
-  box-shadow: 1px 1px 5px #f4f5f9;
-  padding: 0 10px;
-  // margin: 0 10px;
-  width: 100%;
+  width: 600px;
+  height: 600px;
+  border: 1px solid black;
+  border-radius: 50%;
 }
-.process_box {
-  width: 100%;
-  display: flex;
-  height: 300px;
-  // height: 800px;
-}
-.process__legend {
+
+.circle {
   position: absolute;
-  bottom: 25px;
-  left: 40px;
-  z-index: 2;
-}
-.legend {
-  &__title {
-    font-size: 14px;
-    font-weight: 400;
-    color: #999999;
-    margin-left: 5px;
-  }
-  &__desc {
-    display: inline-block;
-    width: 18px;
-    height: 10px;
-  }
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: red;
 }
 </style>

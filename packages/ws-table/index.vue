@@ -44,7 +44,7 @@
         v-bind="$attrs"
         v-on="$listeners"
         @selection-change="selectionChange"
-        ref="el-table"
+        ref="table"
       >
         <!-- 列遍历， 可实现嵌套 -->
         <tableColumn
@@ -175,23 +175,25 @@ export default {
     }
   },
   watch: {
-    tableData: {
-      handler(newData) {
-        // 配置selfAdjust为true,则宽度自调节
-        this.columns.forEach((column) => {
-          const arr = newData.map((x) => x[column.prop]) // 获取每一列的所有数据
-          arr.push(column.label) // 把每列的表头也加进去算
-          const conditon = column.selfAdjust
-          if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
-        })
-        this.tableForm.tableData = this.tableData
-      },
-      immediate: true,
-    },
     tableColumns: {
       handler(newData) {
         this.columns = deepClone(newData)
         this.cloneColunms = deepClone(newData)
+      },
+      immediate: true,
+    },
+    tableData: {
+      handler(newData) {
+        // 配置selfAdjust为true,则宽度自调节
+        // this.columns.forEach((column) => {
+        //   const arr = newData.map((x) => x[column.prop]) // 获取每一列的所有数据
+        //   arr.push(column.label) // 把每列的表头也加进去算
+        //   const conditon = column.selfAdjust
+        //   console.log('conditon', conditon)
+        //   if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
+        // })
+        this.getDynamicWidth(this.columns)
+        this.tableForm.tableData = this.tableData
       },
       immediate: true,
     },
@@ -224,6 +226,41 @@ export default {
     },
   },
   methods: {
+    // 遍历获取动态宽度
+    getDynamicWidth(columns) {
+      const treeProps = this.$attrs['tree-props'] || { children: 'children' }
+      const childrenKey = treeProps.children
+      columns.forEach((column) => {
+        const conditon = column.selfAdjust
+        if (conditon) {
+          // const arr = this.tableData.map((x) => x[column.prop])
+          const arr = this.getColumnData(this.tableData, column, childrenKey)
+          // 迭代获取每一列的所有数据
+          arr.push(column.label) // 把每列的表头也加进去算
+          this.$set(column, 'width', this.getMaxLength(arr) + 40)
+        }
+        if (!conditon && column.children) {
+          this.getDynamicWidth(column.children)
+        }
+      })
+    },
+    // 迭代获取每一列的所有数据
+    getColumnData(tableData, column, childrenKey) {
+      const arr = []
+      tableData.forEach((x) => {
+        x[column.prop] && arr.push(x[column.prop])
+        // console.log(
+        //   Array.isArray(x[childrenKey]) && x[childrenKey].length,
+        //   x[childrenKey],
+        //   'x[childrenKey] '
+        // )
+        if (Array.isArray(x[childrenKey]) && x[childrenKey].length) {
+          arr.push(...this.getColumnData(x[childrenKey], column, childrenKey))
+        }
+      })
+      // console.log(arr, 'arr', tableData, 'tableData')
+      return arr
+    },
     // 分页操作
     handleCurrentChange(val) {
       this.handleSearch()

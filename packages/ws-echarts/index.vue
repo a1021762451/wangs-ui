@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-04-23 16:45:34
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-04-24 09:34:56
+-->
 <template>
   <div style="width: 100%; height: 100%">
     <div
@@ -5,91 +12,82 @@
       :id="echartsId"
       style="width: 100%; height: 100%"
     ></div>
-    <el-empty v-show="showEmpty" :image-size="100"></el-empty>
+    <el-empty v-show="showEmpty" v-bind="$attrs"></el-empty>
   </div>
 </template>
 
 <script>
-import { otherOptions, seriesConfig, commonOptions } from './echartsContant'
-import { deepClone, deepMerge, getRandomId } from '../utils/util'
+import { getRandomId } from '../utils/util'
 export default {
-  name: 'ws-echarts',
+  name: 'commonEcharts',
   data() {
     return {
       echartsId: getRandomId(),
       myChart: {},
-      options: {},
       showEmpty: true
     }
   },
   props: {
-    // 全部配置
-    echartsData: {
+    options: {
       type: Object,
       default() {
         return {}
       }
-    },
-    // 主体类型
-    echarsType: {
-      type: String,
-      default: ''
     }
   },
   watch: {
-    echartsData: {
+    options: {
       handler() {
         this.updateEcharts()
       }
+      // immediate: true
     }
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.resizeEcharts)
   },
   mounted() {
     this.init()
+    this.myChart.on('click', (params) => {
+      console.log('this.myChart.on', params);
+      this.$emit('echartsClick', params)
+    })
   },
   methods: {
     // 初始化
     init() {
+      // myChart.hideLoading()
       // 基于准备好的dom，初始化echarts实例
       this.myChart = this.$echarts.init(document.getElementById(this.echartsId))
-      window.addEventListener('resize', this.resizeEcharts)
-      // 通用配置
-      this.options = deepClone(commonOptions)
-      // 合并通用配置和特殊配置
-      this.echarsType &&
-        (this.options = deepMerge(
-          this.options,
-          deepClone(otherOptions[this.echarsType])
-        ))
+      window.addEventListener('resize', () => {
+        this.myChart.resize()
+      })
       this.updateEcharts()
     },
     // 更新echarts视图
     updateEcharts() {
-      // 合并所有配置
-      let options = deepMerge(this.options, this.echartsData)
-      // 按series类型type取出series通用配置
-      let { series = [] } = this.echartsData
-      series = series.map((item) => {
-        return {
-          ...(seriesConfig[item.type] || {}),
-          ...item
-        }
-      })
       // 判断是否图表为空
+      const { series } = this.options
       this.showEmpty = !Array.isArray(series) || !series.length
-      this.myChart.setOption({ ...options, series })
+      this.myChart.setOption(this.options)
       this.$nextTick(() => {
         this.myChart.resize()
       })
     },
-    // 重置echats大小
-    resizeEcharts() {
-      this.myChart.resize()
+    chartLoading() {
+      this.myChart.showLoading({
+        text: '加载中...',
+        color: '#808080',
+        textColor: '#000',
+        maskColor: 'rgba(255, 255, 255, 0.5)',
+        zlevel: 0
+      })
     }
   }
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+/deep/ .el-empty {
+  padding: 0;
+  justify-content: center;
+  height: 100%;
+}
+</style>

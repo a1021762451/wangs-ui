@@ -4,7 +4,7 @@
   <el-table-column
     v-if="fieldItem.children"
     :label="fieldItem.label"
-    align="center"
+    :align="fieldItem.align || 'center'"
     resizable
     v-bind="fieldItem"
   >
@@ -26,7 +26,7 @@
   <el-table-column
     v-else-if="fieldItem.type === 'operation'"
     align="center"
-    :width="(fieldItem.tableButtons || []).length * 70"
+    :width="fieldItem.width || (fieldItem.tableButtons || []).length * 70"
     label="操作"
     fixed="right"
     v-bind="fieldItem"
@@ -46,7 +46,6 @@
   </el-table-column>
   <!-- 特殊列，如复选框，序号列 -->
   <el-table-column
-    width="55"
     align="center"
     v-else-if="fieldItem.type"
     v-bind="fieldItem"
@@ -75,7 +74,8 @@
     <!-- 内容插槽 -->
     <template v-slot="{ row, column, $index }">
       <!-- 判断是否是el-form-item元素 -->
-      <component
+      <el-form-item
+        v-if="fieldItem.component"
         :is="fieldItem.required ? 'el-form-item' : 'div'"
         :class="{ overflow_tip: fieldItem.showOverflowTooltip }"
         :prop="`tableData.${$index}.${fieldItem.prop}`"
@@ -147,13 +147,24 @@
             ></el-option>
           </template>
         </component>
+      </el-form-item>
+      <template v-else>
+        <!-- 命名插槽 -->
+        <template v-if="fieldItem.slotName">
+          <slot
+            :name="fieldItem.slotName"
+            v-bind="{ row, column, $index, fieldItem }"
+          >
+            {{ row[fieldItem.prop] }}
+          </slot>
+        </template>
         <!-- 格式化 -->
         <template v-else-if="fieldItem.formatter">{{
           fieldItem.formatter(row[fieldItem.prop], row, column, $index)
         }}</template>
         <!-- 默认 -->
         <template v-else>{{ row[fieldItem.prop] }}</template>
-      </component>
+      </template>
     </template>
   </el-table-column>
 </template>
@@ -167,8 +178,12 @@ import {
   getMinValidator,
   getRandomId,
 } from '../../utils/util'
+import wsButtons from '../../ws-buttons/index.vue'
 export default {
   name: 'tableColumn',
+  components: {
+    wsButtons,
+  },
   props: {
     fieldItem: {
       default() {

@@ -2,13 +2,13 @@
   <div
     class="render"
     :class="{ fold: isFold, searchMode: isSearchList }"
-    :style="{ height: isFold ? colHeight + 1 + 'px' : undefined }"
+    :style="{ height: isFold ? colHeight + 'px' : undefined }"
     ref="wsForm"
   >
     <el-form
       :style="{
         transform: isFold
-          ? `translateY(-100%) translateY(${colHeight + 1}px)`
+          ? `translateY(-100%) translateY(${colHeight}px)`
           : undefined,
       }"
       ref="formRef"
@@ -26,6 +26,9 @@
           v-for="fieldItem in configList"
           :key="fieldItem.prop"
         >
+          <!-- ? Object.keys(rules).length
+                  ? '18px'
+                  : '18px' -->
           <el-form-item
             :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
             :style="{
@@ -77,7 +80,7 @@
         <!-- 按钮 -->
         <el-form-item
           v-if="showButtons"
-          :class="isSearchList ? '' : 'formMode-ws-buttons'"
+          :class="isSearchList ? 'searchMode-list' : 'formMode-ws-buttons'"
         >
           <ws-buttons
             :buttonConfigList="buttonsList"
@@ -339,6 +342,7 @@ export default {
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
       const compareHeight = compareEle.offsetHeight
+      console.log(compareHeight, 'compareHeight');
       this.colHeight = compareHeight
       this.exceedOneRow = el.offsetHeight - 10 > compareHeight
     },
@@ -440,6 +444,9 @@ export default {
   // /deep/ .el-form {
   //   transform: translateY(-100%) translateY(50px);
   // }
+}
+.searchMode .searchMode-list {
+  margin-bottom: 0;
 }
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;

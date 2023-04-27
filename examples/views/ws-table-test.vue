@@ -37,7 +37,9 @@
       :header-cell-style="{ background: '#f3f3f3' }"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       ref="wsTable"
+      row-key="id"
     >
       <template v-slot:expand="{ row }">
         <div>
@@ -88,6 +90,35 @@ export default {
           testFormatter: '内容',
           name: '王',
           age: 18,
+          id: '1',
+          children: [
+            {
+              plantName: '二号机组',
+              testInput: '2',
+              widthAdjust: '宽度宽度宽度',
+              testSelect: '香蕉',
+              testMinDatetime: '',
+              testMaxDatetime: '',
+              testTime: '',
+              testFormatter: '内容',
+              adress: '北京',
+              work: '程序员',
+              id: '1-1',
+            },
+            {
+              plantName: '二号机组',
+              testInput: '2',
+              widthAdjust: '宽度宽度宽度',
+              testSelect: '香蕉',
+              testMinDatetime: '',
+              testMaxDatetime: '',
+              testTime: '',
+              testFormatter: '内容',
+              adress: '北京',
+              work: '程序员',
+              id: '1-2',
+            },
+          ],
         },
         {
           plantName: '二号机组',
@@ -110,6 +141,7 @@ export default {
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
+          id: '2',
         },
       ],
       loading: false,
@@ -129,6 +161,7 @@ export default {
         testMaxDatetime: '',
         testTime: '',
         testFormatter: '内容',
+        id: '3',
       })
     }, '1000')
   },
