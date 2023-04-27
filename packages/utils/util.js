@@ -243,9 +243,9 @@ export function getPicker(fieldItem, formData) {
   if (component === 'el-date-picker') {
     // 单独处理日月年限制
     const minTimeValue = () =>
-      +new Date(format(new Date(minValue), 'yyyy-MM-DD'))
+      +new Date(format(new Date(minValue), 'yyyy-MM-dd'))
     const maxTimeValue = () =>
-      +new Date(format(new Date(maxValue), 'yyyy-MM-DD'))
+      +new Date(format(new Date(maxValue), 'yyyy-MM-dd'))
     minDate = minValue ? minTimeValue() : +new Date(minDate)
     maxDate = maxValue ? maxTimeValue() : +new Date(maxDate)
     let selectableRange = ''
@@ -279,7 +279,7 @@ export function getPicker(fieldItem, formData) {
     }
     return {
       disabledDate(time) {
-        time = +new Date(format(new Date(time), 'yyyy-MM-DD'))
+        time = +new Date(format(new Date(time), 'yyyy-MM-dd'))
         let minCondition = false
         let maxCondition = false
         minCondition = minAllowEqual ? minDate <= time : minTime < time
@@ -392,10 +392,10 @@ export function getMaxValidator(fieldItem, max) {
 }
 
 // 根据时间对象和格式，转换时间
-export function format(date, fmt = 'yyyy-MM-DD') {
+export function format(date, fmt = 'yyyy-MM-dd') {
   var o = {
     'M+': date.getMonth() + 1, //月份
-    'D+': date.getDate(), //日
+    'd+': date.getDate(), //日
     'H+': date.getHours(), //小时
     'm+': date.getMinutes(), //分
     's+': date.getSeconds(), //秒

@@ -121,6 +121,13 @@ export default {
       },
       type: Array,
     },
+    // 分页数据
+    pageInfo: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
     // 默认分页配置
     defaultPageInfo: {
       default() {
@@ -162,7 +169,6 @@ export default {
     return {
       columns: [], // 列数据
       cloneColunms: [], // 复制列数据，用于列筛选
-      pageInfo: this.defaultPageInfo, // 分页数据
       // 用于表格input组件
       property: '',
       index: '',
@@ -263,16 +269,17 @@ export default {
     },
     // 分页操作
     handleCurrentChange(val) {
+      this.$emit('update:pageInfo', { ...this.pageInfo, current: val })
       this.handleSearch()
     },
     handleSizeChange(val) {
-      this.pageInfo.current = 1
+      // this.pageInfo.current = 1
+      this.$emit('update:pageInfo', { ...this.pageInfo, size: val, current: 1 })
       this.handleSearch()
     },
     handleSearch() {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'pageChange' },
-        pageInfo: this.pageInfo,
+        buttonItem: { method: 'search' },
       })
     },
     // 遍历列的所有内容，获取最宽一列的宽度

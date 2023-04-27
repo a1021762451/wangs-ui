@@ -3,10 +3,10 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-20 14:56:43
+ * @LastEditTime: 2023-04-27 12:10:32
 -->
 <template>
-  <div class="resizable" ref="container" :style="{ width: width + 'px', height }">
+  <div class="resizable" ref="container" :style="{ width: width + 'px', height, paddingRight: width ? '4px': '0px' }">
     <!-- 组件内容 -->
     <slot></slot>
     <!-- 折叠按钮 -->
@@ -113,8 +113,8 @@ export default {
 .resize-handle {
   position: absolute;
   top: 0;
-  right: 0px;
-  width: 5px;
+  right: -2px;
+  width: 4px;
   height: 100%;
   cursor: ew-resize;
   z-index: 1;

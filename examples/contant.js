@@ -60,7 +60,7 @@ export const formConfigList = [
     isShowCurrent: true,
     componentAttrs: {
       type: 'date',
-      valueFormat: 'yyyy-MM-DD',
+      valueFormat: 'yyyy-MM-dd',
     },
   },
   {
@@ -69,10 +69,10 @@ export const formConfigList = [
     label: '竣工日期大',
     required: true,
     minTimeProp: 'endTime_min',
-    isShowCurrent: true,
+    // isShowCurrent: true,
     componentAttrs: {
       type: 'date',
-      valueFormat: 'yyyy-MM-DD',
+      valueFormat: 'yyyy-MM-dd',
     },
   },
   {

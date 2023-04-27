@@ -289,7 +289,7 @@ export default {
     // 表格内复选框变更
     fieldItemChange(fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'fieldItemChange' },
+        buttonItem: { method: 'tableFieldChange' },
         fieldItem,
         row,
       })

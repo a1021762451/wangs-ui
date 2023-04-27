@@ -5,6 +5,7 @@
       :formButtons="formButtons"
       :allOptions="allOptions"
       :defaultForm="defaultForm"
+      :formData.sync="formData"
       buttonSize="small"
       isSearchList
       @happenEvent="happenEvent"
@@ -35,6 +36,7 @@
       :allOptions="allOptions"
       :utilsList="['setColumms', 'download']"
       :header-cell-style="{ background: '#f3f3f3' }"
+      :pageInfo.sync="pageInfo"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
@@ -91,34 +93,34 @@ export default {
           name: '王',
           age: 18,
           id: '1',
-          children: [
-            {
-              plantName: '二号机组',
-              testInput: '2',
-              widthAdjust: '宽度宽度宽度',
-              testSelect: '香蕉',
-              testMinDatetime: '',
-              testMaxDatetime: '',
-              testTime: '',
-              testFormatter: '内容',
-              adress: '北京',
-              work: '程序员',
-              id: '1-1',
-            },
-            {
-              plantName: '二号机组',
-              testInput: '2',
-              widthAdjust: '宽度宽度宽度',
-              testSelect: '香蕉',
-              testMinDatetime: '',
-              testMaxDatetime: '',
-              testTime: '',
-              testFormatter: '内容',
-              adress: '北京',
-              work: '程序员',
-              id: '1-2',
-            },
-          ],
+          // children: [
+          //   {
+          //     plantName: '二号机组',
+          //     testInput: '2',
+          //     widthAdjust: '宽度宽度宽度',
+          //     testSelect: '香蕉',
+          //     testMinDatetime: '',
+          //     testMaxDatetime: '',
+          //     testTime: '',
+          //     testFormatter: '内容',
+          //     adress: '北京',
+          //     work: '程序员',
+          //     id: '1-1',
+          //   },
+          //   {
+          //     plantName: '二号机组',
+          //     testInput: '2',
+          //     widthAdjust: '宽度宽度宽度',
+          //     testSelect: '香蕉',
+          //     testMinDatetime: '',
+          //     testMaxDatetime: '',
+          //     testTime: '',
+          //     testFormatter: '内容',
+          //     adress: '北京',
+          //     work: '程序员',
+          //     id: '1-2',
+          //   },
+          // ],
         },
         {
           plantName: '二号机组',
@@ -145,12 +147,16 @@ export default {
         },
       ],
       loading: false,
-      formData: {},
-      pageInfo: {},
+      formData: { applyComId: '南昌', equipName: '4号' },
+      pageInfo: {
+        size: 10,
+        current: 1,
+        total: 0,
+      },
     }
   },
   mounted() {
-    this.getInitParams()
+    // this.getInitParams()
     setTimeout(() => {
       this.tableData.push({
         plantName: '四号机组',
@@ -166,6 +172,11 @@ export default {
     }, '1000')
   },
   methods: {
+    // 更新表单数据
+    // updateFormData({ formData }) {
+    //   console.log('updateFormData')
+    //   this.formData = formData
+    // },
     // 获取初始化的参数
     getInitParams() {
       const wsForm = this.$refs.wsForm
@@ -180,6 +191,7 @@ export default {
       const {
         buttonItem: { method },
       } = eventData
+      console.log('method', method);
       this[method] && this[method](eventData)
     },
     export(eventData) {

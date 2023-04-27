@@ -129,7 +129,6 @@ export default {
   components: { wsButtons },
   data() {
     return {
-      formData: {},
       cloneForm: {},
       isFold: false,
       exceedOneRow: false,
@@ -153,8 +152,8 @@ export default {
       },
       type: Object,
     },
-    // 表单默认值
-    defaultForm: {
+    // 表单数据
+    formData: {
       default() {
         return {}
       },
@@ -230,16 +229,9 @@ export default {
             )
             return
           }
-          this.$set(this.formData, item.prop, '')
+          !this.formData.hasOwnProperty(item.prop) && this.$set(this.formData, item.prop, '')
         })
         this.configList = configList
-      },
-      immediate: true,
-    },
-    defaultForm: {
-      handler() {
-        const obj = deepMerge(this.formData, this.defaultForm)
-        this.formData = deepClone(obj)
       },
       immediate: true,
     },
@@ -331,7 +323,7 @@ export default {
     // 表格内复选框变更
     fieldItemChange(fieldItem, row) {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'fieldItemChange' },
+        buttonItem: { method: 'formFieldChange' },
         fieldItem,
         row,
       })
@@ -342,7 +334,6 @@ export default {
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
       const compareHeight = compareEle.offsetHeight
-      console.log(compareHeight, 'compareHeight');
       this.colHeight = compareHeight
       this.exceedOneRow = el.offsetHeight - 10 > compareHeight
     },
@@ -351,7 +342,8 @@ export default {
       const { method } = buttonItem
       // method为reset则进行默认处理
       if (method === 'reset') {
-        this.formData = deepClone(this.cloneForm)
+        const obj = deepClone(this.cloneForm)
+        this.$emit('update:formData', deepClone(obj))
         this.handleSearch()
         return
       }
