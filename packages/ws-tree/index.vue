@@ -2,153 +2,111 @@
   <div class="tree-content">
     <!-- 添加根节点按钮 -->
     <div class="model-title" v-if="changeMode">
-      <el-tooltip effect="dark" placement="top" :content="content">
-        <i class="el-icon-info"></i>
-      </el-tooltip>
-      <el-tooltip effect="dark" placement="right" content="添加根节点">
-        <i class="el-icon-plus" style="cursor: pointer" @click="freeAdd"></i>
-      </el-tooltip>
+      <span class="model-title-left">
+        <slot name="titleLeft">
+          <span>类型</span>
+          <el-tooltip effect="dark" placement="top" :content="content">
+            <i class="el-icon-info"></i>
+          </el-tooltip>
+        </slot>
+      </span>
+      <span class="model-title-right">
+        <slot name="titleRight">
+          <el-tooltip effect="dark" placement="right" content="添加根节点">
+            <i
+              class="el-icon-plus"
+              style="cursor: pointer"
+              @click="freeAdd"
+            ></i>
+          </el-tooltip>
+        </slot>
+      </span>
     </div>
     <!-- 搜索框 -->
     <el-input
-      placeholder="输入关键字进行过滤"
+      placeholder="按关键字筛选"
       v-model="filterText"
       size="small"
     ></el-input>
     <!-- 树主体 -->
-    <el-tree
-      ref="tree"
-      class="tree"
-      node-key="id"
-      default-expand-all
-      highlight-current
-      :props="treeProps"
-      :filter-node-method="
-        excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
-      "
-      :data="treeData"
-      :expand-on-click-node="false"
-      :show-checkbox="showCheckBox"
-      :draggable="draggable"
-      :allow-drop="allowDrop"
-      :allow-drag="allowDrag"
-      @node-drop="handleDrop"
-      @check-change="handleCheckChange"
-      @node-click="handleNodeClick"
-      @node-contextmenu="floderOption"
-    >
-      <div
-        class="custom-tree-node"
-        slot-scope="{ node, data }"
-        @mouseenter="mouseenter(data)"
-        @mouseleave="mouseleave"
+    <div class="tree-container">
+      <el-tree
+        ref="tree"
+        class="tree-ele"
+        node-key="id"
+        default-expand-all
+        highlight-current
+        :filter-node-method="
+          excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
+        "
+        :expand-on-click-node="false"
+        @node-contextmenu="floderOption"
+        v-bind="$attrs"
+        v-on="$listeners"
       >
-        <span>{{ node.label }}</span>
-        <span
-          class="custom-tree-button"
-          v-if="iAct == data && changeMode === 'hover'"
+        <div
+          class="custom-tree-node"
+          slot-scope="{ node, data }"
+          @mouseenter="mouseenter(data)"
+          @mouseleave="mouseleave"
         >
-          <i @click.stop="() => nodeAdd(node, data)" class="el-icon-plus"></i>
-          <!--增加分组-->
-          <i
-            @click.stop="() => nodeDelete(node, data)"
-            class="el-icon-delete"
-          ></i>
-          <!--删除分组-->
-          <i @click.stop="() => nodeEdit(node, data)" class="el-icon-edit"></i>
-          <!--重命名分组-->
-        </span>
-        <div v-if="data.disabled" class="disabled" @click.stop></div>
-      </div>
-    </el-tree>
+          <span>{{ node.label }}</span>
+          <span
+            class="custom-tree-button"
+            v-if="iAct == data && changeMode === 'hover'"
+          >
+            <i
+              v-for="item in operationsList"
+              :key="item.value"
+              @click.stop="happenEvent(node, data, item)"
+              :class="`${item.class}`"
+            ></i>
+          </span>
+          <div v-if="data.disabled" class="disabled" @click.stop></div>
+        </div>
+      </el-tree>
+    </div>
     <!-- 右键菜单栏 -->
     <div
       :style="{
         left: optionCardX + 'px',
-        top: optionCardY + 'px'
+        top: optionCardY + 'px',
       }"
       class="contextmenu"
       v-show="optionCardShow"
       id="option-button-group"
     >
       <el-button
-        @click="nodeAdd(node, optionData)"
-        class="option-card-button el-icon-plus"
+        v-for="item in operationsList"
+        :key="item.value"
+        @click="happenEvent(node, optionData, item)"
+        :class="`option-card-button ${item.class}`"
       >
-        新建</el-button
-      >
-      <el-button
-        @click="nodeDelete(node, optionData)"
-        class="option-card-button el-icon-delete"
-      >
-        删除</el-button
-      >
-      <el-button
-        @click="nodeEdit(node, optionData)"
-        class="option-card-button el-icon-edit"
-      >
-        编辑</el-button
+        {{ item.label }}</el-button
       >
     </div>
   </div>
 </template>
 
 <script>
-import { debounce } from '../utils/util'
 export default {
   name: 'ws-tree',
   props: {
-    // 是否有复选框
-    showCheckBox: {
-      type: Boolean,
-      default: false
-    },
-    // 是否可拖拽
-    draggable: {
-      type: Boolean,
-      default: false
-    },
     // 增删改查模式
     changeMode: {
       default: '', // contextMenu / hover
-      type: String
-    },
-    // 树的配置项
-    treeProps: {
-      default() {
-        return {
-          label: 'label',
-          children: 'children'
-          // firstSpellKey: 'nameFirstSpell' // 通过拼音首字母过滤，数据里面需要有这个字段
-        }
-      },
-      type: Object
-    },
-    // 树数据
-    treeData: {
-      type: Array,
-      default() {
-        return []
-      }
+      type: String,
     },
     // 后续搜索 不被第一次的搜索操作影响
     excludeFirstSearch: {
       default: false,
-      type: Boolean
+      type: Boolean,
     },
-    // 拖拽控制
-    allowDrop: {
-      default() {
-        return true
-      },
-      type: Function
+    // 有哪些按钮
+    operations: {
+      default: () => ['add', 'delete', 'edit'],
+      type: Array,
     },
-    allowDrag: {
-      default() {
-        return true
-      },
-      type: Function
-    }
   },
   data() {
     return {
@@ -162,17 +120,21 @@ export default {
       filterText: '',
       searchText: '',
       preCheckedKeys: [],
-      alreadySet: false
+      alreadySet: false,
+      operationsList: [],
     }
   },
   computed: {
     // 树节点名称字段
+    props() {
+      return this.$attrs.props || {}
+    },
     labelKey() {
-      return this.treeProps.label
+      return this.props.label || 'label'
     },
     // 首拼字段
     firstSpellKey() {
-      return this.treeProps.firstSpellKey
+      return this.props.firstSpellKey
     },
     content() {
       return this.changeMode === 'contextMenu'
@@ -180,7 +142,10 @@ export default {
         : this.changeMode === 'hover'
         ? '鼠标悬浮可进行编辑'
         : ''
-    }
+    },
+  },
+  created() {
+    this.filterOperations()
   },
   mounted() {
     if (this.changeMode === 'contextMenu') {
@@ -195,11 +160,48 @@ export default {
   watch: {
     filterText(val) {
       this.$refs.tree.filter(val)
-    }
+    },
   },
   methods: {
+    // 操作点击事件
+    happenEvent(node, data, item) {
+      const { method } = item
+      this[method](node, data)
+    },
+    // 过滤操作按钮
+    filterOperations() {
+      const operationsList = [
+        {
+          label: '新建',
+          value: 'add',
+          method: 'nodeAdd',
+          class: 'el-icon-plus',
+        },
+        {
+          label: '删除',
+          value: 'delete',
+          method: 'nodeDelete',
+          class: 'el-icon-delete',
+        },
+        {
+          label: '编辑',
+          value: 'edit',
+          method: 'nodeEdit',
+          class: 'el-icon-edit',
+        },
+      ]
+      const arr = []
+      this.operations.forEach((item) => {
+        const finditem = operationsList.find((i) => i.value === item)
+        if (finditem) {
+          arr.push(finditem)
+        }
+      })
+      this.operationsList = arr
+    },
     // 右键菜单属性设置
     floderOption(e, data, n, t) {
+      console.log(e, data, n, t, 'floderOption')
       if (this.changeMode !== 'contextMenu') return
       this.optionCardShow = false
       this.optionCardX = e.x + 10
@@ -237,7 +239,7 @@ export default {
       this.customFormVisible = true
       const params = {
         fatherData: node.parent.data,
-        currentData: data
+        currentData: data,
       }
       this.$emit('nodeAdd', params)
     },
@@ -246,7 +248,7 @@ export default {
       this.customFormVisible = true
       const params = {
         fatherData: node.parent.data,
-        currentData: data
+        currentData: data,
       }
       this.$emit('nodeEdit', params)
     },
@@ -255,7 +257,7 @@ export default {
       this.$confirm('是否继续此操作?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'warning',
       })
         .then(() => {
           if (node.childNodes.length > 0) {
@@ -268,7 +270,7 @@ export default {
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '操作取消'
+            message: '操作取消',
           })
         })
     },
@@ -276,35 +278,29 @@ export default {
     freeAdd() {
       this.$emit('freeAdd')
     },
-    // 对复选操作进行防抖处理 -- 为了实现特殊过滤效果
-    handleCheckChange: debounce(function (data, isChecked, isSubCheckeds) {
-      // 防抖处理了，参数已经没有太大意义
-      this.$emit('check-change', data, isChecked, isSubCheckeds)
-    }, 300),
-    handleNodeClick(data, node, el) {
-      this.$emit('node-click', data, node, el)
-    },
-    // 允许拖拽
-    handleDrop(draggingNode, dropNode, dropType, ev) {
-      this.$emit('handleDrop', draggingNode, dropNode, dropType, ev)
-    },
-    // 获取所有节点key, 包括选中和半选中
-    getAllCheckedKeys() {
-      return this.$refs.tree
-        .getCheckedKeys()
-        .concat(this.$refs.tree.getHalfCheckedKeys())
-    },
+    // // 对复选操作进行防抖处理 -- 为了实现特殊过滤效果
+    // handleCheckChange: debounce(function (data, isChecked, isSubCheckeds) {
+    //   // 防抖处理了，参数已经没有太大意义
+    //   this.$emit('check-change', data, isChecked, isSubCheckeds)
+    // }, 300),
+    // handleNodeClick(data, node, el) {
+    //   this.$emit('node-click', data, node, el)
+    // },
+    // // 允许拖拽
+    // handleDrop(draggingNode, dropNode, dropType, ev) {
+    //   this.$emit('handleDrop', draggingNode, dropNode, dropType, ev)
+    // },
     getCheckedKeys() {
-      return this.$refs.tree.getCheckedNodes().map((item) => item.id)
+      return this.$refs.tree.getCheckedKeys(...arguments)
     },
     getCheckedNodes() {
-      return this.$refs.tree.getCheckedNodes()
+      return this.$refs.tree.getCheckedNodes(...arguments)
     },
-    getCurrentNode(data) {
-      return this.$refs.tree.getCurrentNode()
+    getCurrentNode() {
+      return this.$refs.tree.getCurrentNode(...arguments)
     },
     getCurrentKey() {
-      return this.$refs.tree.getCurrentKey()
+      return this.$refs.tree.getCurrentKey(...arguments)
     },
     // 默认过滤函数
     filterNode(value, data, node) {
@@ -364,8 +360,8 @@ export default {
       } else {
         return node.parent && this.getHasKeyword(value, node.parent)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -386,12 +382,27 @@ export default {
 .tree-content {
   height: 100%;
   padding: 5px 3px;
-  background: #fafafa;
+  // background: #fafafa;
+  display: flex;
+  flex-direction: column;
   .model-title {
     height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    position: relative;
+    .model-title-left {
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .model-title-right {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    // display: flex;
+    // align-items: center;
+    // justify-content: space-between;
   }
   .tree {
     margin-top: 10px;
@@ -411,6 +422,26 @@ export default {
         color: #66b1ff;
       }
     }
+  }
+  .tree-container {
+    // height: 100%;
+    overflow: auto;
+    border: none;
+    padding: 10px 0;
+    // margin-top: 10px;
+    // overflow-y: auto;
+    // height: calc(100% - 54px);
+    // background: #fafafa;
+    flex: 1;
+    /deep/ .el-tree {
+      display: inline-block;
+      min-width: 100%;
+    }
+  }
+  .tree-ele {
+    height: 100%; /*这里要比上面小一点，不然节点就几行就出现纵向滚动条*/
+    /* overflow: auto;这个貌似要去掉，不然会出现双滚动条*/
+    border: none;
   }
 }
 .disabled {

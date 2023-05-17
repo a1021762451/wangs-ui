@@ -1,6 +1,6 @@
 <template>
   <ws-tree
-    showCheckBox
+    showCheckbox
     draggable
     excludeFirstSearch
     changeMode="contextMenu"
@@ -11,7 +11,8 @@
     @freeAdd="freeAdd"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
-    :treeData="treeData"
+    @check="handleCheck"
+    :data="treeData"
   ></ws-tree>
 </template>
 
@@ -35,15 +36,15 @@ export default {
                   children: [
                     {
                       id: 9,
-                      label: '三级 1-1-1'
+                      label: '三级 1-1-1',
                     },
                     {
                       id: 10,
-                      label: '三级 1-1-2'
-                    }
-                  ]
-                }
-              ]
+                      label: '三级 1-1-2',
+                    },
+                  ],
+                },
+              ],
             },
             {
               id: 2,
@@ -51,15 +52,15 @@ export default {
               children: [
                 {
                   id: 5,
-                  label: '二级 2-1'
+                  label: '二级 2-1',
                 },
                 {
                   id: 6,
                   label: '二级 2-2',
                   nameFirstSpell: 'e', //  测试首拼过滤
-                  disabled: true // 测试禁止点击
-                }
-              ]
+                  disabled: true, // 测试禁止点击
+                },
+              ],
             },
             {
               id: 3,
@@ -67,7 +68,7 @@ export default {
               children: [
                 {
                   id: 7,
-                  label: '二级 3-1'
+                  label: '二级 3-1',
                 },
                 {
                   id: 8,
@@ -75,23 +76,23 @@ export default {
                   children: [
                     {
                       id: 11,
-                      label: '三级 3-2-1'
+                      label: '三级 3-2-1',
                     },
                     {
                       id: 12,
-                      label: '三级 3-2-2'
+                      label: '三级 3-2-2',
                     },
                     {
                       id: 13,
-                      label: '三级 3-2-3'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                      label: '三级 3-2-3',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     }
   },
   methods: {
@@ -112,8 +113,14 @@ export default {
     },
     handleNodeClick(data, node, el) {
       console.log('handleNodeClick', data, node, el)
-    }
-  }
+    },
+    handleCheck(
+      data,
+      { checkedNodes, checkedKeys, halfCheckedNodes, halfCheckedKey }
+    ) {
+      console.log('handleCheck', data, checkedNodes, checkedKeys)
+    },
+  },
 }
 </script>
 

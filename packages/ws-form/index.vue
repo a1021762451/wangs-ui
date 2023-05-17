@@ -310,7 +310,7 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(this.judgeOneRow)
+    this.judgeOneRow()
     window.addEventListener('resize', this.judgeOneRow)
     this.cloneForm = deepClone(this.formData)
   },
