@@ -198,6 +198,9 @@ export default {
         //   console.log('conditon', conditon)
         //   if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
         // })
+        // 表格数据增加prop, 便于校验表单
+        this.addFormPropForTable()
+        // 配置selfAdjust为true,则宽度自调节
         this.getDynamicWidth(this.columns)
         this.tableForm.tableData = this.tableData
       },
@@ -232,6 +235,24 @@ export default {
     },
   },
   methods: {
+    // 迭代增加prop
+    addFormPropForTable() {
+      const treeProps = this.$attrs['tree-props'] || { children: 'children' }
+      const childrenKey = treeProps.children
+      const iterateAddProp = (data, childrenKey, prop__table) => {
+        data.forEach((item, index) => {
+          item.prop__table = `${prop__table}.${index}`
+          if (item.children) {
+            iterateAddProp(
+              item.children,
+              childrenKey,
+              `${prop__table}.${index}.${childrenKey}`
+            )
+          }
+        })
+      }
+      iterateAddProp(this.tableData, childrenKey, 'tableData')
+    },
     // 遍历获取动态宽度
     getDynamicWidth(columns) {
       const treeProps = this.$attrs['tree-props'] || { children: 'children' }
@@ -307,11 +328,11 @@ export default {
       return width
     },
     // 校验单行
-    validateRow(index) {
+    validateRow(row) {
       const props = []
       let allpromise = []
       for (let key in this.rules) {
-        props.push(`tableData.${index}.${key}`)
+        props.push(`${row.prop__table}.${key}`)
       }
       this.$refs.tableForm.validateField(props, (valid) => {
         const promise = new Promise((resolve, reject) => {

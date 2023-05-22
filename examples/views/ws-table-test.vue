@@ -93,34 +93,34 @@ export default {
           name: '王',
           age: 18,
           id: '1',
-          // children: [
-          //   {
-          //     plantName: '二号机组',
-          //     testInput: '2',
-          //     widthAdjust: '宽度宽度宽度',
-          //     testSelect: '香蕉',
-          //     testMinDatetime: '',
-          //     testMaxDatetime: '',
-          //     testTime: '',
-          //     testFormatter: '内容',
-          //     adress: '北京',
-          //     work: '程序员',
-          //     id: '1-1',
-          //   },
-          //   {
-          //     plantName: '二号机组',
-          //     testInput: '2',
-          //     widthAdjust: '宽度宽度宽度',
-          //     testSelect: '香蕉',
-          //     testMinDatetime: '',
-          //     testMaxDatetime: '',
-          //     testTime: '',
-          //     testFormatter: '内容',
-          //     adress: '北京',
-          //     work: '程序员',
-          //     id: '1-2',
-          //   },
-          // ],
+          children: [
+            {
+              plantName: '一号机组 - 1',
+              testInput: '1-1',
+              widthAdjust: '宽度宽度宽度 -1',
+              testSelect: '',
+              testMinDatetime: '',
+              testMaxDatetime: '',
+              testTime: '',
+              testFormatter: '内容-1',
+              adress: '北京-1',
+              work: '程序员-1',
+              id: '1-1',
+            },
+            {
+              plantName: '一号机组 - 2',
+              testInput: '2 -2',
+              widthAdjust: '宽度宽度宽度 -2',
+              testSelect: '',
+              testMinDatetime: '',
+              testMaxDatetime: '',
+              testTime: '',
+              testFormatter: '内容 -2',
+              adress: '北京 -2',
+              work: '程序员 -2',
+              id: '1-2',
+            },
+          ],
         },
         {
           plantName: '二号机组',
@@ -133,6 +133,8 @@ export default {
           testFormatter: '内容',
           adress: '北京',
           work: '程序员',
+          id: '2',
+          age: 28,
         },
         {
           plantName: '二号机组',
@@ -143,7 +145,8 @@ export default {
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
-          id: '2',
+          id: '3',
+          age: 38,
         },
       ],
       loading: false,
@@ -167,7 +170,8 @@ export default {
         testMaxDatetime: '',
         testTime: '',
         testFormatter: '内容',
-        id: '3',
+        id: '4',
+        age: 48,
       })
     }, '1000')
   },
@@ -191,8 +195,19 @@ export default {
       const {
         buttonItem: { method },
       } = eventData
-      console.log('method', method);
+      console.log('method', method)
       this[method] && this[method](eventData)
+    },
+    // 单行校验
+    validateRow(eventData) {
+      console.log(eventData, 'validateRow')
+      const { row } = eventData
+      this.$refs.wsTable.validateRow(row)
+    },
+    //全部校验
+    validateAll(eventData) {
+      console.log(eventData, 'validateAll')
+      this.$refs.wsTable.validateAll()
     },
     export(eventData) {
       // console.log('export');
