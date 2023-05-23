@@ -49,14 +49,10 @@
         </div>
       </template>
       <template v-slot:plantName_header="{ column }">
-        <div>
-          {{ column.label + '--插槽' }}
-        </div>
+        {{ column.label + '--插槽' }}
       </template>
       <template v-slot:plantName="{ row, fieldItem }">
-        <div>
-          {{ row.plantName + '--插槽' + fieldItem.prop }}
-        </div>
+        {{ row.plantName + '--插槽' + fieldItem.prop }}
       </template>
     </ws-table>
   </div>

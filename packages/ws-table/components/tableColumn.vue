@@ -74,10 +74,10 @@
     <!-- 内容插槽 -->
     <template v-slot="{ row, column, $index }">
       <!-- 判断是否是el-form-item元素 -->
+      <!-- :is="fieldItem.required ? 'el-form-item' : 'div'"
+      :class="{ overflow_tip: fieldItem.showOverflowTooltip }" -->
       <el-form-item
         v-if="fieldItem.component"
-        :is="fieldItem.required ? 'el-form-item' : 'div'"
-        :class="{ overflow_tip: fieldItem.showOverflowTooltip }"
         :prop="`${row.prop__table}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
@@ -119,7 +119,7 @@
         </template>
         <!-- 表单元素模式 -->
         <component
-          v-if="fieldItem.component"
+          v-else
           size="mini"
           :is="fieldItem.component"
           :disabled="row[fieldItem.disabledKey]"
@@ -148,23 +148,21 @@
           </template>
         </component>
       </el-form-item>
-      <template v-else>
-        <!-- 命名插槽 -->
-        <template v-if="fieldItem.slotName">
-          <slot
-            :name="fieldItem.slotName"
-            v-bind="{ row, column, $index, fieldItem }"
-          >
-            {{ row[fieldItem.prop] }}
-          </slot>
-        </template>
-        <!-- 格式化 -->
-        <template v-else-if="fieldItem.formatter">{{
-          fieldItem.formatter(row[fieldItem.prop], row, column, $index)
-        }}</template>
-        <!-- 默认 -->
-        <template v-else>{{ row[fieldItem.prop] }}</template>
+      <!-- 命名插槽 -->
+      <template v-else-if="fieldItem.slotName">
+        <slot
+          :name="fieldItem.slotName"
+          v-bind="{ row, column, $index, fieldItem }"
+        >
+          {{ row[fieldItem.prop] }}
+        </slot>
       </template>
+      <!-- 格式化 -->
+      <template v-else-if="fieldItem.formatter">{{
+        fieldItem.formatter(row[fieldItem.prop], row, column, $index)
+      }}</template>
+      <!-- 默认 -->
+      <template v-else>{{ row[fieldItem.prop] }}</template>
     </template>
   </el-table-column>
 </template>
@@ -314,5 +312,6 @@ export default {
 .overflow_tip {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
