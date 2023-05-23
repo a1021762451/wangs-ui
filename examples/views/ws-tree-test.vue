@@ -3,7 +3,7 @@
     showCheckbox
     draggable
     excludeFirstSearch
-    changeMode="contextMenu"
+    changeMode="hover"
     style="height: 300px; width: 200px"
     @nodeAdd="nodeAdd"
     @nodeDelete="nodeDelete"
@@ -13,6 +13,7 @@
     @node-click="handleNodeClick"
     @check="handleCheck"
     :data="treeData"
+    default-expand-all
   ></ws-tree>
 </template>
 
@@ -80,7 +81,7 @@ export default {
                     },
                     {
                       id: 12,
-                      label: '三级 3-2-2',
+                      label: '三级 3-2-2三级 3-2-2',
                     },
                     {
                       id: 13,

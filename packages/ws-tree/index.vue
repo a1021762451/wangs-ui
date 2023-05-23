@@ -1,5 +1,12 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-03-03 15:24:34
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-05-23 08:51:03
+-->
 <template>
-  <div class="tree-content">
+  <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
     <div class="model-title" v-if="changeMode">
       <span class="model-title-left">
@@ -29,12 +36,11 @@
       size="small"
     ></el-input>
     <!-- 树主体 -->
+
     <div class="tree-container">
       <el-tree
         ref="tree"
         class="tree-ele"
-        node-key="id"
-        default-expand-all
         highlight-current
         :filter-node-method="
           excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
@@ -89,8 +95,10 @@
 </template>
 
 <script>
+import mixins from './mixins'
 export default {
   name: 'ws-tree',
+  mixins: [mixins],
   props: {
     // 增删改查模式
     changeMode: {
@@ -106,6 +114,11 @@ export default {
     operations: {
       default: () => ['add', 'delete', 'edit'],
       type: Array,
+    },
+    // 背景色除了树
+    backgroundColor: {
+      default: '#fff',
+      type: String,
     },
   },
   data() {
@@ -142,6 +155,9 @@ export default {
         : this.changeMode === 'hover'
         ? '鼠标悬浮可进行编辑'
         : ''
+    },
+    nodeKey() {
+      return this.$attrs['node-key'] || 'id'
     },
   },
   created() {
@@ -290,18 +306,6 @@ export default {
     // handleDrop(draggingNode, dropNode, dropType, ev) {
     //   this.$emit('handleDrop', draggingNode, dropNode, dropType, ev)
     // },
-    getCheckedKeys() {
-      return this.$refs.tree.getCheckedKeys(...arguments)
-    },
-    getCheckedNodes() {
-      return this.$refs.tree.getCheckedNodes(...arguments)
-    },
-    getCurrentNode() {
-      return this.$refs.tree.getCurrentNode(...arguments)
-    },
-    getCurrentKey() {
-      return this.$refs.tree.getCurrentKey(...arguments)
-    },
     // 默认过滤函数
     filterNode(value, data, node) {
       if (!value) return true
@@ -333,10 +337,10 @@ export default {
       }
       const flag = this.getHasKeyword(value, node)
       const index = this.preCheckedKeys.findIndex((item) => {
-        return item === data.id
+        return item === data[this.nodeKey]
       })
       const condition = flag && index !== -1
-      this.$refs.tree.setChecked(data.id, condition)
+      this.$refs.tree.setChecked(data[this.nodeKey], condition)
 
       this.searchText = value
       return flag
@@ -423,11 +427,13 @@ export default {
       }
     }
   }
+  // 树横向滚动条方案一 ---- 外部容器滚动
   .tree-container {
     // height: 100%;
     overflow: auto;
     border: none;
-    padding: 10px 0;
+    // padding: 10px 0;
+
     // margin-top: 10px;
     // overflow-y: auto;
     // height: calc(100% - 54px);
@@ -437,11 +443,11 @@ export default {
       display: inline-block;
       min-width: 100%;
     }
-  }
-  .tree-ele {
-    height: 100%; /*这里要比上面小一点，不然节点就几行就出现纵向滚动条*/
-    /* overflow: auto;这个貌似要去掉，不然会出现双滚动条*/
-    border: none;
+    .tree-ele {
+      height: 100%; /*这里要比上面小一点，不然节点就几行就出现纵向滚动条*/
+      /* overflow: auto;这个貌似要去掉，不然会出现双滚动条*/
+      border: none;
+    }
   }
 }
 .disabled {
@@ -455,5 +461,16 @@ export default {
 }
 /deep/ .el-tree-node__content {
   position: relative;
+}
+// 树横向滚动条方案一 ---- 树组件滚动
+.tree-selfoverflow {
+  overflow: auto;
+  flex: 1;
+  /deep/ .el-tree-node > .el-tree-node__children {
+    overflow: visible;
+  }
+}
+/deep/ .el-tree-node {
+  background: #fff;
 }
 </style>
