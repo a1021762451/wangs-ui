@@ -259,13 +259,21 @@ export const tableColumns = [
   {
     type: 'operation',
     tableButtons: [
+      // {
+      //   method: 'viewDetail',
+      //   label: '查看',
+      // },
+      // {
+      //   method: 'edit',
+      //   label: '编辑',
+      // },
       {
-        method: 'viewDetail',
-        label: '查看',
+        method: 'validateRow',
+        label: '单验',
       },
       {
-        method: 'edit',
-        label: '编辑',
+        method: 'validateAll',
+        label: '全验',
       },
     ],
   },

@@ -211,13 +211,17 @@ export default {
         let remain = 0
         let total = 0
         configList.forEach((item, index) => {
-          const col = item.col || 6
-          total += col
-          const newRemain = Math.floor((total - 1) / 24)
-          if (newRemain !== remain || index === 0) {
-            this.$set(item, 'isSide', true)
-            remain = newRemain
+          // 搜索模式下判断表单元素是否在最左边
+          if (this.isSearchList) {
+            const col = item.col || 6
+            total += col
+            const newRemain = Math.floor((total - 1) / 24)
+            if (newRemain !== remain || index === 0) {
+              this.$set(item, 'isSide', true)
+              remain = newRemain
+            }
           }
+          // 判断是否显示当前时间
           if (item.isShowCurrent) {
             const { componentAttrs = {} } = item
             this.$set(
@@ -229,7 +233,9 @@ export default {
             )
             return
           }
-          !this.formData.hasOwnProperty(item.prop) && this.$set(this.formData, item.prop, '')
+          // 判断是否需要初始化表单值
+          !this.formData.hasOwnProperty(item.prop) &&
+            this.$set(this.formData, item.prop, '')
         })
         this.configList = configList
       },

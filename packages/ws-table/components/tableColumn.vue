@@ -78,7 +78,7 @@
         v-if="fieldItem.component"
         :is="fieldItem.required ? 'el-form-item' : 'div'"
         :class="{ overflow_tip: fieldItem.showOverflowTooltip }"
-        :prop="`tableData.${$index}.${fieldItem.prop}`"
+        :prop="`${row.prop__table}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
         <!-- 命名插槽 -->
@@ -226,6 +226,8 @@ export default {
       this.$emit('happenEvent', {
         buttonItem,
         row,
+        column,
+        $index,
       })
     },
     // 动态获取校验
