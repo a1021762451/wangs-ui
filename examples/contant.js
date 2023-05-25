@@ -15,7 +15,7 @@ export const formButtons = [
     method: 'export',
     label: '导出EXCEL',
     icon: 'el-icon-setting',
-    loading: false,
+    loading: false, // 按钮loading转圈状态
   },
   {
     slotName: 'download',
@@ -35,6 +35,18 @@ export const formConfigList = [
     prop: 'equipName',
     label: '停电设备',
     required: true,
+    // '如果输入格式为数字加小数点， 去掉小数点'
+    blurHandler: function (value) {
+      if (/^\d*\.$/.test(value)) {
+        return value.replace('.', '')
+      }
+      return value
+    },
+    // 限制输入6位小数
+    inputHandler: function (value) {
+      value = value.replace(/[^0-9.]/g, '')
+      return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
+    },
   },
   {
     component: 'el-input-number',
@@ -55,9 +67,9 @@ export const formConfigList = [
     prop: 'endTime_min',
     label: '竣工日期小',
     required: true,
-    maxTimeProp: 'endTime_max',
-    timeDisabled: true,
-    isShowCurrent: true,
+    maxTimeProp: 'endTime_max', // 用于比较的最大时间对应字段
+    timeDisabled: true, // 时间限制精度是否到时分秒
+    defaultTimeType: 'lastYearToday', // 默认当前时间
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd',
@@ -68,8 +80,10 @@ export const formConfigList = [
     prop: 'endTime_max',
     label: '竣工日期大',
     required: true,
-    minTimeProp: 'endTime_min',
+    minTimeProp: 'endTime_min', // 用于比较的最小时间对应字段
     // isShowCurrent: true,
+    minAllowEqual: false, // 允许和用于比较的最小时间相等
+    maxAllowEqual: false, // 允许和用于比较的最大时间相等
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd',
@@ -109,7 +123,7 @@ export const tableColumns = [
       {
         prop: 'name',
         label: '姓名',
-        alwaysVisible: true
+        alwaysVisible: true, // 在列选择器中始终显示
       },
       {
         prop: 'age',
@@ -174,7 +188,7 @@ export const tableColumns = [
     prop: 'testCheckBox',
     label: '测试复选框',
     component: 'el-checkbox',
-    alwaysVisible: true
+    alwaysVisible: true,
   },
   // 测试下拉框
   {
@@ -184,17 +198,19 @@ export const tableColumns = [
     width: 200,
     required: true,
   },
-  // // 测试时间框模式
+  // 测试时间框模式
   {
     prop: 'testMinDatetime',
     label: '测试时间框小',
     width: 200,
     component: 'el-date-picker',
-    maxTimeProp: 'testMaxDatetime',
-    minDate: '2022-01-01',
-    maxDate: '2024-01-01',
     required: true,
-    // timeDisabled: true,
+    maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
+    minDate: '2022-01-01', // 用于比较的最小时间固定值
+    maxDate: '2024-01-01', // 用于比较的最大时间固定值
+    timeDisabled: true, // 时间限制精度是否到时分秒
+    // minAllowEqual: false, // 不允许和用于比较的最小时间相等
+    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -206,11 +222,13 @@ export const tableColumns = [
     label: '测试时间框大',
     width: 200,
     component: 'el-date-picker',
-    minTimeProp: 'testMinDatetime',
     required: true,
-    // timeDisabled: true,
-    // minAllowEqual: false, // 不允许和对应的小时间相等
-    // maxAllowEqual: false, // 不允许和对应的大时间相等
+    minTimeProp: 'testMinDatetime', // 用于比较的最小时间对应字段
+    minDate: '2022-01-01', // 用于比较的最小时间固定值
+    maxDate: '2024-01-01', // 用于比较的最大时间固定值
+    timeDisabled: true, // 时间限制精度是否到时分秒
+    // minAllowEqual: false, // 不允许和用于比较的最小时间相等
+    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -259,14 +277,6 @@ export const tableColumns = [
   {
     type: 'operation',
     tableButtons: [
-      // {
-      //   method: 'viewDetail',
-      //   label: '查看',
-      // },
-      // {
-      //   method: 'edit',
-      //   label: '编辑',
-      // },
       {
         method: 'validateRow',
         label: '单验',
@@ -276,18 +286,6 @@ export const tableColumns = [
         label: '全验',
       },
     ],
-  },
-]
-
-// 按钮组配置同tableButtons
-export const tableButtons = [
-  {
-    method: 'viewDetail',
-    label: '查看',
-  },
-  {
-    method: 'edit',
-    label: '编辑',
   },
 ]
 

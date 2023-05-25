@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-05-23 08:51:03
+ * @LastEditTime: 2023-05-24 15:05:56
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -457,7 +457,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 11;
 }
 /deep/ .el-tree-node__content {
   position: relative;

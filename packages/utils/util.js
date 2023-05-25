@@ -58,7 +58,7 @@ let getAttrsCount = 0
 let getPickerCount = 0
 
 // 获取所有的配置属性
-export function getAttrs(fieldItem, formData = {}) {
+export function getAttrs(fieldItem, formData = {}, isDetail) {
   getAttrsCount += 1
   // console.log(getAttrsCount, 'getAttrsCount');
   let obj = {}
@@ -76,6 +76,7 @@ export function getAttrs(fieldItem, formData = {}) {
     ...obj,
     ...globalAttrs,
     ...(allTypes[type] || allTypes.default || {}),
+    disabled: isDetail,
     ...componentAttrs,
   }
   obj.placeholder = obj.disabled ? '' : obj.placeholder
@@ -282,7 +283,7 @@ export function getPicker(fieldItem, formData) {
         time = +new Date(format(new Date(time), 'yyyy-MM-dd'))
         let minCondition = false
         let maxCondition = false
-        minCondition = minAllowEqual ? minDate <= time : minTime < time
+        minCondition = minAllowEqual ? minDate <= time : minDate < time
         maxCondition = maxAllowEqual ? time <= maxDate : time < maxDate
         if (maxDate) {
           return !(minCondition && maxCondition)
@@ -456,3 +457,119 @@ export function encodeFormatTime(o, fmt) {
       )
   return fmt
 }
+
+const typeFuMap = {
+  day: {
+    setFn: 'setDate',
+    getFn: 'getDate',
+  },
+  month: {
+    setFn: 'setMonth',
+    getFn: 'getMonth',
+  },
+  year: {
+    setFn: 'setFullYear',
+    getFn: 'getFullYear',
+  },
+  hour: {
+    setFn: 'setHours',
+    getFn: 'getHours',
+  },
+  minute: {
+    setFn: 'setMinutes',
+    getFn: 'getMinutes',
+  },
+  second: {
+    setFn: 'setSeconds',
+    getFn: 'getSeconds',
+  },
+  millisecond: {
+    setFn: 'setMilliseconds',
+    getFn: 'getMilliseconds',
+  },
+}
+function handleDate(num, type = 'day', date = new Date(), hasCalculate = true) {
+  //计算出要加/减的毫秒数
+  const { setFn, getFn } = typeFuMap[type]
+  const time = new Date(date)
+  const value = hasCalculate ? time[getFn]() + num : num
+  time[setFn](value)
+  return time
+}
+
+// 获取默认时间- 今年的当前时间，明天当前时间，昨天当前时间， 同理去年和明年
+export function getDefaultTime(defaultTimeType, formatStr) {
+  let time
+  const lastYearToday = handleDate(-1, 'year')
+  const nextYearToday = handleDate(1, 'year')
+  switch (defaultTimeType) {
+    case 'today':
+      time = new Date()
+      break
+    case 'yesterday':
+      time = handleDate(-1)
+      break
+    case 'tomorrow':
+      time = handleDate(1)
+      break
+    case 'lastYearToday':
+      time = handleDate(-1, 'year')
+      break
+    case 'lastYearYesterday':
+      time = handleDate(-1, 'day', lastYearToday)
+      break
+    case 'lastYearTomorrow':
+      time = handleDate(1, 'day', lastYearToday)
+      break
+    case 'nextYearToday':
+      time = handleDate(1, 'year')
+      break
+    case 'nextYearYesterday':
+      time = handleDate(-1, 'day', nextYearToday)
+      break
+    case 'nextYearTomorrow':
+      time = handleDate(1, 'day', nextYearToday)
+      break
+    default:
+      time = new Date()
+      break
+  }
+  return formatStr ? format(time, formatStr) : time
+}
+
+// console.log(
+//   getDefaultTime('today', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('yesterday', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('tomorrow', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('lastYearToday', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('lastYearYesterday', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('lastYearTomorrow', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('nextYearToday', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('nextYearYesterday', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )
+// console.log(
+//   getDefaultTime('nextYearTomorrow', 'yyyy-MM-dd HH:mm:ss'),
+//   'getDefaultTime------------------'
+// )

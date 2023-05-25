@@ -55,9 +55,19 @@
               v-if="fieldItem.component"
               :is="fieldItem.component"
               :popper-class="fieldItem.timeDisabled ? 'hideCurrent' : ''"
-              v-bind="getAttrs(fieldItem, formData)"
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
+              @blur="
+                fieldItem.component === 'el-input'
+                  ? handleBlur(formData, fieldItem)
+                  : undefined
+              "
+              @input="
+                fieldItem.component === 'el-input'
+                  ? handleInput($event, formData, fieldItem)
+                  : undefined
+              "
+              v-bind="getAttrs(fieldItem, formData, isDetail)"
             >
               <template v-if="fieldItem.component === 'el-select'">
                 <el-option
@@ -115,13 +125,13 @@
 
 <script>
 import {
-  deepMerge,
   deepClone,
   getPicker,
   getAttrs,
   getMaxValidator,
   getMinValidator,
   format,
+  getDefaultTime,
 } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
 export default {
@@ -181,6 +191,11 @@ export default {
       default: 'small',
       type: String,
     },
+    // 是否是详情模式
+    isDetail: {
+      default: false,
+      type: Boolean,
+    },
   },
   //自定义指令
   directives: {
@@ -221,15 +236,16 @@ export default {
               remain = newRemain
             }
           }
-          // 判断是否显示当前时间
-          if (item.isShowCurrent) {
+          // 设置默认时间
+          if (item.defaultTimeType) {
             const { componentAttrs = {} } = item
             this.$set(
               this.formData,
               item.prop,
-              componentAttrs.valueFormat
-                ? format(new Date(), componentAttrs.valueFormat)
-                : new Date()
+              getDefaultTime(item.defaultTimeType, componentAttrs.valueFormat)
+              // componentAttrs.valueFormat
+              //   ? format(new Date(), componentAttrs.valueFormat)
+              //   : new Date()
             )
             return
           }
@@ -364,15 +380,25 @@ export default {
         formData: this.formData,
       })
     },
-    // 下拉框变更
-    changeSelect(value, fieldItem) {
-      this.$emit('changeSelect', value, fieldItem)
+    // input框失焦处理
+    handleBlur(row, fieldItem) {
+      const { prop, blurHandler: handler } = fieldItem
+      // 自定义数据过滤
+      if (typeof handler === 'function') {
+        const newValue = handler(row[prop])
+        row[prop] = newValue
+      }
+      this.fieldItemChange(fieldItem, row)
     },
-    // 下拉框选项确认
-    async filterList(prop) {
-      let res = null
-      res = this.allOptions[prop]
-      return res
+    // input框输入处理
+    handleInput(value, row, fieldItem) {
+      const { prop, inputHandler: handler } = fieldItem
+      if (typeof handler === 'function') {
+        const newValue = handler(value)
+        row[prop] = newValue
+      } else {
+        row[prop] = value
+      }
     },
   },
 }

@@ -100,6 +100,7 @@
             style="min-height: 23px"
             v-if="!(property === fieldItem.prop && index === $index)"
             @dblclick="toggleInput(row, column, $index)"
+            class="overflow_tip"
           >
             {{ row[fieldItem.prop] }}
           </div>
@@ -274,7 +275,6 @@ export default {
         const newValue = handler(row[prop])
         row[prop] = newValue
       }
-      this.fieldItemChange(fieldItem, row)
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {

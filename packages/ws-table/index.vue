@@ -128,17 +128,6 @@ export default {
       },
       type: Object,
     },
-    // 默认分页配置
-    defaultPageInfo: {
-      default() {
-        return {
-          size: 10,
-          current: 1,
-          total: 0,
-        }
-      },
-      type: Object,
-    },
     // 展示分页组件
     showPagination: {
       type: Boolean,

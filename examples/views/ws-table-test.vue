@@ -4,10 +4,10 @@
       :formConfigList="formConfigList"
       :formButtons="formButtons"
       :allOptions="allOptions"
-      :defaultForm="defaultForm"
       :formData.sync="formData"
       buttonSize="small"
       isSearchList
+      :isDetail="false"
       @happenEvent="happenEvent"
       style="margin-bottom: 10px"
       ref="wsForm"
@@ -39,7 +39,6 @@
       :pageInfo.sync="pageInfo"
       @happenEvent="happenEvent"
       @selection-change="selectionChange"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       ref="wsTable"
       row-key="id"
     >
