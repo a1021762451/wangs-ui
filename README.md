@@ -199,27 +199,27 @@ const allOptions = {
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
-| 参数           | 说明                            | 类型     | 可选值 | 默认值 |
-| -------------- | ------------------------------- | -------- | ------ | ------ |
-| slotName       | 对应列插槽名                    | String   | -      | -      |
-| headerSlotName | 对应列表头插槽名                | String   | -      | -      |
-| children       | 多级表头配置                    | Array    | -      | -      |
-| formatter      | 同 el-table formatter           | Function | -      | -      |
-| selfAdjust     | 列宽根据内容自调节              | Boolean  | -      | false  |
-| component      | 组件名，用于表单组件            | String   | -      | -      |
-| blurHandler    | el-input 组件失焦时值过滤       | Function | -      | -      |
-| inputHandler   | el-input 组件输入时值过滤       | Function | -      | -      |
-| required       | 是否必填                        | Boolean  | -      | false  |
-| alwaysVisible  | 列是否一直展示                  | Boolean  | -      | false  |
-| maxTimeProp    | 时间组件最大值对应的字段        | String   | -      | -      |
-| minTimeProp    | 时间组件最小值对应的字段        | String   | -      | -      |
-| minDate        | 固定的最小时间                  | String   | -      | -      |
-| maxDate        | 固定的最大时间                  | String   | -      | -      |
-| timeDisabled   | 时间限制精度是否到时分秒        | Boolean  | -      | -      |
-| minAllowEqual  | 允许和用于比较的最小时间相等    | Boolean  | -      | true   |
-| maxAllowEqual  | 允许和用于比较的最大时间相等    | Boolean  | -      | true   |
-| allowToggle    | 是否允许双击切换， 仅支持输入框 | Boolean  | -      | -      |
-| componentAttrs | 组件对应的属性                  | Object   | -      | -      |
+| 参数           | 说明                                   | 类型     | 可选值 | 默认值 |
+| -------------- | -------------------------------------- | -------- | ------ | ------ |
+| slotName       | 对应列插槽名                           | String   | -      | -      |
+| headerSlotName | 对应列表头插槽名                       | String   | -      | -      |
+| children       | 多级表头配置                           | Array    | -      | -      |
+| formatter      | 同 el-table formatter                  | Function | -      | -      |
+| selfAdjust     | 列宽根据内容自调节                     | Boolean  | -      | false  |
+| component      | 组件名，用于表单组件                   | String   | -      | -      |
+| blurHandler    | el-input 组件失焦时值过滤              | Function | -      | -      |
+| inputHandler   | el-input 组件输入时值过滤              | Function | -      | -      |
+| required       | 是否必填                               | Boolean  | -      | false  |
+| alwaysVisible  | 列是否一直展示                         | Boolean  | -      | false  |
+| maxTimeProp    | 时间组件最大值对应的字段               | String   | -      | -      |
+| minTimeProp    | 时间组件最小值对应的字段               | String   | -      | -      |
+| minDate        | 固定的最小时间                         | String   | -      | -      |
+| maxDate        | 固定的最大时间                         | String   | -      | -      |
+| timeDisabled   | 时间限制精度是否到时分秒               | Boolean  | -      | -      |
+| minAllowEqual  | 允许和用于比较的最小时间相等, 精度到天 | Boolean  | -      | true   |
+| maxAllowEqual  | 允许和用于比较的最大时间相等, 精度到天 | Boolean  | -      | true   |
+| allowToggle    | 是否允许双击切换， 仅支持输入框        | Boolean  | -      | -      |
+| componentAttrs | 组件对应的属性                         | Object   | -      | -      |
 
 #### 组件事件
 
@@ -354,8 +354,8 @@ export const formConfigList = [
 | minDate         | 固定的最小时间                                   | String   | -      | -      |
 | maxDate         | 固定的最大时间                                   | String   | -      | -      |
 | timeDisabled    | 时间限制精度是否到时分秒                         | Boolean  | -      | -      |
-| minAllowEqual   | 允许和用于比较的最小时间相等                     | Boolean  | -      | true   |
-| maxAllowEqual   | 允许和用于比较的最大时间相等                     | Boolean  | -      | true   |
+| minAllowEqual   | 允许和用于比较的最小时间相等,精度到天            | Boolean  | -      | true   |
+| maxAllowEqual   | 允许和用于比较的最大时间相等,精度到天            | Boolean  | -      | true   |
 | defaultTimeType | 默认时间类型，支持去年/今年/明年的昨天/明天/今天 | String   | -      | ''     |
 | componentAttrs  | 组件对应的属性                                   | Object   | -      | -      |
 

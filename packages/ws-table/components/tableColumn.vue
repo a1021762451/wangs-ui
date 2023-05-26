@@ -56,7 +56,12 @@
     </template>
   </el-table-column>
   <!-- 内容列 -->
-  <el-table-column v-else align="center" resizable v-bind="fieldItem">
+  <el-table-column
+    v-else
+    align="center"
+    resizable
+    v-bind="{ showOverflowTooltip: !fieldItem.component, ...fieldItem }"
+  >
     <!-- 表头插槽 -->
     <template v-slot:header="scope">
       <slot

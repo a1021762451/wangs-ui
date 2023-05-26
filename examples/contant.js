@@ -69,7 +69,7 @@ export const formConfigList = [
     required: true,
     maxTimeProp: 'endTime_max', // 用于比较的最大时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
-    defaultTimeType: 'lastYearToday', // 默认当前时间
+    defaultTimeType: 'today', // 默认当前时间
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd',
@@ -81,9 +81,10 @@ export const formConfigList = [
     label: '竣工日期大',
     required: true,
     minTimeProp: 'endTime_min', // 用于比较的最小时间对应字段
+    timeDisabled: true, // 时间限制精度是否到时分秒 
     // isShowCurrent: true,
-    minAllowEqual: false, // 允许和用于比较的最小时间相等
-    maxAllowEqual: false, // 允许和用于比较的最大时间相等
+    minAllowEqual: false, // 允许和用于比较的最小时间相等 精度到天
+    maxAllowEqual: false, // 允许和用于比较的最大时间相等 精度到天
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd',
@@ -209,8 +210,8 @@ export const tableColumns = [
     minDate: '2022-01-01', // 用于比较的最小时间固定值
     maxDate: '2024-01-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    // minAllowEqual: false, // 不允许和用于比较的最小时间相等
-    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等
+    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -227,8 +228,8 @@ export const tableColumns = [
     minDate: '2022-01-01', // 用于比较的最小时间固定值
     maxDate: '2024-01-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    // minAllowEqual: false, // 不允许和用于比较的最小时间相等
-    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等
+    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',

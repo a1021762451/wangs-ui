@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="table-container">
     <!-- 工具箱 -->
     <div class="talbe-utils" v-if="utilsList.length">
       <el-tooltip
@@ -29,9 +29,7 @@
       :validate-on-rule-change="false"
       inline
       size="small"
-      :style="{
-        height: showPagination ? 'calc(100% - 35px)' : 'calc(100%)',
-      }"
+      class="common-table"
     >
       <!-- 表格 -->
       <el-table
@@ -485,5 +483,13 @@ export default {
 }
 /deep/ .el-date-editor.el-input {
   width: 100%;
+}
+.table-container {
+  display: flex;
+  flex-direction: column;
+}
+.common-table {
+  flex: 1;
+  min-height: 0;
 }
 </style>

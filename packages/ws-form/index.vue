@@ -19,7 +19,7 @@
       v-bind="$attrs"
       v-on="$listeners"
     >
-      <el-row :gutter="12" type="flex">
+      <el-row :gutter="gutter" type="flex">
         <!-- 表单元素 -->
         <el-col
           :span="fieldItem.col || 6"
@@ -41,7 +41,7 @@
             v-bind="fieldItem"
             :required="undefined"
           >
-            <template v-slot:label>
+            <template v-slot:label v-if="fieldItem.label || fieldItem.headerSlotName">
               <slot
                 v-if="fieldItem.headerSlotName"
                 :name="fieldItem.headerSlotName"
@@ -196,6 +196,16 @@ export default {
       default: false,
       type: Boolean,
     },
+    // 是否显示默认查询重置按钮
+    useDeafultButtons: {
+      default: true,
+      type: Boolean,
+    },
+    //  el-col间隔
+    gutter: {
+      default: 12,
+      type: Number,
+    },
   },
   //自定义指令
   directives: {
@@ -260,18 +270,20 @@ export default {
     formButtons: {
       handler() {
         if (this.isSearchList) {
-          this.buttonsList = [
-            {
-              method: 'search',
-              label: '查询',
-            },
-            {
-              method: 'reset',
-              label: '重置',
-              type: 'plain',
-            },
-            ...this.formButtons,
-          ]
+          const defaultButtons = this.useDeafultButtons
+            ? [
+                {
+                  method: 'search',
+                  label: '查询',
+                },
+                {
+                  method: 'reset',
+                  label: '重置',
+                  type: 'plain',
+                },
+              ]
+            : []
+          this.buttonsList = [...defaultButtons, ...this.formButtons]
         } else {
           this.buttonsList = [...this.formButtons]
         }
