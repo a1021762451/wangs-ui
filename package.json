@@ -1,8 +1,12 @@
 {
   "name": "wangs-ui",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": false,
   "description": "基于element-ui封装的组件",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/a1021762451/wangs-ui.git"
+  },  
   "author": {
     "name": "wangshuai"
   },
