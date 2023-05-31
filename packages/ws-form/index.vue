@@ -41,7 +41,10 @@
             v-bind="fieldItem"
             :required="undefined"
           >
-            <template v-slot:label v-if="fieldItem.label || fieldItem.headerSlotName">
+            <template
+              v-slot:label
+              v-if="fieldItem.label || fieldItem.headerSlotName"
+            >
               <slot
                 v-if="fieldItem.headerSlotName"
                 :name="fieldItem.headerSlotName"
@@ -201,7 +204,7 @@ export default {
       default: true,
       type: Boolean,
     },
-    //  el-col间隔
+    // el-row 属性
     gutter: {
       default: 12,
       type: Number,

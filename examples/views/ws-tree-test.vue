@@ -13,6 +13,7 @@
     @node-click="handleNodeClick"
     @check="handleCheck"
     :data="treeData"
+    :nodeSpaceBetween="false"
     default-expand-all
   ></ws-tree>
 </template>

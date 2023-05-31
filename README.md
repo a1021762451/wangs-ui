@@ -227,6 +227,13 @@ const allOptions = {
 | ----------- | -------------- | --------- |
 | happenEvent | 行按钮点击事件 | eventData |
 
+#### 组件方法
+
+| 事件名      | 说明       | 参数        |
+| ----------- | ---------- | ----------- |
+| validateRow | 校验单行   | row：行数据 |
+| validateAll | 校验全部行 | -           |
+
 #### slot 插槽
 
 tableColumns 配置 slotName 和 headerSlotName
@@ -330,15 +337,17 @@ export const formConfigList = [
 
 #### 组件属性
 
-| 参数           | 说明                                | 类型    | 可选值 | 默认值 |
-| -------------- | ----------------------------------- | ------- | ------ | ------ |
-| allOptions     | 所有表单下拉框选项集合，同 ws-table | Object  | -      | -      |
-| formConfigList | 表单元素配置数组                    | Array   | -      | -      |
-| formButtons    | 按钮组配置                          | Array   | -      | -      |
-| buttonSize     | 按钮组尺寸                          | String  | -      | small  |
-| formData       | 表单数据                            | Object  | -      | -      |
-| colon          | 标签后面是否有冒号                  | Boolean | -      | true   |
-| isSearchList   | 是否是搜索控件                      | Boolean | -      | false  |
+| 参数              | 说明                                | 类型    | 可选值 | 默认值 |
+| ----------------- | ----------------------------------- | ------- | ------ | ------ |
+| allOptions        | 所有表单下拉框选项集合，同 ws-table | Object  | -      | -      |
+| formConfigList    | 表单元素配置数组                    | Array   | -      | -      |
+| formButtons       | 按钮组配置                          | Array   | -      | -      |
+| buttonSize        | 按钮组尺寸                          | String  | -      | small  |
+| formData          | 表单数据                            | Object  | -      | -      |
+| colon             | 标签后面是否有冒号                  | Boolean | -      | true   |
+| isSearchList      | 是否是搜索控件                      | Boolean | -      | false  |
+| useDeafultButtons | 是否使用默认的查询重置按钮          | Boolean | -      | true   |
+| gutter            | el-row 属性                         | Number  | -      | 12     |
 
 - formConfigList 内部对象属性(兼容 el-form-item 自带的属性， 不另作说明)
 

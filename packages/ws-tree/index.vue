@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-05-24 15:05:56
+ * @LastEditTime: 2023-05-30 13:18:16
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -42,6 +42,7 @@
         ref="tree"
         class="tree-ele"
         highlight-current
+        :style="{ backgroundColor }"
         :filter-node-method="
           excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
         "
@@ -51,7 +52,9 @@
         v-on="$listeners"
       >
         <div
-          class="custom-tree-node"
+          :class="
+            nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
+          "
           slot-scope="{ node, data }"
           @mouseenter="mouseenter(data)"
           @mouseleave="mouseleave"
@@ -59,7 +62,10 @@
           <span>{{ node.label }}</span>
           <span
             class="custom-tree-button"
-            v-if="iAct == data && changeMode === 'hover'"
+            v-if="changeMode === 'hover'"
+            :style="{
+              visibility: iAct == data ? 'visible' : 'hidden',
+            }"
           >
             <i
               v-for="item in operationsList"
@@ -119,6 +125,11 @@ export default {
     backgroundColor: {
       default: '#fff',
       type: String,
+    },
+    // 节点内容和按钮之间的布局是否采取flex SpaceBetween布局
+    nodeSpaceBetween: {
+      default: true,
+      type: Boolean,
     },
   },
   data() {
@@ -386,7 +397,6 @@ export default {
 .tree-content {
   height: 100%;
   padding: 5px 3px;
-  // background: #fafafa;
   display: flex;
   flex-direction: column;
   .model-title {
@@ -404,9 +414,6 @@ export default {
       top: 50%;
       transform: translateY(-50%);
     }
-    // display: flex;
-    // align-items: center;
-    // justify-content: space-between;
   }
   .tree {
     margin-top: 10px;
@@ -417,10 +424,23 @@ export default {
   .custom-tree-node {
     flex: 1;
     .custom-tree-button {
-      position: absolute;
-      right: 0;
-      padding-right: 10px;
-      z-index: 10;
+      // position: absolute;
+      // right: 0;
+      // z-index: 10;
+      padding-left: 10px;
+      padding-right: 5px;
+      i {
+        padding: 2px;
+        color: #66b1ff;
+      }
+    }
+  }
+  .custom-tree-node-flex {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    .custom-tree-button {
+      padding: 0 5px;
       i {
         padding: 2px;
         color: #66b1ff;
@@ -429,15 +449,8 @@ export default {
   }
   // 树横向滚动条方案一 ---- 外部容器滚动
   .tree-container {
-    // height: 100%;
     overflow: auto;
     border: none;
-    // padding: 10px 0;
-
-    // margin-top: 10px;
-    // overflow-y: auto;
-    // height: calc(100% - 54px);
-    // background: #fafafa;
     flex: 1;
     /deep/ .el-tree {
       display: inline-block;
@@ -469,8 +482,5 @@ export default {
   /deep/ .el-tree-node > .el-tree-node__children {
     overflow: visible;
   }
-}
-/deep/ .el-tree-node {
-  background: #fff;
 }
 </style>
