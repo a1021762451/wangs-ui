@@ -15,8 +15,7 @@
       label-width="auto"
       :model="formData"
       :rules="rules"
-      :validate-on-rule-change="false"
-      v-bind="$attrs"
+      v-bind="{ 'validate-on-rule-change': false, ...$attrs }"
       v-on="$listeners"
     >
       <el-row :gutter="gutter" type="flex">

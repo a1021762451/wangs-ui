@@ -3,23 +3,25 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-05-30 13:18:16
+ * @LastEditTime: 2023-06-01 13:33:06
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
     <div class="model-title" v-if="changeMode">
       <span class="model-title-left">
-        <slot name="titleLeft">
-          <span>类型</span>
-          <el-tooltip effect="dark" placement="top" :content="content">
-            <i class="el-icon-info"></i>
-          </el-tooltip>
-        </slot>
+        <span>{{ headerConfig.titleLeft }}</span>
+        <el-tooltip effect="dark" placement="top" :content="content">
+          <i class="el-icon-info"></i>
+        </el-tooltip>
       </span>
       <span class="model-title-right">
         <slot name="titleRight">
-          <el-tooltip effect="dark" placement="right" content="添加根节点">
+          <el-tooltip
+            effect="dark"
+            placement="top"
+            :content="headerConfig.tipContent"
+          >
             <i
               class="el-icon-plus"
               style="cursor: pointer"
@@ -29,8 +31,14 @@
         </slot>
       </span>
     </div>
+    <div class="model-title" v-if="!changeMode && showTitle">
+      <span class="model-title-left">
+        <span>{{ headerConfig.titleLeft }}</span>
+      </span>
+    </div>
     <!-- 搜索框 -->
     <el-input
+      v-if="showSearch"
       placeholder="按关键字筛选"
       v-model="filterText"
       size="small"
@@ -46,36 +54,42 @@
         :filter-node-method="
           excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
         "
-        :expand-on-click-node="false"
         @node-contextmenu="floderOption"
-        v-bind="$attrs"
+        v-bind="{
+          'expand-on-click-node': false,
+          ...$attrs,
+        }"
         v-on="$listeners"
       >
-        <div
-          :class="
-            nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
-          "
-          slot-scope="{ node, data }"
-          @mouseenter="mouseenter(data)"
-          @mouseleave="mouseleave"
-        >
-          <span>{{ node.label }}</span>
-          <span
-            class="custom-tree-button"
-            v-if="changeMode === 'hover'"
-            :style="{
-              visibility: iAct == data ? 'visible' : 'hidden',
-            }"
-          >
-            <i
-              v-for="item in operationsList"
-              :key="item.value"
-              @click.stop="happenEvent(node, data, item)"
-              :class="`${item.class}`"
-            ></i>
-          </span>
-          <div v-if="data.disabled" class="disabled" @click.stop></div>
-        </div>
+        <template v-slot="{ node, data }">
+          <slot v-bind="{ node, data }">
+            <div
+              :class="
+                nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
+              "
+              @mouseenter="mouseenter(data)"
+              @mouseleave="mouseleave"
+            >
+              <span>{{ node.label }}</span>
+              <span
+                class="custom-tree-button"
+                v-if="changeMode === 'hover'"
+                :style="{
+                  visibility: iAct == data ? 'visible' : 'hidden',
+                }"
+              >
+                <i
+                  v-for="item in operationsList"
+                  :key="item.value"
+                  @click.stop="happenEvent(node, data, item)"
+                  :class="`${item.class}`"
+                  :title="item.label"
+                ></i>
+              </span>
+              <div v-if="data.disabled" class="disabled" @click.stop></div>
+            </div>
+          </slot>
+        </template>
       </el-tree>
     </div>
     <!-- 右键菜单栏 -->
@@ -128,6 +142,24 @@ export default {
     },
     // 节点内容和按钮之间的布局是否采取flex SpaceBetween布局
     nodeSpaceBetween: {
+      default: true,
+      type: Boolean,
+    },
+    // 头部内容配置
+    headerConfig: {
+      default: () => ({
+        titleLeft: '类型',
+        tipContent: '添加根节点',
+      }),
+      type: Object,
+    },
+    // 是否显示标题
+    showTitle: {
+      default: false,
+      type: Boolean,
+    },
+    // 是否显示搜索框
+    showSearch: {
       default: true,
       type: Boolean,
     },
@@ -264,20 +296,20 @@ export default {
     // 新增
     nodeAdd(node, data) {
       this.customFormVisible = true
-      const params = {
-        fatherData: node.parent.data,
-        currentData: data,
-      }
-      this.$emit('nodeAdd', params)
+      // const params = {
+      //   fatherData: node.parent.data,
+      //   currentData: data,
+      // }
+      this.$emit('nodeAdd', data)
     },
     // 修改
     nodeEdit(node, data) {
       this.customFormVisible = true
-      const params = {
-        fatherData: node.parent.data,
-        currentData: data,
-      }
-      this.$emit('nodeEdit', params)
+      // const params = {
+      //   fatherData: node.parent.data,
+      //   currentData: data,
+      // }
+      this.$emit('nodeEdit', data)
     },
     // 节点删除
     nodeDelete(node, data) {
@@ -290,8 +322,11 @@ export default {
           if (node.childNodes.length > 0) {
             this.$message.error('删除失败,该节点拥有子节点')
           } else {
-            const params = data
-            this.$emit('nodeDelete', params)
+            // const params = {
+            //   fatherData: node.parent.data,
+            //   currentData: data,
+            // }
+            this.$emit('nodeDelete', data)
           }
         })
         .catch(() => {
@@ -452,6 +487,7 @@ export default {
     overflow: auto;
     border: none;
     flex: 1;
+    margin-top: 4px;
     /deep/ .el-tree {
       display: inline-block;
       min-width: 100%;
