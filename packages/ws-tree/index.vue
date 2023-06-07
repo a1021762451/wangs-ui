@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-01 13:33:06
+ * @LastEditTime: 2023-06-06 14:20:14
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -41,6 +41,7 @@
       v-if="showSearch"
       placeholder="按关键字筛选"
       v-model="filterText"
+      clearable
       size="small"
     ></el-input>
     <!-- 树主体 -->
@@ -115,6 +116,23 @@
 </template>
 
 <script>
+// 防抖
+export const debounce = (fn, t) => {
+  const delay = t || 500
+  let timer
+  return function () {
+    const args = arguments
+    if (timer) {
+      console.log('防抖中')
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      timer = null
+      fn.apply(this, args)
+    }, delay)
+  }
+}
+
 import mixins from './mixins'
 export default {
   name: 'ws-tree',
@@ -163,6 +181,11 @@ export default {
       default: true,
       type: Boolean,
     },
+    // 是否需要进行过滤， 通常结合远程搜索使用
+    noFilter: {
+      default: false,
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -178,6 +201,7 @@ export default {
       preCheckedKeys: [],
       alreadySet: false,
       operationsList: [],
+      filterTextFn: debounce(this.filterTextCallback),
     }
   },
   computed: {
@@ -218,10 +242,14 @@ export default {
   },
   watch: {
     filterText(val) {
-      this.$refs.tree.filter(val)
+      this.filterTextFn(val)
     },
   },
   methods: {
+    filterTextCallback(val) {
+      this.$emit('search', val)
+      !this.noFilter &&  this.$refs.tree.filter(val)
+    },
     // 操作点击事件
     happenEvent(node, data, item) {
       const { method } = item
@@ -295,46 +323,15 @@ export default {
     },
     // 新增
     nodeAdd(node, data) {
-      this.customFormVisible = true
-      // const params = {
-      //   fatherData: node.parent.data,
-      //   currentData: data,
-      // }
       this.$emit('nodeAdd', data)
     },
     // 修改
     nodeEdit(node, data) {
-      this.customFormVisible = true
-      // const params = {
-      //   fatherData: node.parent.data,
-      //   currentData: data,
-      // }
       this.$emit('nodeEdit', data)
     },
     // 节点删除
     nodeDelete(node, data) {
-      this.$confirm('是否继续此操作?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          if (node.childNodes.length > 0) {
-            this.$message.error('删除失败,该节点拥有子节点')
-          } else {
-            // const params = {
-            //   fatherData: node.parent.data,
-            //   currentData: data,
-            // }
-            this.$emit('nodeDelete', data)
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '操作取消',
-          })
-        })
+      this.$emit('nodeDelete', data)
     },
     // 自由新增
     freeAdd() {

@@ -5,8 +5,10 @@
     v-if="fieldItem.children"
     :label="fieldItem.label"
     :align="fieldItem.align || 'center'"
-    resizable
-    v-bind="fieldItem"
+    v-bind="{
+      resizable: true,
+      ...fieldItem,
+    }"
   >
     <tableColumn
       v-for="column in fieldItem.children"
@@ -59,8 +61,11 @@
   <el-table-column
     v-else
     align="center"
-    resizable
-    v-bind="{ showOverflowTooltip: !fieldItem.component, ...fieldItem }"
+    v-bind="{
+      showOverflowTooltip: !fieldItem.component,
+      resizable: true,
+      ...fieldItem,
+    }"
   >
     <!-- 表头插槽 -->
     <template v-slot:header="scope">
