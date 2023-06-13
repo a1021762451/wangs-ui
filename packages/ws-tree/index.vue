@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-06 14:20:14
+ * @LastEditTime: 2023-06-13 09:28:52
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -46,7 +46,7 @@
     ></el-input>
     <!-- 树主体 -->
 
-    <div class="tree-container">
+    <div :class="textEllipsis ? 'container-textEllipsis' : 'tree-container'">
       <el-tree
         ref="tree"
         class="tree-ele"
@@ -68,10 +68,17 @@
               :class="
                 nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
               "
+              class="textEllipsis-tree-node"
               @mouseenter="mouseenter(data)"
               @mouseleave="mouseleave"
             >
-              <span>{{ node.label }}</span>
+              <wsTooltip
+                :content="node.label"
+                overflow
+                :placement="changeMode === 'hover' ? 'top' : 'right'"
+              >
+                <span class="custom-tree-label">{{ node.label }}</span>
+              </wsTooltip>
               <span
                 class="custom-tree-button"
                 v-if="changeMode === 'hover'"
@@ -97,7 +104,7 @@
     <div
       :style="{
         left: optionCardX + 'px',
-        top: optionCardY + 'px',
+        bottom: optionCardY + 'px',
       }"
       class="contextmenu"
       v-show="optionCardShow"
@@ -134,9 +141,13 @@ export const debounce = (fn, t) => {
 }
 
 import mixins from './mixins'
+import wsTooltip from '../ws-tooltip/index.vue'
 export default {
   name: 'ws-tree',
   mixins: [mixins],
+  components: {
+    wsTooltip,
+  },
   props: {
     // 增删改查模式
     changeMode: {
@@ -183,6 +194,11 @@ export default {
     },
     // 是否需要进行过滤， 通常结合远程搜索使用
     noFilter: {
+      default: false,
+      type: Boolean,
+    },
+    // 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字
+    textEllipsis: {
       default: false,
       type: Boolean,
     },
@@ -248,7 +264,7 @@ export default {
   methods: {
     filterTextCallback(val) {
       this.$emit('search', val)
-      !this.noFilter &&  this.$refs.tree.filter(val)
+      !this.noFilter && this.$refs.tree.filter(val)
     },
     // 操作点击事件
     happenEvent(node, data, item) {
@@ -290,9 +306,11 @@ export default {
     floderOption(e, data, n, t) {
       console.log(e, data, n, t, 'floderOption')
       if (this.changeMode !== 'contextMenu') return
+      const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false
       this.optionCardX = e.x + 10
-      this.optionCardY = e.y - 110
+      // this.optionCardY = e.y + 10
+      this.optionCardY = clientHeight - e.y
       this.optionData = data
       this.node = n
       this.tree = t
@@ -414,16 +432,20 @@ export default {
 
 <style lang="less" scoped>
 .contextmenu {
-  width: 80px;
+  width: 70px;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   z-index: 99;
   position: fixed;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  overflow: hidden;
   .option-card-button {
     width: 100%;
     margin-left: 0 !important;
     font-size: 10px;
     border-radius: 0;
+    padding: 8px 0px;
   }
 }
 .tree-content {
@@ -447,38 +469,25 @@ export default {
       transform: translateY(-50%);
     }
   }
-  .tree {
-    margin-top: 10px;
-    overflow-y: auto;
-    height: calc(100% - 54px);
-    background: #fafafa;
-  }
-  .custom-tree-node {
+  .container-textEllipsis {
+    overflow: auto;
+    border: none;
     flex: 1;
-    .custom-tree-button {
-      // position: absolute;
-      // right: 0;
-      // z-index: 10;
-      padding-left: 10px;
-      padding-right: 5px;
-      i {
-        padding: 2px;
-        color: #66b1ff;
-      }
+    margin-top: 4px;
+    .textEllipsis-tree-node {
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+    }
+    .custom-tree-label {
+      display: block;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
-  .custom-tree-node-flex {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    .custom-tree-button {
-      padding: 0 5px;
-      i {
-        padding: 2px;
-        color: #66b1ff;
-      }
-    }
-  }
+
   // 树横向滚动条方案一 ---- 外部容器滚动
   .tree-container {
     overflow: auto;
@@ -494,6 +503,30 @@ export default {
       /* overflow: auto;这个貌似要去掉，不然会出现双滚动条*/
       border: none;
     }
+    .custom-tree-node {
+      flex: 1;
+      .custom-tree-button {
+        // position: absolute;
+        // right: 0;
+        // z-index: 10;
+        padding-left: 10px;
+        padding-right: 5px;
+      }
+    }
+    .custom-tree-node-flex {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      .custom-tree-button {
+        padding: 0 5px;
+      }
+    }
+  }
+}
+.custom-tree-button {
+  i {
+    padding: 2px;
+    color: #66b1ff;
   }
 }
 .disabled {

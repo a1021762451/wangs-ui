@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-24 09:34:56
+ * @LastEditTime: 2023-06-09 09:20:40
 -->
 <template>
   <div style="width: 100%; height: 100%">
@@ -19,7 +19,7 @@
 <script>
 import { getRandomId } from '../utils/util'
 export default {
-  name: 'commonEcharts',
+  name: 'ws-echarts',
   data() {
     return {
       echartsId: getRandomId(),

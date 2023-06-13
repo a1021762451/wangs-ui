@@ -4,7 +4,10 @@
     draggable
     excludeFirstSearch
     changeMode="hover"
-    style="height: 300px; width: 200px"
+    style="height: 300px; width: 240px"
+    textEllipsis
+    default-expand-all
+    :data="treeData"
     @nodeAdd="nodeAdd"
     @nodeDelete="nodeDelete"
     @nodeEdit="nodeEdit"
@@ -12,9 +15,6 @@
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"
-    :data="treeData"
-    :nodeSpaceBetween="false"
-    default-expand-all
   ></ws-tree>
 </template>
 
