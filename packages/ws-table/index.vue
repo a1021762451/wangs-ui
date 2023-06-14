@@ -1,5 +1,24 @@
 <template>
   <div class="table-container">
+    <ws-form
+      v-if="showSearch"
+      :formData="searchData"
+      @update:formData="
+        (params) => {
+          $emit('update:searchData', params)
+        }
+      "
+      buttonSize="small"
+      isSearchList
+      @happenEvent="(params) => $emit('happenEvent', params)"
+      style="margin-bottom: 10px"
+      v-bind="seachConfig"
+    >
+      <!-- 将父组件插槽内容转发给子组件 -->
+      <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+        <slot :name="name" v-bind="scope"></slot>
+      </template>
+    </ws-form>
     <!-- 工具箱 -->
     <div class="talbe-utils" v-if="utilsList.length">
       <el-tooltip
@@ -89,12 +108,14 @@ import { deepClone } from '../utils/util'
 import { allUtils } from './contant.js'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
+import wsForm from '../ws-form/index.vue'
 export default {
   name: 'ws-table',
   components: {
     wsButtons,
     tableColumn,
     filterColumns: () => import('./components/filterColumns'),
+    wsForm,
   },
   props: {
     // 必传,
@@ -138,6 +159,20 @@ export default {
     },
     // 下拉框选项配置数组
     allOptions: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
+    // 搜索框配置
+    seachConfig: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
+    // 搜索框数据
+    searchData: {
       default() {
         return {}
       },
@@ -219,6 +254,9 @@ export default {
       return utils.filter((item) => {
         return this.utilsList.includes(item.method)
       })
+    },
+    showSearch() {
+      return Object.keys(this.seachConfig).length
     },
   },
   methods: {

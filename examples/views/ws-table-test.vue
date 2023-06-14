@@ -1,17 +1,38 @@
 <template>
   <div>
-    <ws-form
-      :formConfigList="formConfigList"
-      :formButtons="formButtons"
+    <ws-table
+      style="height: 700px"
+      :loading="loading"
+      :tableData="tableData"
+      :tableColumns="tableColumns"
       :allOptions="allOptions"
-      :formData.sync="formData"
-      buttonSize="small"
-      isSearchList
-      :isDetail="false"
+      :utilsList="['setColumms', 'download']"
+      :header-cell-style="{ background: '#f3f3f3' }"
+      :pageInfo.sync="pageInfo"
+      stripe
       @happenEvent="happenEvent"
-      style="margin-bottom: 10px"
-      ref="wsForm"
+      @selection-change="selectionChange"
+      ref="wsTable"
+      row-key="id"
+      :searchData.sync="formData"
+      :seachConfig="{
+        formConfigList,
+        formButtons,
+        allOptions,
+      }"
     >
+      <!-- 指向table组件的插槽 -->
+      <template v-slot:expand="{ row }">
+        <div>
+          {{ JSON.stringify(row) }}
+        </div>
+      </template>
+      <template v-slot:plantName_header="{ column }">
+        {{ column.label + '--插槽' }}
+      </template>
+      <template v-slot:plantName="{ row, fieldItem }">
+        {{ row.plantName + '--插槽' + fieldItem.prop }}
+      </template>
       <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">
         <el-input
@@ -26,33 +47,6 @@
         <el-button type="primary" size="small" @click="happenEvent(scope)"
           >下载</el-button
         >
-      </template>
-    </ws-form>
-    <ws-table
-      style="height: 450px"
-      :loading="loading"
-      :tableData="tableData"
-      :tableColumns="tableColumns"
-      :allOptions="allOptions"
-      :utilsList="['setColumms', 'download']"
-      :header-cell-style="{ background: '#f3f3f3' }"
-      :pageInfo.sync="pageInfo"
-      stripe
-      @happenEvent="happenEvent"
-      @selection-change="selectionChange"
-      ref="wsTable"
-      row-key="id"
-    >
-      <template v-slot:expand="{ row }">
-        <div>
-          {{ JSON.stringify(row) }}
-        </div>
-      </template>
-      <template v-slot:plantName_header="{ column }">
-        {{ column.label + '--插槽' }}
-      </template>
-      <template v-slot:plantName="{ row, fieldItem }">
-        {{ row.plantName + '--插槽' + fieldItem.prop }}
       </template>
     </ws-table>
   </div>
@@ -73,7 +67,6 @@ export default {
       formConfigList,
       allOptions,
       tableColumns,
-      defaultForm: { applyComId: '南昌', equipName: '4号' },
       selection: [],
       tableData: [
         {

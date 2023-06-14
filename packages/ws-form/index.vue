@@ -93,6 +93,7 @@
         <el-form-item
           v-if="showButtons"
           :class="isSearchList ? 'searchMode-list' : 'formMode-ws-buttons'"
+          ref="searchModeList"
         >
           <ws-buttons
             :buttonConfigList="buttonsList"
@@ -342,7 +343,7 @@ export default {
       return obj
     },
     showButtons() {
-      return this.configList.length > 0
+      return this.configList.length > 0 && this.buttonsList.length > 0
     },
   },
   mounted() {
@@ -366,12 +367,18 @@ export default {
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
     judgeOneRow() {
+      if (!this.isSearchList || !this.showButtons) return
+      // 判断是否单行, 第一个col高度或者第一个row高度 与 整个form高度比较
       const el = this.$refs.wsForm
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
       const compareHeight = compareEle.offsetHeight
-      this.colHeight = compareHeight
       this.exceedOneRow = el.offsetHeight - 10 > compareHeight
+      // exceedOneRow变动后，按钮组高度可能会变化，nextTick中获取按钮组高度
+      this.$nextTick(() => {
+        let searchModeListEl = this.$refs.searchModeList.$el
+        this.colHeight = searchModeListEl.offsetHeight
+      })
     },
     // 集中处理事件
     happenEvent(buttonItem) {
@@ -463,6 +470,7 @@ export default {
   }
   .fold-button {
     // margin-left: 10px;
+    line-height: initial;
     .fold-text {
       margin-right: 5px;
     }

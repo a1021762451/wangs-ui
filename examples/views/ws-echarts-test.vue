@@ -3,10 +3,10 @@
  * @Author: wang shuai
  * @Date: 2023-03-05 17:52:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-24 10:25:54
+ * @LastEditTime: 2023-06-14 14:14:11
 -->
 <template>
-  <div style="height: 150px; width: 150px">
+  <div style="height: 90vh; width: 90vw">
     <ws-echarts :options="options" :imageSize="40"></ws-echarts>
   </div>
 </template>
