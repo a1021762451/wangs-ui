@@ -35,6 +35,7 @@ const commonAttrs = {
   'el-date-picker': {
     default: {
       placeholder: '选择时间',
+      clearable: false,
     },
   },
   'el-time-picker': {
@@ -537,39 +538,55 @@ export function getDefaultTime(defaultTimeType, formatStr) {
   return formatStr ? format(time, formatStr) : time
 }
 
-// console.log(
-//   getDefaultTime('today', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('yesterday', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('tomorrow', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('lastYearToday', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('lastYearYesterday', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('lastYearTomorrow', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('nextYearToday', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('nextYearYesterday', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
-// console.log(
-//   getDefaultTime('nextYearTomorrow', 'yyyy-MM-dd HH:mm:ss'),
-//   'getDefaultTime------------------'
-// )
+// 树结构数据扁平化
+export function treeToFlat(
+  data,
+  config = {
+    parent: 'parentId',
+    children: 'children',
+    nodeKey: 'id',
+  }
+) {
+  const { parent: parentKey, children: childrenKey, nodeKey } = config
+  const result = []
+  const loop = (data, parentId = null) => {
+    data.forEach((item) => {
+      item[parentKey] = parentId
+      result.push(item)
+      if (item[childrenKey] && item[childrenKey].length) {
+        loop(item[childrenKey], item[nodeKey])
+      }
+    })
+  }
+  loop(data)
+  return result
+}
+// 扁平数据转树结构数据
+export function flatToTree(
+  data,
+  config = {
+    parent: 'parentId',
+    children: 'children',
+    nodeKey: 'id',
+  }
+) {
+  const { parent: parentKey, children: childrenKey, nodeKey } = config
+  const result = []
+  const map = {}
+  data.forEach((item) => {
+    map[item[nodeKey]] = item
+  })
+  data.forEach((item) => {
+    const parent = map[item[parentKey]]
+    // item.disabled = item.isEmployee === '0'
+    if (parent) {
+      if (!parent[childrenKey]) {
+        parent[childrenKey] = []
+      }
+      parent[childrenKey].push(item)
+    } else {
+      result.push(item)
+    }
+  })
+  return result
+}
