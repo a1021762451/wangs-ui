@@ -147,11 +147,6 @@ export default {
       },
       type: Object,
     },
-    // 展示分页组件
-    showPagination: {
-      type: Boolean,
-      default: true,
-    },
     // 加载样式
     loading: {
       type: Boolean,
@@ -258,8 +253,23 @@ export default {
     showSearch() {
       return Object.keys(this.seachConfig).length
     },
+    showPagination() {
+      return Object.keys(this.pageInfo).length
+    },
+  },
+  mounted() {
+    window.addEventListener('resize', this.doLayout)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.doLayout)
   },
   methods: {
+    // 页面缩放，表格重新布局
+    doLayout() {
+      this.$nextTick(() => {
+        this.$refs['table'].doLayout()
+      })
+    },
     // 迭代增加prop
     addFormPropForTable() {
       const treeProps = this.$attrs['tree-props'] || { children: 'children' }

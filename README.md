@@ -23,10 +23,10 @@ Vue.use(wangsUi)
 #### 特点
 
 - 配置化开发
-- 嵌套 el-form 组件
-- 单行和多行校验表单元素
+- 带有搜索栏，分页栏
+- 嵌套 el-form 组件，支持单行和多行校验表单元素
 - 可根据列内容自适应宽度
-- 工具栏支持纯前端下载，可以勾选显示的列
+- 封装工具栏，支持表格纯前端下载、列勾选功能
 - 保留`elementui el-table`原有功能
 
 #### 使用方式
@@ -186,16 +186,18 @@ const allOptions = {
 
 #### 组件属性
 
-| 参数           | 说明                   | 类型    | 可选值                                              | 默认值 |
-| -------------- | ---------------------- | ------- | --------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合 | Object  | -                                                   | -      |
-| tableColumns   | 所有列的对象集合数组   | Array   | -                                                   | -      |
-| tableButtons   | 每行按钮组             | Array   | -                                                   | -      |
-| tableData      | 表单数据               | Array   | -                                                   | -      |
-| utilsList      | 工具栏                 | Array   | 'setColumms' - 对应列筛选 'download' - 对应表格下载 | -      |
-| showPagination | 展示分页组件           | Boolean | -                                                   | true   |
-| pageInfo       | 分页数据               | Object  | -                                                   | -      |
-| loading        | 加载样式               | Boolean | -                                                   | false  |
+| 参数           | 说明                                      | 类型    | 可选值                                              | 默认值 |
+| -------------- | ----------------------------------------- | ------- | --------------------------------------------------- | ------ |
+| allOptions     | 所有表单下拉框选项集合                    | Object  | -                                                   | -      |
+| tableColumns   | 所有列的对象集合数组                      | Array   | -                                                   | -      |
+| tableButtons   | 每行按钮组                                | Array   | -                                                   | -      |
+| tableData      | 表单数据                                  | Array   | -                                                   | -      |
+| utilsList      | 工具栏                                    | Array   | 'setColumms' - 对应列筛选 'download' - 对应表格下载 | -      |
+| showPagination | 展示分页组件                              | Boolean | -                                                   | true   |
+| pageInfo       | 分页数据, 不传则没有分页栏                | Object  | -                                                   | -      |
+| loading        | 加载样式                                  | Boolean | -                                                   | false  |
+| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏 | Object  | -                                                   | -      |
+| searchData     | 搜索栏数据                                | Object  | -                                                   | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
@@ -378,7 +380,65 @@ export const formConfigList = [
 
 formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
+### ws-tree
+
+#### 特点
+
+- 增删改查功能
+- 搜索功能
+- 支持拼音首字母搜索
+- 支持文字超出浮动显示
+- 保留`elementui el-tree`原有功能
+
+#### 使用方式
+
+- 组件使用
+
+```html
+<ws-tree
+  showCheckbox
+  excludeFirstSearch
+  changeMode="hover"
+  style="height: 300px; width: 240px"
+  textEllipsis
+  default-expand-all
+  :data="treeData"
+  @nodeAdd="nodeAdd"
+  @nodeDelete="nodeDelete"
+  @nodeEdit="nodeEdit"
+  @freeAdd="freeAdd"
+  @check-change="handleCheckChange"
+></ws-tree>
+```
+
+#### 组件属性
+
+| 参数               | 说明                                                   | 类型    | 可选值                                      | 默认值 |
+| ------------------ | ------------------------------------------------------ | ------- | ------------------------------------------- | ------ |
+| changeMode         | 增删改查模式                                           | String  | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |        |
+| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean | -                                           | false  |
+| operations         | 有哪些按钮                                             | Array   | -                                           | -      |
+| backgroundColor    | 组件背景色，包括树                                     | String  | -                                           | -      |
+| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean | -                                           | false  |
+| headerConfig       | 头部内容配置                                           | Object  | -                                           | -      |
+| showTitle          | 是否显示标题 结合 changeMode 使用                      | Boolean | -                                           | false  |
+| showSearch         | 是否显示搜索框                                         | Boolean | -                                           | true   |
+| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean | -                                           | false  |
+| textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean | -                                           | false  |
+
+#### 组件事件
+
+| 事件名  | 说明         | 参数                        |
+| ------- | ------------ | --------------------------- |
+| search  | 树搜索       | 搜索值                      |
+| nodeAdd | 依据节点新建 | node(树节点)/data(节点数据) |
+| delete  | 删除         | node(树节点)/data(节点数据) |
+| edit    | 编辑         | node(树节点)/data(节点数据) |
+| freeAdd | 任意新建节点 | node(树节点)/data(节点数据) |
+
 ### 组件示例图片
+
+![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-tree.png)
 
 #### ws-table
 

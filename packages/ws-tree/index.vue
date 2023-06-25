@@ -3,37 +3,35 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-13 09:28:52
+ * @LastEditTime: 2023-06-15 16:50:28
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
     <div class="model-title" v-if="changeMode">
       <span class="model-title-left">
-        <span>{{ headerConfig.titleLeft }}</span>
-        <el-tooltip effect="dark" placement="top" :content="content">
+        <span>{{ headerConfig.title }}</span>
+        <el-tooltip
+          effect="dark"
+          placement="top"
+          :content="headerConfig.titleTip || titleTip"
+        >
           <i class="el-icon-info"></i>
         </el-tooltip>
       </span>
       <span class="model-title-right">
-        <slot name="titleRight">
-          <el-tooltip
-            effect="dark"
-            placement="top"
-            :content="headerConfig.tipContent"
-          >
-            <i
-              class="el-icon-plus"
-              style="cursor: pointer"
-              @click="freeAdd"
-            ></i>
-          </el-tooltip>
-        </slot>
+        <el-tooltip
+          effect="dark"
+          placement="top"
+          :content="headerConfig.addTip"
+        >
+          <i class="el-icon-plus" style="cursor: pointer" @click="freeAdd"></i>
+        </el-tooltip>
       </span>
     </div>
     <div class="model-title" v-if="!changeMode && showTitle">
       <span class="model-title-left">
-        <span>{{ headerConfig.titleLeft }}</span>
+        <span>{{ headerConfig.title }}</span>
       </span>
     </div>
     <!-- 搜索框 -->
@@ -164,7 +162,7 @@ export default {
       default: () => ['add', 'delete', 'edit'],
       type: Array,
     },
-    // 背景色除了树
+    // 背景色
     backgroundColor: {
       default: '#fff',
       type: String,
@@ -177,12 +175,12 @@ export default {
     // 头部内容配置
     headerConfig: {
       default: () => ({
-        titleLeft: '类型',
-        tipContent: '添加根节点',
+        title: '类型',
+        addTip: '添加根节点',
       }),
       type: Object,
     },
-    // 是否显示标题
+    // 是否显示标题 结合changeMode使用
     showTitle: {
       default: false,
       type: Boolean,
@@ -232,7 +230,7 @@ export default {
     firstSpellKey() {
       return this.props.firstSpellKey
     },
-    content() {
+    titleTip() {
       return this.changeMode === 'contextMenu'
         ? '鼠标右键可进行编辑'
         : this.changeMode === 'hover'
@@ -450,6 +448,7 @@ export default {
 }
 .tree-content {
   height: 100%;
+  width: 100%;
   padding: 5px 3px;
   display: flex;
   flex-direction: column;
