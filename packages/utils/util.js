@@ -231,10 +231,9 @@ export function getPicker(fieldItem, formData) {
     maxDate = 0,
     minTimeProp,
     maxTimeProp,
-    step,
   } = fieldItem
   const componentAttrs = fieldItem.componentAttrs || {}
-  const { type, isRange, valueFormat } = componentAttrs
+  const { type, isRange, valueFormat, pickerOptions = {} } = componentAttrs
 
   // 如果是范围选择则 不进行限制
   if (/range/i.test(type) || isRange) return {}
@@ -293,6 +292,7 @@ export function getPicker(fieldItem, formData) {
         }
       },
       selectableRange,
+      ...pickerOptions,
     }
     // el-time-select组件
   } else if (component === 'el-time-select') {
@@ -302,7 +302,7 @@ export function getPicker(fieldItem, formData) {
     return {
       start: minTime || '00:00',
       end: maxTime || '23:59',
-      step: step || '00:05',
+      ...pickerOptions,
       // minTime: minValue,
       // maxTime: maxValue
     }
@@ -326,6 +326,7 @@ export function getPicker(fieldItem, formData) {
     selectableRange = minTime + '-' + maxTime
     return {
       selectableRange,
+      ...pickerOptions,
     }
   }
 }

@@ -3,12 +3,12 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-15 16:50:28
+ * @LastEditTime: 2023-06-29 13:41:49
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
-    <div class="model-title" v-if="changeMode">
+    <div class="model-title" v-if="showHeader">
       <span class="model-title-left">
         <span>{{ headerConfig.title }}</span>
         <el-tooltip
@@ -27,11 +27,6 @@
         >
           <i class="el-icon-plus" style="cursor: pointer" @click="freeAdd"></i>
         </el-tooltip>
-      </span>
-    </div>
-    <div class="model-title" v-if="!changeMode && showTitle">
-      <span class="model-title-left">
-        <span>{{ headerConfig.title }}</span>
       </span>
     </div>
     <!-- 搜索框 -->
@@ -61,7 +56,7 @@
         v-on="$listeners"
       >
         <template v-slot="{ node, data }">
-          <slot v-bind="{ node, data }">
+          <slot name="treeNode" v-bind="{ node, data }">
             <div
               :class="
                 nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
@@ -75,7 +70,11 @@
                 overflow
                 :placement="changeMode === 'hover' ? 'top' : 'right'"
               >
-                <span class="custom-tree-label">{{ node.label }}</span>
+                <span class="custom-tree-label">
+                  <slot v-bind="{ node, data }">
+                    {{ node.label }}
+                  </slot>
+                </span>
               </wsTooltip>
               <span
                 class="custom-tree-button"
@@ -86,7 +85,7 @@
               >
                 <i
                   v-for="item in operationsList"
-                  :key="item.value"
+                  :key="item.label"
                   @click.stop="happenEvent(node, data, item)"
                   :class="`${item.class}`"
                   :title="item.label"
@@ -110,7 +109,7 @@
     >
       <el-button
         v-for="item in operationsList"
-        :key="item.value"
+        :key="item.label"
         @click="happenEvent(node, optionData, item)"
         :class="`option-card-button ${item.class}`"
       >
@@ -159,12 +158,22 @@ export default {
     },
     // 有哪些按钮
     operations: {
-      default: () => ['add', 'delete', 'edit'],
+      default: () => ['nodeAdd', 'nodeDelete', 'nodeEdit'],
+      type: Array,
+    },
+    // 额外操作按钮
+    extraOperations: {
+      default: () => [],
       type: Array,
     },
     // 背景色
     backgroundColor: {
       default: '#fff',
+      type: String,
+    },
+    // 树点击选中颜色
+    activeColor: {
+      default: '',
       type: String,
     },
     // 节点内容和按钮之间的布局是否采取flex SpaceBetween布局
@@ -180,8 +189,8 @@ export default {
       }),
       type: Object,
     },
-    // 是否显示标题 结合changeMode使用
-    showTitle: {
+    // 是否显示头部
+    showHeader: {
       default: false,
       type: Boolean,
     },
@@ -250,6 +259,14 @@ export default {
       const tree = document.getElementsByClassName('el-tree')[0]
       tree.addEventListener('scroll', this.scroll)
     }
+    // todo：动态设置选中颜色
+    // if (this.activeColor) {
+    //   const treeEl = this.$refs.tree.$el
+    //   console.log(treeEl, 'treeEl');
+    //   const activeColorEl = treeEl.querySelector('.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content')
+    //   console.log(activeColorEl, 'background-color');
+    //   activeColorEl.style.backgroundColor = this.activeColor
+    // }
   },
   beforeDestroy() {
     document.removeEventListener('click', this.OptionCardClose)
@@ -265,44 +282,45 @@ export default {
       !this.noFilter && this.$refs.tree.filter(val)
     },
     // 操作点击事件
-    happenEvent(node, data, item) {
-      const { method } = item
-      this[method](node, data)
+    happenEvent(node, data, buttonItem) {
+      this.optionCardShow = false
+      this.$emit('happenEvent', {
+        buttonItem,
+        node,
+        data,
+      })
     },
     // 过滤操作按钮
     filterOperations() {
       const operationsList = [
         {
           label: '新建',
-          value: 'add',
           method: 'nodeAdd',
           class: 'el-icon-plus',
         },
         {
           label: '删除',
-          value: 'delete',
           method: 'nodeDelete',
           class: 'el-icon-delete',
         },
         {
           label: '编辑',
-          value: 'edit',
           method: 'nodeEdit',
           class: 'el-icon-edit',
         },
       ]
       const arr = []
       this.operations.forEach((item) => {
-        const finditem = operationsList.find((i) => i.value === item)
+        const finditem = operationsList.find((i) => i.method === item)
         if (finditem) {
           arr.push(finditem)
         }
       })
-      this.operationsList = arr
+      this.operationsList = arr.concat(this.extraOperations)
     },
     // 右键菜单属性设置
     floderOption(e, data, n, t) {
-      console.log(e, data, n, t, 'floderOption')
+      // console.log(e, data, n, t, 'floderOption')
       if (this.changeMode !== 'contextMenu') return
       const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false
@@ -337,21 +355,23 @@ export default {
       if (this.changeMode !== 'hover') return
       this.iAct = ''
     },
-    // 新增
-    nodeAdd(node, data) {
-      this.$emit('nodeAdd', data)
-    },
-    // 修改
-    nodeEdit(node, data) {
-      this.$emit('nodeEdit', data)
-    },
-    // 节点删除
-    nodeDelete(node, data) {
-      this.$emit('nodeDelete', data)
-    },
+    // // 新增
+    // nodeAdd(node, data) {
+    //   this.$emit('nodeAdd', data)
+    // },
+    // // 修改
+    // nodeEdit(node, data) {
+    //   this.$emit('nodeEdit', data)
+    // },
+    // // 节点删除
+    // nodeDelete(node, data) {
+    //   this.$emit('nodeDelete', data)
+    // },
     // 自由新增
     freeAdd() {
-      this.$emit('freeAdd')
+      this.$emit('happenEvent', {
+        buttonItem: { method: 'freeAdd' },
+      })
     },
     // // 对复选操作进行防抖处理 -- 为了实现特殊过滤效果
     // handleCheckChange: debounce(function (data, isChecked, isSubCheckeds) {
@@ -430,7 +450,9 @@ export default {
 
 <style lang="less" scoped>
 .contextmenu {
-  width: 70px;
+  // width: 70px;
+  display: flex;
+  flex-direction: column;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   z-index: 99;
@@ -443,7 +465,7 @@ export default {
     margin-left: 0 !important;
     font-size: 10px;
     border-radius: 0;
-    padding: 8px 0px;
+    padding: 8px 10px;
   }
 }
 .tree-content {
@@ -547,5 +569,9 @@ export default {
   /deep/ .el-tree-node > .el-tree-node__children {
     overflow: visible;
   }
+}
+/* 点击树结构项的选中颜色 */
+.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+  background-color: #b0c4de;
 }
 </style>

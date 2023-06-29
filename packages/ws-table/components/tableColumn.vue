@@ -181,7 +181,6 @@
 <script>
 import {
   deepClone,
-  getPicker,
   getAttrs,
   getMaxValidator,
   getMinValidator,
@@ -227,7 +226,6 @@ export default {
     }
   },
   methods: {
-    getPicker,
     getAttrs,
     getRandomId,
     // 监听转发事件

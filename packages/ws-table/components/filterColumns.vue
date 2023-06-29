@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import wsCheckbbox from '../../ws-checkbox/index'
+// import wsCheckbbox from '../../ws-checkbox/index'
 export default {
   name: 'filterColumns',
   components: {

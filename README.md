@@ -436,9 +436,6 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 | edit    | 编辑         | node(树节点)/data(节点数据) |
 | freeAdd | 任意新建节点 | node(树节点)/data(节点数据) |
 
-### 组件示例图片
-
-![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-tree.png)
 
 #### ws-table
 

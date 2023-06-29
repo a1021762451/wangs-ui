@@ -129,11 +129,9 @@
 <script>
 import {
   deepClone,
-  getPicker,
   getAttrs,
   getMaxValidator,
   getMinValidator,
-  format,
   getDefaultTime,
 } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
@@ -355,7 +353,6 @@ export default {
     window.removeEventListener('resize', this.judgeOneRow)
   },
   methods: {
-    getPicker,
     getAttrs,
     // 表格内复选框变更
     fieldItemChange(fieldItem, row) {

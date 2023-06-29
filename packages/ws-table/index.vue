@@ -8,7 +8,6 @@
           $emit('update:searchData', params)
         }
       "
-      buttonSize="small"
       isSearchList
       @happenEvent="(params) => $emit('happenEvent', params)"
       style="margin-bottom: 10px"
@@ -93,13 +92,13 @@
       :total="pageInfo.total"
     ></el-pagination>
     <!-- 列展示选择 -->
-    <filterColumns
+    <!-- <filterColumns
       v-if="utilsList.includes('setColumms')"
       :tableColumns="tableColumns"
       :columns="columns"
       @filterColumnsConfirm="filterColumnsConfirm"
       ref="filterColumns"
-    ></filterColumns>
+    ></filterColumns> -->
   </div>
 </template>
 
@@ -114,7 +113,7 @@ export default {
   components: {
     wsButtons,
     tableColumn,
-    filterColumns: () => import('./components/filterColumns'),
+    // filterColumns: () => import('./components/filterColumns'),
     wsForm,
   },
   props: {

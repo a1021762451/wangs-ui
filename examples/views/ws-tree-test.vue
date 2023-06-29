@@ -3,19 +3,22 @@
     showCheckbox
     draggable
     excludeFirstSearch
-    changeMode="hover"
+    changeMode="contextMenu"
     style="height: 300px; width: 240px"
     textEllipsis
     default-expand-all
+    showHeader
     :data="treeData"
-    @nodeAdd="nodeAdd"
-    @nodeDelete="nodeDelete"
-    @nodeEdit="nodeEdit"
-    @freeAdd="freeAdd"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"
-  ></ws-tree>
+    @happenEvent="happenEvent"
+  >
+    <template v-slot="{ data }">
+      <i class="el-icon-s-tools" style="font-size: 10px"></i>
+      <span>{{ data.label + '插槽' }}</span>
+    </template>
+  </ws-tree>
 </template>
 
 <script>
@@ -98,6 +101,14 @@ export default {
     }
   },
   methods: {
+    // 触发事件
+    happenEvent(eventData) {
+      const {
+        buttonItem: { method },
+      } = eventData
+      console.log('method', method)
+      this[method] && this[method](eventData)
+    },
     freeAdd() {
       console.log('freeAdd')
     },
