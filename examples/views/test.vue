@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 12:15:36
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-25 14:55:11
+ * @LastEditTime: 2023-06-29 15:15:50
 -->
 <template>
   <div class="ring">
@@ -13,6 +13,9 @@
       class="circle"
       :style="getCircleStyle(i)"
     ></div>
+    <el-button type="primary" size="default" @click="testclick"
+      >testclick</el-button
+    >
   </div>
 </template>
 
@@ -44,6 +47,39 @@ export default {
     this.compareIp(leftIp, rightIp)
   },
   methods: {
+    async testclick() {
+      const res =  this.testclickLast()
+      // console.log(res, 'testclick')
+      // try {
+      //   const res = await this.testclickLast()
+      //   console.log(res, 'testclick')
+      // } catch (error) {
+      //   console.log(error)
+      // }
+    },
+    async testclickLast() {
+      const res = await this.testasync()
+      console.log(res, 'testclickLast')
+    },
+    async testasync() {
+      return Promise.reject(new Error('testasyncError'))
+    },
+    twiceConfirm(msg = '是否继续此操作?', tip = '提示', options = {}) {
+      return new Promise((resolve, reject) => {
+        this.$confirm(msg, tip, {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          ...options,
+        })
+          .then(() => {
+            resolve('resolve')
+          })
+          .catch(() => {
+            reject('reject')
+          })
+      })
+    },
     circleClick(index) {
       console.log(index)
     },

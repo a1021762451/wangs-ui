@@ -413,18 +413,21 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
 #### 组件属性
 
-| 参数               | 说明                                                   | 类型    | 可选值                                      | 默认值 |
-| ------------------ | ------------------------------------------------------ | ------- | ------------------------------------------- | ------ |
-| changeMode         | 增删改查模式                                           | String  | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |        |
-| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean | -                                           | false  |
-| operations         | 有哪些按钮                                             | Array   | -                                           | -      |
-| backgroundColor    | 组件背景色，包括树                                     | String  | -                                           | -      |
-| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean | -                                           | false  |
-| headerConfig       | 头部内容配置                                           | Object  | -                                           | -      |
-| showTitle          | 是否显示标题 结合 changeMode 使用                      | Boolean | -                                           | false  |
-| showSearch         | 是否显示搜索框                                         | Boolean | -                                           | true   |
-| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean | -                                           | false  |
-| textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean | -                                           | false  |
+| 参数               | 说明                                                   | 类型     | 可选值                                      | 默认值                                |
+| ------------------ | ------------------------------------------------------ | -------- | ------------------------------------------- | ------------------------------------- |
+| changeMode         | 增删改查模式                                           | String   | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |                                       |
+| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean  | -                                           | false                                 |
+| operations         | 有哪些按钮                                             | Array    | -                                           | ['nodeAdd', 'nodeDelete', 'nodeEdit'] |
+| extraOperations    | 额外的按钮                                             | Array    | -                                           | -                                     |
+| backgroundColor    | 组件背景色，包括树                                     | String   | -                                           | -                                     |
+| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean  | -                                           | false                                 |
+| headerConfig       | 头部内容配置                                           | Object   | -                                           | -                                     |
+| showHeader         | 是否显示头部                                           | Boolean  | -                                           | false                                 |
+| showSearch         | 是否显示搜索框                                         | Boolean  | -                                           | true                                  |
+| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean  | -                                           | false                                 |
+| textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean  | -                                           | false                                 |
+| dataIsFlat         | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean  | -                                           | true                                  |
+| disabledEditFn     | 结点能否操作的回调函数, 返回 true 则不能操作           | Function | -                                           | -                                     |
 
 #### 组件事件
 
@@ -435,7 +438,6 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 | delete  | 删除         | node(树节点)/data(节点数据) |
 | edit    | 编辑         | node(树节点)/data(节点数据) |
 | freeAdd | 任意新建节点 | node(树节点)/data(节点数据) |
-
 
 #### ws-table
 

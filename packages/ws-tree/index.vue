@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-29 13:41:49
+ * @LastEditTime: 2023-06-30 15:51:11
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -52,11 +52,13 @@
         v-bind="{
           'expand-on-click-node': false,
           ...$attrs,
+          nodeKey,
+          data: treeData,
         }"
         v-on="$listeners"
       >
-        <template v-slot="{ node, data }">
-          <slot name="treeNode" v-bind="{ node, data }">
+        <template v-slot="{ data, node }">
+          <slot name="treeNode" v-bind="{ data, node }">
             <div
               :class="
                 nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
@@ -71,14 +73,14 @@
                 :placement="changeMode === 'hover' ? 'top' : 'right'"
               >
                 <span class="custom-tree-label">
-                  <slot v-bind="{ node, data }">
+                  <slot v-bind="{ data, node }">
                     {{ node.label }}
                   </slot>
                 </span>
               </wsTooltip>
               <span
                 class="custom-tree-button"
-                v-if="changeMode === 'hover'"
+                v-if="changeMode === 'hover' && !judgeDisabledEdit(data, node)"
                 :style="{
                   visibility: iAct == data ? 'visible' : 'hidden',
                 }"
@@ -86,7 +88,7 @@
                 <i
                   v-for="item in operationsList"
                   :key="item.label"
-                  @click.stop="happenEvent(node, data, item)"
+                  @click.stop="happenEvent(data, node, item)"
                   :class="`${item.class}`"
                   :title="item.label"
                 ></i>
@@ -110,7 +112,7 @@
       <el-button
         v-for="item in operationsList"
         :key="item.label"
-        @click="happenEvent(node, optionData, item)"
+        @click="happenEvent(optionData, node, item)"
         :class="`option-card-button ${item.class}`"
       >
         {{ item.label }}</el-button
@@ -139,6 +141,7 @@ export const debounce = (fn, t) => {
 
 import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
+import { flatToTree } from '../utils/util.js'
 export default {
   name: 'ws-tree',
   mixins: [mixins],
@@ -209,6 +212,20 @@ export default {
       default: false,
       type: Boolean,
     },
+    // 数据是否扁平
+    dataIsFlat: {
+      default: true,
+      type: Boolean,
+    },
+    // 数据
+    data: {
+      default: () => [],
+      type: Array,
+    },
+    // 结点能否操作的回调函数
+    disabledEditFn: {
+      type: Function,
+    },
   },
   data() {
     return {
@@ -231,13 +248,6 @@ export default {
     // 树节点名称字段
     props() {
       return this.$attrs.props || {}
-    },
-    labelKey() {
-      return this.props.label || 'label'
-    },
-    // 首拼字段
-    firstSpellKey() {
-      return this.props.firstSpellKey
     },
     titleTip() {
       return this.changeMode === 'contextMenu'
@@ -275,6 +285,16 @@ export default {
     filterText(val) {
       this.filterTextFn(val)
     },
+    data: {
+      handler(val) {
+        const data = this.data
+        this.treeData = this.dataIsFlat ? flatToTree(data, this.props) : data
+      },
+      immediate: true,
+    },
+    extraOperations(val) {
+      this.filterOperations()
+    },
   },
   methods: {
     filterTextCallback(val) {
@@ -282,7 +302,7 @@ export default {
       !this.noFilter && this.$refs.tree.filter(val)
     },
     // 操作点击事件
-    happenEvent(node, data, buttonItem) {
+    happenEvent(data, node, buttonItem) {
       this.optionCardShow = false
       this.$emit('happenEvent', {
         buttonItem,
@@ -319,18 +339,35 @@ export default {
       this.operationsList = arr.concat(this.extraOperations)
     },
     // 右键菜单属性设置
-    floderOption(e, data, n, t) {
+    floderOption(e, data, node, t) {
+      this.$emit('nodeContextmenu', e, data, node, t)
       // console.log(e, data, n, t, 'floderOption')
-      if (this.changeMode !== 'contextMenu') return
+      if (
+        this.changeMode !== 'contextMenu' ||
+        this.judgeDisabledEdit(data, node)
+      )
+        return
       const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false
       this.optionCardX = e.x + 10
       // this.optionCardY = e.y + 10
       this.optionCardY = clientHeight - e.y
       this.optionData = data
-      this.node = n
+      this.node = node
       this.tree = t
       this.optionCardShow = true
+    },
+    judgeDisabledEdit(data, node) {
+      // return (
+      //   data.disabledEdit ||
+      //   (Array.isArray(this.editLevels) &&
+      //     !this.editLevels.includes(node.level)) ||
+      //   (this.onlyEditLeaf && !node.isLeaf)
+      // )
+      return (
+        typeof this.disabledEditFn === 'function' &&
+        this.disabledEditFn(data, node)
+      )
     },
     // 滚动隐藏菜单
     scroll() {
@@ -355,36 +392,12 @@ export default {
       if (this.changeMode !== 'hover') return
       this.iAct = ''
     },
-    // // 新增
-    // nodeAdd(node, data) {
-    //   this.$emit('nodeAdd', data)
-    // },
-    // // 修改
-    // nodeEdit(node, data) {
-    //   this.$emit('nodeEdit', data)
-    // },
-    // // 节点删除
-    // nodeDelete(node, data) {
-    //   this.$emit('nodeDelete', data)
-    // },
     // 自由新增
     freeAdd() {
       this.$emit('happenEvent', {
         buttonItem: { method: 'freeAdd' },
       })
     },
-    // // 对复选操作进行防抖处理 -- 为了实现特殊过滤效果
-    // handleCheckChange: debounce(function (data, isChecked, isSubCheckeds) {
-    //   // 防抖处理了，参数已经没有太大意义
-    //   this.$emit('check-change', data, isChecked, isSubCheckeds)
-    // }, 300),
-    // handleNodeClick(data, node, el) {
-    //   this.$emit('node-click', data, node, el)
-    // },
-    // // 允许拖拽
-    // handleDrop(draggingNode, dropNode, dropType, ev) {
-    //   this.$emit('handleDrop', draggingNode, dropNode, dropType, ev)
-    // },
     // 默认过滤函数
     filterNode(value, data, node) {
       if (!value) return true
@@ -426,6 +439,7 @@ export default {
     },
     // 迭代函数，如果字节点不满足条件，则判断父节点
     getHasKeyword(value, node) {
+      const { firstSpellKey, labelKey = 'label' } = this.props
       let data
       if (node.data instanceof Array) {
         // data = node.data.length > 0 ? node.data[0] : {}
@@ -434,10 +448,10 @@ export default {
         data = node.data || {}
       }
       if (
-        data[this.labelKey].indexOf(value) !== -1 ||
-        (this.firstSpellKey &&
-          data[this.firstSpellKey] &&
-          data[this.firstSpellKey].indexOf(value) !== -1)
+        data[labelKey].indexOf(value) !== -1 ||
+        (firstSpellKey &&
+          data[firstSpellKey] &&
+          data[firstSpellKey].indexOf(value) !== -1)
       ) {
         return true
       } else {

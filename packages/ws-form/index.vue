@@ -341,7 +341,8 @@ export default {
       return obj
     },
     showButtons() {
-      return this.configList.length > 0 && this.buttonsList.length > 0
+      // this.configList.length > 0 &&
+      return  this.buttonsList.length > 0
     },
   },
   mounted() {

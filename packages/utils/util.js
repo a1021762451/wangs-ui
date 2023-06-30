@@ -539,20 +539,16 @@ export function getDefaultTime(defaultTimeType, formatStr) {
   return formatStr ? format(time, formatStr) : time
 }
 
-// 树结构数据扁平化
-export function treeToFlat(
-  data,
-  config = {
-    parent: 'parentId',
-    children: 'children',
-    nodeKey: 'id',
-  }
-) {
-  const { parent: parentKey, children: childrenKey, nodeKey } = config
+// 树数据扁平化
+export function treeDataFlat(data=[], props = {}, nodeKey = 'id') {
+  let { children: childrenKey, parent: parentIdKey } = props
+  childrenKey = childrenKey || 'children'
+  parentIdKey = parentIdKey || 'pid'
   const result = []
+  if(!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
-      item[parentKey] = parentId
+      item[parentIdKey] = parentId
       result.push(item)
       if (item[childrenKey] && item[childrenKey].length) {
         loop(item[childrenKey], item[nodeKey])
@@ -562,23 +558,21 @@ export function treeToFlat(
   loop(data)
   return result
 }
-// 扁平数据转树结构数据
-export function flatToTree(
-  data,
-  config = {
-    parent: 'parentId',
-    children: 'children',
-    nodeKey: 'id',
-  }
-) {
-  const { parent: parentKey, children: childrenKey, nodeKey } = config
+// 扁平数据转树
+export function flatToTree(data=[], props = {}, nodeKey = 'id') {
+  let { children: childrenKey, parent: parentIdKey } = props
+  childrenKey = childrenKey || 'children'
+  parentIdKey = parentIdKey || 'pid'
   const result = []
   const map = {}
+  if(!Array.isArray(data)) return result
   data.forEach((item) => {
     map[item[nodeKey]] = item
   })
+  console.log(map, 'map-flatToTree');
   data.forEach((item) => {
-    const parent = map[item[parentKey]]
+    const parent = map[item[parentIdKey]]
+    console.log(parent,item, 'flatToTree-parent');
     // item.disabled = item.isEmployee === '0'
     if (parent) {
       if (!parent[childrenKey]) {
@@ -589,5 +583,6 @@ export function flatToTree(
       result.push(item)
     }
   })
+  console.log(result, 'flatToTree');
   return result
 }

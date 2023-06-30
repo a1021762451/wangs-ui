@@ -57,7 +57,10 @@
         height="100%"
         :data="tableForm.tableData"
         v-loading="loading"
-        v-bind="$attrs"
+        v-bind="{
+          rowKey: 'id',
+          ...$attrs,
+        }"
         v-on="$listeners"
         @selection-change="selectionChange"
         ref="table"
