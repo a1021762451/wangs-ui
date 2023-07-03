@@ -8,7 +8,10 @@
     textEllipsis
     default-expand-all
     showHeader
+    :dataIsFlat="false"
     :data="treeData"
+    :filterButtonsFn="filterButtonsFn"
+    :disabledFn="disabledFn"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"
@@ -101,6 +104,14 @@ export default {
     }
   },
   methods: {
+    filterButtonsFn(buttons, data, node) {
+      if(node.isLeaf) return buttons
+      return []
+    },
+    disabledFn(data, node) {
+      if(!node.isLeaf) return true
+      return false
+    },
     // 触发事件
     happenEvent(eventData) {
       const {

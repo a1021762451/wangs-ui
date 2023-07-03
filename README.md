@@ -427,7 +427,8 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 | noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean  | -                                           | false                                 |
 | textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean  | -                                           | false                                 |
 | dataIsFlat         | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean  | -                                           | true                                  |
-| disabledEditFn     | 结点能否操作的回调函数, 返回 true 则不能操作           | Function | -                                           | -                                     |
+| disabledFn         | 结点是否禁用的回调函数,会自动添加 disabled 属性        | Function | -                                           | -                                     |
+| filterButtonsFn    | 过滤操作按钮回调函数                                   | Function | -                                           | -                                     |
 
 #### 组件事件
 

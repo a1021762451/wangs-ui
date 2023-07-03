@@ -72,6 +72,7 @@
           :fieldItem="fieldItem"
           :rules="rules"
           :allOptions="allOptions"
+          :filterButtons="filterButtons"
           @happenEvent="(params) => $emit('happenEvent', params)"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -108,11 +109,13 @@
 <script>
 import { deepClone } from '../utils/util'
 import { allUtils } from './contant.js'
+import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
 import wsForm from '../ws-form/index.vue'
 export default {
   name: 'ws-table',
+  mixins: [mixins],
   components: {
     wsButtons,
     tableColumn,
@@ -161,6 +164,13 @@ export default {
       },
       type: Object,
     },
+    // 过滤表格操作按钮
+    filterButtons: {
+      default(tableButtons) {
+        return tableButtons
+      },
+      type: Function,
+    },
     // 搜索框配置
     seachConfig: {
       default() {
@@ -206,6 +216,15 @@ export default {
         this.cloneColunms = deepClone(newData)
       },
       immediate: true,
+    },
+    // 列表变更更新表单布局
+    columns: {
+      handler() {
+        this.$nextTick(() => {
+          console.log('列表变更更新表单布局')
+          this.doLayout()
+        })
+      },
     },
     tableData: {
       handler(newData) {
@@ -266,12 +285,6 @@ export default {
     window.removeEventListener('resize', this.doLayout)
   },
   methods: {
-    // 页面缩放，表格重新布局
-    doLayout() {
-      this.$nextTick(() => {
-        this.$refs['table'].doLayout()
-      })
-    },
     // 迭代增加prop
     addFormPropForTable() {
       const treeProps = this.$attrs['tree-props'] || { children: 'children' }
@@ -505,39 +518,49 @@ export default {
   justify-content: flex-end;
   margin-bottom: 10px;
   padding-right: 12px;
+
   .icon-setting {
     font-size: 20px;
     cursor: pointer;
     margin-right: 8px;
   }
 }
+
 .common-table-pagination {
   text-align: right;
   margin: 10px 0;
 }
+
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;
 }
+
 /deep/ .el-textarea.is-disabled .el-textarea__inner {
   color: #959090;
 }
+
 /deep/ .el-input-number {
   width: 100%;
   overflow: hidden;
 }
+
 /deep/ .el-select {
   width: 100%;
 }
+
 /deep/ .el-date-editor.el-input__inner {
   width: 100%;
 }
+
 /deep/ .el-date-editor.el-input {
   width: 100%;
 }
+
 .table-container {
   display: flex;
   flex-direction: column;
 }
+
 .common-table {
   flex: 1;
   min-height: 0;

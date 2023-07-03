@@ -569,10 +569,8 @@ export function flatToTree(data=[], props = {}, nodeKey = 'id') {
   data.forEach((item) => {
     map[item[nodeKey]] = item
   })
-  console.log(map, 'map-flatToTree');
   data.forEach((item) => {
     const parent = map[item[parentIdKey]]
-    console.log(parent,item, 'flatToTree-parent');
     // item.disabled = item.isEmployee === '0'
     if (parent) {
       if (!parent[childrenKey]) {
@@ -583,6 +581,5 @@ export function flatToTree(data=[], props = {}, nodeKey = 'id') {
       result.push(item)
     }
   })
-  console.log(result, 'flatToTree');
   return result
 }

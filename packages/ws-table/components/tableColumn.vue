@@ -37,7 +37,7 @@
     <template v-slot="{ row, column, $index }">
       <ws-buttons
         isLinkButton
-        :buttonConfigList="filterButtons(row, fieldItem.tableButtons || [])"
+        :buttonConfigList="filterButtons(fieldItem.tableButtons || [], row)"
         @happenEvent="happenEvent($event, { row, column, $index })"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -214,7 +214,7 @@ export default {
     },
     // 过滤表格操作按钮
     filterButtons: {
-      default(row, tableButtons) {
+      default(tableButtons) {
         return tableButtons
       },
       type: Function,

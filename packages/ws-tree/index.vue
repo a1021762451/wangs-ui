@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-30 15:51:11
+ * @LastEditTime: 2023-07-03 14:03:49
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -39,7 +39,10 @@
     ></el-input>
     <!-- 树主体 -->
 
-    <div :class="textEllipsis ? 'container-textEllipsis' : 'tree-container'">
+    <div
+      :class="textEllipsis ? 'container-textEllipsis' : 'tree-container'"
+      ref="container"
+    >
       <el-tree
         ref="tree"
         class="tree-ele"
@@ -80,20 +83,24 @@
               </wsTooltip>
               <span
                 class="custom-tree-button"
-                v-if="changeMode === 'hover' && !judgeDisabledEdit(data, node)"
+                v-if="changeMode === 'hover'"
                 :style="{
                   visibility: iAct == data ? 'visible' : 'hidden',
                 }"
               >
                 <i
-                  v-for="item in operationsList"
+                  v-for="item in filterButtonsFn(operationsList, data, node)"
                   :key="item.label"
                   @click.stop="happenEvent(data, node, item)"
-                  :class="`${item.class}`"
+                  :class="`${item.icon}`"
                   :title="item.label"
                 ></i>
               </span>
-              <div v-if="data.disabled" class="disabled" @click.stop></div>
+              <div
+                v-if="judgeDisabled(data, node)"
+                class="disabled"
+                @click.stop
+              ></div>
             </div>
           </slot>
         </template>
@@ -110,10 +117,13 @@
       id="option-button-group"
     >
       <el-button
-        v-for="item in operationsList"
+        v-for="item in filterButtonsFn
+          ? filterButtonsFn(operationsList, optionData, node)
+          : operationsList"
         :key="item.label"
         @click="happenEvent(optionData, node, item)"
-        :class="`option-card-button ${item.class}`"
+        class="option-card-button"
+        :icon="item.icon"
       >
         {{ item.label }}</el-button
       >
@@ -222,8 +232,12 @@ export default {
       default: () => [],
       type: Array,
     },
-    // 结点能否操作的回调函数
-    disabledEditFn: {
+    // 结点是否禁用的回调函数
+    disabledFn: {
+      type: Function,
+    },
+    // 过滤操作按钮
+    filterButtonsFn: {
       type: Function,
     },
   },
@@ -233,8 +247,8 @@ export default {
       optionCardY: '',
       optionCardShow: false,
       optionData: [],
-      node: null,
-      tree: null,
+      node: {},
+      nodeRef: {},
       iAct: '',
       filterText: '',
       searchText: '',
@@ -261,13 +275,13 @@ export default {
     },
   },
   created() {
-    this.filterOperations()
+    this.filterButtons()
   },
   mounted() {
     if (this.changeMode === 'contextMenu') {
+      const container = this.$refs.container
+      container.addEventListener('scroll', this.scroll)
       document.addEventListener('click', this.OptionCardClose)
-      const tree = document.getElementsByClassName('el-tree')[0]
-      tree.addEventListener('scroll', this.scroll)
     }
     // todo：动态设置选中颜色
     // if (this.activeColor) {
@@ -293,13 +307,13 @@ export default {
       immediate: true,
     },
     extraOperations(val) {
-      this.filterOperations()
+      this.filterButtons()
     },
   },
   methods: {
     filterTextCallback(val) {
       this.$emit('search', val)
-      !this.noFilter && this.$refs.tree.filter(val)
+      !this.noFilter && this.filter(val)
     },
     // 操作点击事件
     happenEvent(data, node, buttonItem) {
@@ -311,22 +325,22 @@ export default {
       })
     },
     // 过滤操作按钮
-    filterOperations() {
+    filterButtons() {
       const operationsList = [
         {
           label: '新建',
           method: 'nodeAdd',
-          class: 'el-icon-plus',
+          icon: 'el-icon-plus',
         },
         {
           label: '删除',
           method: 'nodeDelete',
-          class: 'el-icon-delete',
+          icon: 'el-icon-delete',
         },
         {
           label: '编辑',
           method: 'nodeEdit',
-          class: 'el-icon-edit',
+          icon: 'el-icon-edit',
         },
       ]
       const arr = []
@@ -339,14 +353,9 @@ export default {
       this.operationsList = arr.concat(this.extraOperations)
     },
     // 右键菜单属性设置
-    floderOption(e, data, node, t) {
-      this.$emit('nodeContextmenu', e, data, node, t)
-      // console.log(e, data, n, t, 'floderOption')
-      if (
-        this.changeMode !== 'contextMenu' ||
-        this.judgeDisabledEdit(data, node)
-      )
-        return
+    floderOption(e, data, node, nodeRef) {
+      this.$emit('nodeContextmenu', e, data, node, nodeRef)
+      // console.log(e, data, node, nodeRef, 'floderOption')
       const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false
       this.optionCardX = e.x + 10
@@ -354,20 +363,22 @@ export default {
       this.optionCardY = clientHeight - e.y
       this.optionData = data
       this.node = node
-      this.tree = t
+      this.nodeRef = nodeRef
       this.optionCardShow = true
     },
+    // 判断节点是否能操作
     judgeDisabledEdit(data, node) {
-      // return (
-      //   data.disabledEdit ||
-      //   (Array.isArray(this.editLevels) &&
-      //     !this.editLevels.includes(node.level)) ||
-      //   (this.onlyEditLeaf && !node.isLeaf)
-      // )
       return (
         typeof this.disabledEditFn === 'function' &&
         this.disabledEditFn(data, node)
       )
+    },
+    // 判断节点是否禁用
+    judgeDisabled(data, node) {
+      let disabled =
+        data.disabled ||
+        (typeof this.disabledFn === 'function' && this.disabledFn(data, node))
+      this.$set(data, 'disabled', disabled)
     },
     // 滚动隐藏菜单
     scroll() {
@@ -412,7 +423,7 @@ export default {
         // console.log('树搜索框有值变无值');
         !this.alreadySet &&
           this.preCheckedKeys.forEach((key) => {
-            this.$refs.tree.setChecked(key, true)
+            this.setChecked(key, true)
           })
         this.alreadySet = true
         this.preCheckedKeys = []
@@ -432,7 +443,7 @@ export default {
         return item === data[this.nodeKey]
       })
       const condition = flag && index !== -1
-      this.$refs.tree.setChecked(data[this.nodeKey], condition)
+      this.setChecked(data[this.nodeKey], condition)
 
       this.searchText = value
       return flag
