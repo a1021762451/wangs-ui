@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-03 14:03:49
+ * @LastEditTime: 2023-07-04 16:13:54
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -594,9 +594,5 @@ export default {
   /deep/ .el-tree-node > .el-tree-node__children {
     overflow: visible;
   }
-}
-/* 点击树结构项的选中颜色 */
-.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
-  background-color: #b0c4de;
 }
 </style>

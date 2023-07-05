@@ -148,4 +148,9 @@ export default {
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+/* 点击树结构项的选中颜色 */
+.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+  background-color: #b0c4de;
+}
+</style>

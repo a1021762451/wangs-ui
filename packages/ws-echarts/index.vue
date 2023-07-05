@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-14 14:16:52
+ * @LastEditTime: 2023-07-05 10:30:35
 -->
 <template>
   <div style="width: 100%; height: 100%">
@@ -13,7 +13,7 @@
       :id="echartsId"
     ></div>
     <el-empty
-      v-if="showEmpty"
+      v-if="showEmpty && isShowEmpty"
       style="width: 100%; height: 100%"
       v-bind="$attrs"
     ></el-empty>
@@ -31,15 +31,22 @@ export default {
     }
   },
   props: {
+    // 图表配置
     options: {
       type: Object,
       default() {
         return {}
       },
     },
+    // 图表id， 随机
     echartsId: {
       type: String,
       default: getRandomId(),
+    },
+    // 是否允许显示空组件
+    isShowEmpty: {
+      type: Boolean,
+      default: true,
     },
   },
   watch: {
@@ -97,15 +104,15 @@ export default {
       }
       return true
     },
-    chartLoading() {
-      this.myChart.showLoading({
-        text: '加载中...',
-        color: '#808080',
-        textColor: '#000',
-        maskColor: 'rgba(255, 255, 255, 0.5)',
-        zlevel: 0,
-      })
-    },
+    // chartLoading() {
+    //   this.myChart.showLoading({
+    //     text: '加载中...',
+    //     color: '#808080',
+    //     textColor: '#000',
+    //     maskColor: 'rgba(255, 255, 255, 0.5)',
+    //     zlevel: 0,
+    //   })
+    // },
   },
 }
 </script>
