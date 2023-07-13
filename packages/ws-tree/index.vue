@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-04 16:13:54
+ * @LastEditTime: 2023-07-13 13:47:50
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -255,6 +255,7 @@ export default {
       preCheckedKeys: [],
       alreadySet: false,
       operationsList: [],
+      treeData: [],
       filterTextFn: debounce(this.filterTextCallback),
     }
   },
@@ -355,6 +356,7 @@ export default {
     // 右键菜单属性设置
     floderOption(e, data, node, nodeRef) {
       this.$emit('nodeContextmenu', e, data, node, nodeRef)
+      if (this.changeMode !== 'contextMenu') return
       // console.log(e, data, node, nodeRef, 'floderOption')
       const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false

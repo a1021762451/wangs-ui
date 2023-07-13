@@ -560,6 +560,7 @@ export function treeDataFlat(data=[], props = {}, nodeKey = 'id') {
 }
 // 扁平数据转树
 export function flatToTree(data=[], props = {}, nodeKey = 'id') {
+  data = deepClone(data)
   let { children: childrenKey, parent: parentIdKey } = props
   childrenKey = childrenKey || 'children'
   parentIdKey = parentIdKey || 'pid'

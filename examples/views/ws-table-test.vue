@@ -9,6 +9,7 @@
       :utilsList="['setColumms', 'download']"
       :header-cell-style="{ background: '#f3f3f3' }"
       :pageInfo.sync="pageInfo"
+      placeholder="-"
       stripe
       @happenEvent="happenEvent"
       @selection-change="selectionChange"

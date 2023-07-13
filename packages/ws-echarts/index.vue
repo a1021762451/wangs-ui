@@ -3,17 +3,17 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-05 10:30:35
+ * @LastEditTime: 2023-07-12 14:59:10
 -->
 <template>
   <div style="width: 100%; height: 100%">
     <div
-      v-show="!showEmpty"
+      v-show="!emptyCondition"
       style="width: 100%; height: 100%"
-      :id="echartsId"
+      :id="chartId"
     ></div>
     <el-empty
-      v-if="showEmpty && isShowEmpty"
+      v-if="emptyCondition"
       style="width: 100%; height: 100%"
       v-bind="$attrs"
     ></el-empty>
@@ -41,7 +41,7 @@ export default {
     // 图表id， 随机
     echartsId: {
       type: String,
-      default: getRandomId(),
+      default: '',
     },
     // 是否允许显示空组件
     isShowEmpty: {
@@ -54,6 +54,14 @@ export default {
       handler() {
         this.updateEcharts()
       },
+    },
+  },
+  computed: {
+    chartId() {
+      return this.echartsId || getRandomId()
+    },
+    emptyCondition() {
+      return this.isShowEmpty && this.showEmpty
     },
   },
   mounted() {
@@ -71,7 +79,7 @@ export default {
     init() {
       // myChart.hideLoading()
       // 基于准备好的dom，初始化echarts实例
-      this.myChart = this.$echarts.init(document.getElementById(this.echartsId))
+      this.myChart = this.$echarts.init(document.getElementById(this.chartId))
       this.updateEcharts()
       window.addEventListener('resize', this.resizeEcharts)
       this.myChart.on('click', (params) => {
@@ -82,8 +90,7 @@ export default {
     // 更新echarts视图
     updateEcharts() {
       // 判断是否图表为空
-      const { series } = this.options
-      this.showEmpty = this.judgeEmpty(series)
+      this.showEmpty = this.judgeEmpty()
       this.myChart.setOption(this.options)
       this.$nextTick(this.resizeEcharts)
     },

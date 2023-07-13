@@ -16,6 +16,7 @@
       :fieldItem="column"
       :rules="rules"
       :allOptions="allOptions"
+      :placeholder="placeholder"
       @happenEvent="(params) => $emit('happenEvent', params)"
     >
       <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -37,7 +38,7 @@
     <template v-slot="{ row, column, $index }">
       <ws-buttons
         isLinkButton
-        :buttonConfigList="filterButtons(fieldItem.tableButtons || [], row)"
+        :buttonConfigList="filterButtons(row, fieldItem.tableButtons || [])"
         @happenEvent="happenEvent($event, { row, column, $index })"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -165,15 +166,19 @@
           :name="fieldItem.slotName"
           v-bind="{ row, column, $index, fieldItem }"
         >
-          {{ row[fieldItem.prop] }}
+          {{ row[fieldItem.prop] || fieldItem.placeholder || placeholder }}
         </slot>
       </template>
       <!-- 格式化 -->
       <template v-else-if="fieldItem.formatter">{{
-        fieldItem.formatter(row[fieldItem.prop], row, column, $index)
+        fieldItem.formatter(row[fieldItem.prop], row, column, $index) ||
+        fieldItem.placeholder ||
+        placeholder
       }}</template>
       <!-- 默认 -->
-      <template v-else>{{ row[fieldItem.prop] }}</template>
+      <template v-else>{{
+        row[fieldItem.prop] || fieldItem.placeholder || placeholder
+      }}</template>
     </template>
   </el-table-column>
 </template>
@@ -214,10 +219,15 @@ export default {
     },
     // 过滤表格操作按钮
     filterButtons: {
-      default(tableButtons) {
+      default(row, tableButtons) {
         return tableButtons
       },
       type: Function,
+    },
+    // 表格单元格占位
+    placeholder: {
+      default: '',
+      type: String,
     },
   },
   data() {

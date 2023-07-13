@@ -196,6 +196,7 @@ const allOptions = {
 | showPagination | 展示分页组件                              | Boolean | -                                                   | true   |
 | pageInfo       | 分页数据, 不传则没有分页栏                | Object  | -                                                   | -      |
 | loading        | 加载样式                                  | Boolean | -                                                   | false  |
+| placeholder    | 表格空单元占位                            | String  | -                                                   | -      |
 | seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏 | Object  | -                                                   | -      |
 | searchData     | 搜索栏数据                                | Object  | -                                                   | -      |
 
@@ -221,6 +222,7 @@ const allOptions = {
 | minAllowEqual  | 允许和用于比较的最小时间相等, 精度到天 | Boolean  | -      | true   |
 | maxAllowEqual  | 允许和用于比较的最大时间相等, 精度到天 | Boolean  | -      | true   |
 | allowToggle    | 是否允许双击切换， 仅支持输入框        | Boolean  | -      | -      |
+| placeholder    | 表格空单元占位                         | String   | -      | -      |
 | componentAttrs | 组件对应的属性                         | Object   | -      | -      |
 
 #### 组件事件

@@ -73,6 +73,7 @@
           :rules="rules"
           :allOptions="allOptions"
           :filterButtons="filterButtons"
+          :placeholder="placeholder"
           @happenEvent="(params) => $emit('happenEvent', params)"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -166,7 +167,7 @@ export default {
     },
     // 过滤表格操作按钮
     filterButtons: {
-      default(tableButtons) {
+      default(row, tableButtons) {
         return tableButtons
       },
       type: Function,
@@ -184,6 +185,16 @@ export default {
         return {}
       },
       type: Object,
+    },
+    // 显示分页
+    showPagination: {
+      default: false,
+      type: Boolean,
+    },
+    // 表格单元格占位
+    placeholder: {
+      default: '',
+      type: String,
     },
   },
   //自定义指令
@@ -273,9 +284,6 @@ export default {
     },
     showSearch() {
       return Object.keys(this.seachConfig).length
-    },
-    showPagination() {
-      return Object.keys(this.pageInfo).length
     },
   },
   mounted() {

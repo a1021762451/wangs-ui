@@ -81,7 +81,7 @@ export const formConfigList = [
     label: '竣工日期大',
     required: true,
     minTimeProp: 'endTime_min', // 用于比较的最小时间对应字段
-    timeDisabled: true, // 时间限制精度是否到时分秒 
+    timeDisabled: true, // 时间限制精度是否到时分秒
     // isShowCurrent: true,
     minAllowEqual: false, // 允许和用于比较的最小时间相等 精度到天
     maxAllowEqual: false, // 允许和用于比较的最大时间相等 精度到天
