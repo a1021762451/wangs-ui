@@ -42,7 +42,7 @@
         @happenEvent="happenEvent($event, { row, column, $index })"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
-          <slot :name="name" v-bind="scope"></slot>
+          <slot :name="name" v-bind="{ ...scope, fieldItem }"></slot>
         </template>
       </ws-buttons>
     </template>
@@ -160,6 +160,12 @@
           </template>
         </component>
       </el-form-item>
+      <!-- 格式化 -->
+      <template v-else-if="fieldItem.formatter">{{
+        fieldItem.formatter(row[fieldItem.prop], row, column, $index) ||
+        fieldItem.placeholder ||
+        placeholder
+      }}</template>
       <!-- 命名插槽 -->
       <template v-else-if="fieldItem.slotName">
         <slot
@@ -169,12 +175,6 @@
           {{ row[fieldItem.prop] || fieldItem.placeholder || placeholder }}
         </slot>
       </template>
-      <!-- 格式化 -->
-      <template v-else-if="fieldItem.formatter">{{
-        fieldItem.formatter(row[fieldItem.prop], row, column, $index) ||
-        fieldItem.placeholder ||
-        placeholder
-      }}</template>
       <!-- 默认 -->
       <template v-else>{{
         row[fieldItem.prop] || fieldItem.placeholder || placeholder

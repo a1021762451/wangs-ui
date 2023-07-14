@@ -3,7 +3,7 @@
     <ws-table
       style="height: 700px"
       :loading="loading"
-      :tableData="tableData"
+      :data="tableData"
       :tableColumns="tableColumns"
       :allOptions="allOptions"
       :utilsList="['setColumms', 'download']"
@@ -80,23 +80,10 @@ export default {
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
-          name: '王',
+          name: '爷',
           age: 18,
           id: '1',
           children: [
-            {
-              plantName: '一号机组 - 1',
-              testInput: '1-1',
-              widthAdjust: '宽度宽度宽度 -1',
-              testSelect: '',
-              testMinDatetime: '',
-              testMaxDatetime: '',
-              testTime: '',
-              testFormatter: '内容-1',
-              adress: '北京-1',
-              work: '程序员-1',
-              id: '1-1',
-            },
             {
               plantName: '一号机组 - 2',
               testInput: '2 -2',
@@ -109,6 +96,37 @@ export default {
               adress: '北京 -2',
               work: '程序员 -2',
               id: '1-2',
+              name: '父',
+              children: [
+                {
+                  name: '孙',
+                  plantName: '一号机组 - 1',
+                  testInput: '1-1',
+                  widthAdjust: '宽度宽度宽度 -1',
+                  testSelect: '',
+                  testMinDatetime: '',
+                  testMaxDatetime: '',
+                  testTime: '',
+                  testFormatter: '内容-1',
+                  adress: '北京-1',
+                  work: '程序员-1',
+                  id: '1-2-1',
+                },
+                {
+                  name: '孙',
+                  plantName: '一号机组 - 2',
+                  testInput: '2 -2',
+                  widthAdjust: '宽度宽度宽度 -2',
+                  testSelect: '',
+                  testMinDatetime: '',
+                  testMaxDatetime: '',
+                  testTime: '',
+                  testFormatter: '内容 -2',
+                  adress: '北京 -2',
+                  work: '程序员 -2',
+                  id: '1-2-2',
+                },
+              ],
             },
           ],
         },
@@ -209,6 +227,7 @@ export default {
     },
     // 勾选操作
     selectionChange(selection) {
+      console.log('selectionChange', selection)
       this.selection = selection
     },
   },

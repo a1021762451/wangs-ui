@@ -540,18 +540,16 @@ export function getDefaultTime(defaultTimeType, formatStr) {
 }
 
 // 树数据扁平化
-export function treeDataFlat(data=[], props = {}, nodeKey = 'id') {
-  let { children: childrenKey, parent: parentIdKey } = props
-  childrenKey = childrenKey || 'children'
-  parentIdKey = parentIdKey || 'pid'
+export function treeDataFlat(data = [], props = {}, nodeKey = 'id') {
+  let { children = 'children', parent = 'pid' } = props
   const result = []
-  if(!Array.isArray(data)) return result
+  if (!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
-      item[parentIdKey] = parentId
+      item[parent] = parentId
       result.push(item)
-      if (item[childrenKey] && item[childrenKey].length) {
-        loop(item[childrenKey], item[nodeKey])
+      if (item[children] && item[children].length) {
+        loop(item[children], item[nodeKey])
       }
     })
   }
@@ -559,25 +557,23 @@ export function treeDataFlat(data=[], props = {}, nodeKey = 'id') {
   return result
 }
 // 扁平数据转树
-export function flatToTree(data=[], props = {}, nodeKey = 'id') {
+export function flatToTree(data = [], props = {}, nodeKey = 'id') {
   data = deepClone(data)
-  let { children: childrenKey, parent: parentIdKey } = props
-  childrenKey = childrenKey || 'children'
-  parentIdKey = parentIdKey || 'pid'
+  let { children = 'children', parent = 'pid' } = props
   const result = []
   const map = {}
-  if(!Array.isArray(data)) return result
+  if (!Array.isArray(data)) return result
   data.forEach((item) => {
     map[item[nodeKey]] = item
   })
   data.forEach((item) => {
-    const parent = map[item[parentIdKey]]
+    const parentNode = map[item[parent]]
     // item.disabled = item.isEmployee === '0'
-    if (parent) {
-      if (!parent[childrenKey]) {
-        parent[childrenKey] = []
+    if (parentNode) {
+      if (!parentNode[children]) {
+        parentNode[children] = []
       }
-      parent[childrenKey].push(item)
+      parentNode[children].push(item)
     } else {
       result.push(item)
     }

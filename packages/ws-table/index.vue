@@ -58,11 +58,22 @@
         :data="tableForm.tableData"
         v-loading="loading"
         v-bind="{
-          rowKey: 'id',
+          rowKey,
           ...$attrs,
         }"
-        v-on="$listeners"
+        @select="select"
+        @select-all="selectAll"
         @selection-change="selectionChange"
+        v-on="{
+          ...$listeners,
+          ...(!checkStrictly
+            ? {
+                select: () => {},
+                'select-all': () => {},
+                'selection-change': () => {},
+              }
+            : {}),
+        }"
         ref="table"
       >
         <!-- 列遍历， 可实现嵌套 -->
@@ -108,7 +119,7 @@
 </template>
 
 <script>
-import { deepClone } from '../utils/util'
+import { debounce, deepClone } from '../utils/util'
 import { allUtils } from './contant.js'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
@@ -140,7 +151,7 @@ export default {
       type: Array,
     },
     // 表格数据
-    tableData: {
+    data: {
       default() {
         return []
       },
@@ -188,13 +199,18 @@ export default {
     },
     // 显示分页
     showPagination: {
-      default: false,
+      default: true,
       type: Boolean,
     },
     // 表格单元格占位
     placeholder: {
       default: '',
       type: String,
+    },
+    // 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false
+    checkStrictly: {
+      default: false,
+      type: Boolean,
     },
   },
   //自定义指令
@@ -216,8 +232,10 @@ export default {
       tableForm: {
         tableData: [],
       },
+      tableData: [],
       filterColumnsVisable: false, // 列勾选弹窗
       selection: [],
+      selectionChange: debounce(this.selectionChangeCallback, 100),
     }
   },
   watch: {
@@ -232,26 +250,18 @@ export default {
     columns: {
       handler() {
         this.$nextTick(() => {
-          console.log('列表变更更新表单布局')
           this.doLayout()
         })
       },
     },
-    tableData: {
+    data: {
       handler(newData) {
-        // 配置selfAdjust为true,则宽度自调节
-        // this.columns.forEach((column) => {
-        //   const arr = newData.map((x) => x[column.prop]) // 获取每一列的所有数据
-        //   arr.push(column.label) // 把每列的表头也加进去算
-        //   const conditon = column.selfAdjust
-        //   console.log('conditon', conditon)
-        //   if (conditon) this.$set(column, 'width', this.getMaxLength(arr) + 40)
-        // })
+        this.tableData = newData
+        this.tableForm.tableData = newData
         // 表格数据增加prop, 便于校验表单
         this.addFormPropForTable()
         // 配置selfAdjust为true,则宽度自调节
         this.getDynamicWidth(this.columns)
-        this.tableForm.tableData = this.tableData
       },
       immediate: true,
     },
@@ -285,6 +295,15 @@ export default {
     showSearch() {
       return Object.keys(this.seachConfig).length
     },
+    treeProps() {
+      return this.$attrs['tree-props'] || {}
+    },
+    childrenKey() {
+      return this.treeProps.children || 'children'
+    },
+    rowKey() {
+      return this.$attrs['row-key'] || 'id'
+    },
   },
   mounted() {
     window.addEventListener('resize', this.doLayout)
@@ -295,8 +314,7 @@ export default {
   methods: {
     // 迭代增加prop
     addFormPropForTable() {
-      const treeProps = this.$attrs['tree-props'] || { children: 'children' }
-      const childrenKey = treeProps.children
+      const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {
           item.prop__table = `${prop__table}.${index}`
@@ -313,12 +331,10 @@ export default {
     },
     // 遍历获取动态宽度
     getDynamicWidth(columns) {
-      const treeProps = this.$attrs['tree-props'] || { children: 'children' }
-      const childrenKey = treeProps.children
+      const childrenKey = this.childrenKey
       columns.forEach((column) => {
         const conditon = column.selfAdjust
         if (conditon) {
-          // const arr = this.tableData.map((x) => x[column.prop])
           const arr = this.getColumnData(this.tableData, column, childrenKey)
           // 迭代获取每一列的所有数据
           arr.push(column.label) // 把每列的表头也加进去算
@@ -334,16 +350,10 @@ export default {
       const arr = []
       tableData.forEach((x) => {
         x[column.prop] && arr.push(x[column.prop])
-        // console.log(
-        //   Array.isArray(x[childrenKey]) && x[childrenKey].length,
-        //   x[childrenKey],
-        //   'x[childrenKey] '
-        // )
         if (Array.isArray(x[childrenKey]) && x[childrenKey].length) {
           arr.push(...this.getColumnData(x[childrenKey], column, childrenKey))
         }
       })
-      // console.log(arr, 'arr', tableData, 'tableData')
       return arr
     },
     // 分页操作
@@ -450,10 +460,81 @@ export default {
       })
       return arr
     },
+    // 批量勾选， 动态改变selection
+    toggleSelection(rows, flag = true) {
+      if (!Array.isArray(rows) || !rows.length) return
+      rows.forEach((row) => {
+        const index = this.selection.indexOf(row)
+        this.toggleRowSelection(row, flag)
+        if ((index !== -1) !== flag) {
+          flag ? this.selection.push(row) : this.selection.splice(index, 1)
+        }
+      })
+    },
     // 勾选操作
-    selectionChange(selection) {
+    selectionChangeCallback(selection) {
+      !this.checkStrictly && this.$emit('selection-change', this.selection)
+    },
+    // 全选
+    selectAll(selection) {
+      this.tableData.forEach((item) => {
+        const condition = selection.includes(item)
+        const childrenAndOwn = this.findChildrenAndOwnNode(item)
+        this.toggleSelection(childrenAndOwn, condition)
+      })
+      !this.checkStrictly && this.$emit('select-all', this.selection)
+    },
+    // 手动勾选数据行的 Checkbox 时触发的事件
+    select(selection, row) {
       this.selection = selection
-      this.$emit('selection-change', selection)
+      // 勾选子元素, 所有子元素
+      const condition = selection.includes(row)
+      const childrenAndOwn = this.findChildrenAndOwnNode(row)
+      this.toggleSelection(childrenAndOwn, condition)
+      // 判断父元素是否取消勾选， 循环往上找父元素
+      let parent = this.findParentNode(this.tableData, row)
+      while (parent) {
+        const children = parent[this.childrenKey]
+        const isAllChecked = children.every((item) => selection.includes(item))
+        this.toggleSelection([parent], isAllChecked)
+        parent = this.findParentNode(this.tableData, parent)
+      }
+      !this.checkStrictly && this.$emit('select', this.selection, row)
+    },
+    // 迭代找父节点
+    findParentNode(dataList, row) {
+      let parent = null
+      const childrenKey = this.childrenKey
+      function iterateFn(dataList, row) {
+        dataList.forEach((item) => {
+          const children = item[childrenKey]
+          if (Array.isArray(children) && children.length) {
+            if (children.includes(row)) {
+              parent = item
+            } else {
+              iterateFn(children, row)
+            }
+          }
+        })
+      }
+      iterateFn(dataList, row)
+      return parent
+    },
+    // 迭代找所有子节点 -- 可包括自己
+    findChildrenAndOwnNode(row, hasOwn = true) {
+      const childrenKey = this.childrenKey
+      const arr = []
+      function iterateFn(dataList) {
+        dataList.forEach((item) => {
+          arr.push(item)
+          const children = item[childrenKey]
+          if (Array.isArray(children) && children.length) {
+            iterateFn(children)
+          }
+        })
+      }
+      iterateFn(row.children || [])
+      return hasOwn ? arr.concat(row) : arr
     },
     // 处理工具箱点击事件
     happenUtilEvent(util) {

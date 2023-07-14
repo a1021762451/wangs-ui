@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-06-01 13:35:59
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2023-07-14 13:28:09
+-->
 <template>
   <ws-tree
     showCheckbox
@@ -105,11 +112,11 @@ export default {
   },
   methods: {
     filterButtonsFn(buttons, data, node) {
-      if(node.isLeaf) return buttons
+      if (node.isLeaf) return buttons
       return []
     },
     disabledFn(data, node) {
-      if(!node.isLeaf) return true
+      if (!node.isLeaf) return true
       return false
     },
     // 触发事件

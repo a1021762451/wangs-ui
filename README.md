@@ -186,19 +186,19 @@ const allOptions = {
 
 #### 组件属性
 
-| 参数           | 说明                                      | 类型    | 可选值                                              | 默认值 |
-| -------------- | ----------------------------------------- | ------- | --------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合                    | Object  | -                                                   | -      |
-| tableColumns   | 所有列的对象集合数组                      | Array   | -                                                   | -      |
-| tableButtons   | 每行按钮组                                | Array   | -                                                   | -      |
-| tableData      | 表单数据                                  | Array   | -                                                   | -      |
-| utilsList      | 工具栏                                    | Array   | 'setColumms' - 对应列筛选 'download' - 对应表格下载 | -      |
-| showPagination | 展示分页组件                              | Boolean | -                                                   | true   |
-| pageInfo       | 分页数据, 不传则没有分页栏                | Object  | -                                                   | -      |
-| loading        | 加载样式                                  | Boolean | -                                                   | false  |
-| placeholder    | 表格空单元占位                            | String  | -                                                   | -      |
-| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏 | Object  | -                                                   | -      |
-| searchData     | 搜索栏数据                                | Object  | -                                                   | -      |
+| 参数           | 说明                                                     | 类型    | 可选值                                              | 默认值 |
+| -------------- | -------------------------------------------------------- | ------- | --------------------------------------------------- | ------ |
+| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                   | -      |
+| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                   | -      |
+| tableButtons   | 每行按钮组                                               | Array   | -                                                   | -      |
+| utilsList      | 工具栏                                                   | Array   | 'setColumms' - 对应列筛选 'download' - 对应表格下载 | -      |
+| showPagination | 展示分页组件                                             | Boolean | -                                                   | true   |
+| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                   | false  |
+| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                   | -      |
+| loading        | 加载样式                                                 | Boolean | -                                                   | false  |
+| placeholder    | 表格空单元占位                                           | String  | -                                                   | -      |
+| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                   | -      |
+| searchData     | 搜索栏数据                                               | Object  | -                                                   | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
@@ -233,10 +233,13 @@ const allOptions = {
 
 #### 组件方法
 
-| 事件名      | 说明       | 参数        |
-| ----------- | ---------- | ----------- |
-| validateRow | 校验单行   | row：行数据 |
-| validateAll | 校验全部行 | -           |
+| 事件名           | 说明                     | 参数                                            |
+| ---------------- | ------------------------ | ----------------------------------------------- |
+| validateRow      | 校验单行                 | row：行数据                                     |
+| validateAll      | 校验全部行               | -                                               |
+| getRowsByRowKeys | 根据 id 数组获取多行数据 | rowKeys：id 数组                                |
+| getSelection     | 获取选中行               | -                                               |
+| setSelection     | 设置选择行               | selection: id 数组或者 row 数组, flag：是否选中 |
 
 #### slot 插槽
 

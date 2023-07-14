@@ -125,6 +125,7 @@ export const tableColumns = [
         prop: 'name',
         label: '姓名',
         alwaysVisible: true, // 在列选择器中始终显示
+        width: 100,
       },
       {
         prop: 'age',

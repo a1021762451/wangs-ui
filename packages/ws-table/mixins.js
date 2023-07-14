@@ -1,6 +1,7 @@
 export default {
   methods: {
     clearSelection() {
+      this.selection = []
       return this.$refs.table.clearSelection(...arguments)
     },
     toggleRowSelection() {
@@ -26,6 +27,52 @@ export default {
     },
     sort() {
       return this.$refs.table.sort(...arguments)
+    },
+    // 获取选中行
+    getSelection() {
+      return this.selection
+    },
+    // 设置部分选择行  全选和清空可以使用toggleAllSelection和clearSelection
+    setSelection(selection, flag = true) {
+      if (!Array.isArray(selection) || !selection.length) return
+      const isIds = typeof selection[0] === 'string'
+      selection = isIds ? this.getRowsByRowKeys(selection) : selection
+      let handleSelection = []
+      if (flag) {
+        handleSelection = Array.from(new Set(this.selection.concat(selection)))
+      } else {
+        handleSelection = this.selection.filter(
+          (row) => !selection.includes(row)
+        )
+      }
+      selection.forEach((row) => {
+        this.select(handleSelection, row)
+      })
+    },
+    // 根据多个rowKey获取多行数据
+    getRowsByRowKeys(rowKeys) {
+      const rows = []
+      rowKeys.forEach((rowKeyValue) => {
+        const row = this.getRowByRowKey(rowKeyValue)
+        row && rows.push(row)
+      })
+      return rows
+    },
+    // 根据rowKey获取行数据
+    getRowByRowKey(rowKeyValue) {
+      const rowKey = this.rowKey
+      function iterateFn(datalist, rowKeyValue) {
+        for (let i = 0; i < datalist.length; i++) {
+          if (datalist[i][rowKey] === rowKeyValue) {
+            return datalist[i]
+          }
+          if (datalist[i].children) {
+            const row = iterateFn(datalist[i].children, rowKeyValue)
+            if (row) return row
+          }
+        }
+      }
+      return iterateFn(this.tableData, rowKeyValue)
     },
   },
 }
