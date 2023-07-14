@@ -61,13 +61,13 @@ export default {
     // 根据rowKey获取行数据
     getRowByRowKey(rowKeyValue) {
       const rowKey = this.rowKey
-      function iterateFn(datalist, rowKeyValue) {
-        for (let i = 0; i < datalist.length; i++) {
-          if (datalist[i][rowKey] === rowKeyValue) {
-            return datalist[i]
+      function iterateFn(dataList, rowKeyValue) {
+        for (let i = 0; i < dataList.length; i++) {
+          if (dataList[i][rowKey] === rowKeyValue) {
+            return dataList[i]
           }
-          if (datalist[i].children) {
-            const row = iterateFn(datalist[i].children, rowKeyValue)
+          if (dataList[i].children) {
+            const row = iterateFn(dataList[i].children, rowKeyValue)
             if (row) return row
           }
         }

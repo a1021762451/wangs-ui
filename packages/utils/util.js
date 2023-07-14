@@ -130,13 +130,12 @@ export const getObjType = (obj) => {
 }
 
 // 防抖
-export const debounce = (fn, t) => {
-  const delay = t || 500
+export const debounce = (fn, delay = 500) => {
   let timer
   return function () {
-    const args = arguments
+    let args = arguments //注意如果要传参的话 这句不能省略
     if (timer) {
-      console.log('防抖中')
+      // console.log('防抖中')
       clearTimeout(timer)
     }
     timer = setTimeout(() => {
@@ -146,18 +145,18 @@ export const debounce = (fn, t) => {
   }
 }
 // 节流
-export const throttle = (fn, t) => {
-  var prev = Date.now()
+export const throttle = (fn, delay = 500) => {
+  let timer
   return function () {
-    var context = this //this指向window
-    var args = arguments
-    var now = Date.now()
-    if (now - prev >= t) {
-      fn.apply(context, args)
-      prev = Date.now()
-    } else {
-      console.log('节流中')
+    let args = arguments //注意如果要传参的话 这句不能省略
+    if (timer) {
+      // console.log('节流中')
+      return
     }
+    timer = setTimeout(() => {
+      timer = null
+      fn.apply(this, args)
+    }, delay)
   }
 }
 // 深度合并两个对象

@@ -503,22 +503,21 @@ export default {
     },
     // 迭代找父节点
     findParentNode(dataList, row) {
-      let parent = null
       const childrenKey = this.childrenKey
       function iterateFn(dataList, row) {
-        dataList.forEach((item) => {
-          const children = item[childrenKey]
+        for (let i = 0; i < dataList.length; i++) {
+          const children = dataList[i][childrenKey]
           if (Array.isArray(children) && children.length) {
             if (children.includes(row)) {
-              parent = item
+              return dataList[i]
             } else {
-              iterateFn(children, row)
+              const parent = iterateFn(children, row)
+              if (parent) return parent
             }
           }
-        })
+        }
       }
-      iterateFn(dataList, row)
-      return parent
+      return iterateFn(dataList, row)
     },
     // 迭代找所有子节点 -- 可包括自己
     findChildrenAndOwnNode(row, hasOwn = true) {
