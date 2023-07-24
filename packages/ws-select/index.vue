@@ -10,14 +10,16 @@
 <template>
   <el-select
     v-model="ownValue"
-    clearable
-    filterable
-    :remote="true"
-    :remote-method="remoteMethod"
     :loading="loading"
-    :placeholder="$attrs.disabled ? '' : '请选择'"
     @focus="selectFocus"
-    v-bind="$attrs"
+    v-bind="{
+      clearable: true,
+      filterable: true,
+      remote: true,
+      'remote-method': remoteMethod,
+      placeholder: $attrs.disabled ? '' : '请选择',
+      ...$attrs,
+    }"
     v-on="$listeners"
   >
     <el-option

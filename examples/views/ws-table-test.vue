@@ -1,56 +1,52 @@
 <template>
-  <div>
-    <ws-table
-      style="height: 700px"
-      :loading="loading"
-      :data="tableData"
-      :tableColumns="tableColumns"
-      :allOptions="allOptions"
-      :utilsList="['setColumms', 'download']"
-      :header-cell-style="{ background: '#f3f3f3' }"
-      :pageInfo.sync="pageInfo"
-      placeholder="-"
-      stripe
-      @happenEvent="happenEvent"
-      @selection-change="selectionChange"
-      ref="wsTable"
-      row-key="id"
-      :searchData.sync="formData"
-      :seachConfig="{
-        formConfigList,
-        formButtons,
-        allOptions,
-      }"
-    >
-      <!-- 指向table组件的插槽 -->
-      <template v-slot:expand="{ row }">
-        <div>
-          {{ JSON.stringify(row) }}
-        </div>
-      </template>
-      <template v-slot:plantName_header="{ column }">
-        {{ column.label + '--插槽' }}
-      </template>
-      <template v-slot:plantName="{ row, fieldItem }">
-        {{ row.plantName + '--插槽' + fieldItem.prop }}
-      </template>
-      <!-- 指向ws-form组件的插槽 -->
-      <template #lightOut="{ fieldItem, formData }">
-        <el-input
-          clearable
-          v-model="formData[fieldItem.prop]"
-          :placeholder="fieldItem.disabled ? '' : '请输入内容'"
-          :disabled="fieldItem.disabled"
-        ></el-input>
-      </template>
-      <!-- 指向ws-buttons组件的插槽 -->
-      <template #download="scope">
-        <el-button type="primary" size="small" @click="happenEvent(scope)"
-          >下载</el-button
-        >
-      </template>
-    </ws-table>
-  </div>
+  <ws-table
+    ref="wsTable"
+    showSearch
+    style="height: 100%"
+    placeholder="-"
+    :loading="loading"
+    :data="tableData"
+    :tableColumns="tableColumns"
+    :allOptions="allOptions"
+    :utilsList="['setColumms', 'download']"
+    :pageInfo.sync="pageInfo"
+    :searchData.sync="formData"
+    :seachConfig="{
+      formConfigList,
+      formButtons,
+      allOptions,
+    }"
+    @happenEvent="happenEvent"
+    @selection-change="selectionChange"
+  >
+    <!-- 指向table组件的插槽 -->
+    <template v-slot:expand="{ row }">
+      <div>
+        {{ JSON.stringify(row) }}
+      </div>
+    </template>
+    <template v-slot:plantName_header="{ column }">
+      {{ column.label + '--插槽' }}
+    </template>
+    <template v-slot:plantName="{ row, fieldItem }">
+      {{ row.plantName + '--插槽' + fieldItem.prop }}
+    </template>
+    <!-- 指向ws-form组件的插槽 -->
+    <template #lightOut="{ fieldItem, formData }">
+      <el-input
+        clearable
+        v-model="formData[fieldItem.prop]"
+        :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+        :disabled="fieldItem.disabled"
+      ></el-input>
+    </template>
+    <!-- 指向ws-buttons组件的插槽 -->
+    <template #download="scope">
+      <el-button type="primary" size="small" @click="happenEvent(scope)"
+        >下载</el-button
+      >
+    </template>
+  </ws-table>
 </template>
 
 <script>
@@ -75,7 +71,7 @@ export default {
           testInput: '1',
           widthAdjust: '宽度宽度宽度',
           testCheckBox: '0',
-          testSelect: '苹果',
+          testSelect: 'apple',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
@@ -134,7 +130,7 @@ export default {
           plantName: '二号机组',
           testInput: '2',
           widthAdjust: '宽度宽度宽度',
-          testSelect: '香蕉',
+          testSelect: 'banana',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
@@ -148,7 +144,7 @@ export default {
           plantName: '二号机组',
           testInput: '2',
           widthAdjust: '宽度宽度宽度',
-          testSelect: '香蕉',
+          testSelect: 'banana',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',

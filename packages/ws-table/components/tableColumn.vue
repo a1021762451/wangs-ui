@@ -3,16 +3,15 @@
   <!-- 迭代tableColumn组件，实现多级表头 -->
   <el-table-column
     v-if="fieldItem.children"
-    :label="fieldItem.label"
-    :align="fieldItem.align || 'center'"
     v-bind="{
+      align: 'center',
       resizable: true,
       ...fieldItem,
     }"
   >
     <tableColumn
       v-for="column in fieldItem.children"
-      :key="column.prop || column.label"
+      :key="column.label + column.prop"
       :fieldItem="column"
       :rules="rules"
       :allOptions="allOptions"
@@ -28,13 +27,21 @@
   <!-- 操作列 -->
   <el-table-column
     v-else-if="fieldItem.type === 'operation'"
-    align="center"
-    :width="fieldItem.width || (fieldItem.tableButtons || []).length * 70"
-    label="操作"
-    fixed="right"
-    v-bind="fieldItem"
-    :key="fieldItem.type"
+    v-bind="{
+      label: '操作',
+      fixed: 'right',
+      align: 'center',
+      resizable: true,
+      width: (fieldItem.tableButtons || []).length * 70,
+      ...fieldItem,
+    }"
   >
+    <!-- 表头插槽 -->
+    <template v-slot:header="scope" v-if="fieldItem.headerSlotName">
+      <slot :name="fieldItem.headerSlotName" v-bind="{ ...scope, fieldItem }">
+        {{ fieldItem.label || '操作' }}
+      </slot>
+    </template>
     <template v-slot="{ row, column, $index }">
       <ws-buttons
         isLinkButton
@@ -45,17 +52,6 @@
           <slot :name="name" v-bind="{ ...scope, fieldItem }"></slot>
         </template>
       </ws-buttons>
-    </template>
-  </el-table-column>
-  <!-- 特殊列，如复选框，序号列 -->
-  <el-table-column
-    align="center"
-    v-else-if="fieldItem.type"
-    v-bind="fieldItem"
-    :key="fieldItem.type + 'special'"
-  >
-    <template v-if="fieldItem.slotName" v-slot="scope">
-      <slot :name="fieldItem.slotName" v-bind="{ ...scope, fieldItem }"> </slot>
     </template>
   </el-table-column>
   <!-- 内容列 -->
@@ -83,10 +79,11 @@
       </template>
     </template>
     <!-- 内容插槽 -->
-    <template v-slot="{ row, column, $index }">
-      <!-- 判断是否是el-form-item元素 -->
-      <!-- :is="fieldItem.required ? 'el-form-item' : 'div'"
-      :class="{ overflow_tip: fieldItem.showOverflowTooltip }" -->
+    <template
+      v-slot="{ row, column, $index }"
+      v-if="!fieldItem.type || (fieldItem.type && fieldItem.slotName)"
+    >
+      <!-- 表单元素 -->
       <el-form-item
         v-if="fieldItem.component"
         :prop="`${row.prop__table}.${fieldItem.prop}`"
@@ -101,64 +98,53 @@
             {{ row[fieldItem.prop] }}
           </slot>
         </template>
-        <!-- 输入框模式 allowToggle控制是否能够双击切换-->
-        <template
-          v-else-if="
-            fieldItem.component === 'el-input' && fieldItem.allowToggle
-          "
-        >
-          <div
-            style="min-height: 23px"
-            v-if="!(property === fieldItem.prop && index === $index)"
-            @dblclick="toggleInput(row, column, $index)"
-            class="overflow_tip"
-          >
-            {{ row[fieldItem.prop] }}
-          </div>
+        <template v-else>
+          <!-- 表单元素显示 -->
           <component
-            v-else
-            size="mini"
+            v-if="
+              !fieldItem.allowToggle ||
+              (fieldItem.allowToggle &&
+                property === fieldItem.prop &&
+                index === $index)
+            "
             :is="fieldItem.component"
-            :disabled="row[fieldItem.disabledKey]"
-            v-bind="getAttrs(fieldItem, row)"
-            v-focus
-            :value="row[fieldItem.prop]"
+            v-bind="{
+              size: 'mini',
+              'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+              disabled: row[fieldItem.disabledKey],
+              ...getAttrs(fieldItem, row),
+            }"
+            v-focus="fieldItem.allowToggle"
+            v-model="row[fieldItem.prop]"
             @change="fieldItemChange(fieldItem, row)"
             @blur="handleBlur(row, fieldItem)"
             @input="handleInput($event, row, fieldItem)"
           >
+            <template v-if="fieldItem.component === 'el-select'">
+              <el-option
+                v-for="item in allOptions[fieldItem.prop]"
+                :key="item.label"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </template>
           </component>
+          <!--allowToggle控制是否能够双击切换-->
+          <ws-tooltip
+            placement="top"
+            :content="getComponentShowValue(row, fieldItem)"
+            overflow
+            v-else
+          >
+            <div
+              style="min-height: 23px"
+              @dblclick="toggleInput(row, column, $index)"
+              class="overflow_tip"
+            >
+              {{ getComponentShowValue(row, fieldItem) }}
+            </div>
+          </ws-tooltip>
         </template>
-        <!-- 表单元素模式 -->
-        <component
-          v-else
-          size="mini"
-          :is="fieldItem.component"
-          :disabled="row[fieldItem.disabledKey]"
-          :popper-class="fieldItem.timeDisabled ? 'hideCurrent' : ''"
-          v-bind="getAttrs(fieldItem, row)"
-          v-model="row[fieldItem.prop]"
-          @change="fieldItemChange(fieldItem, row)"
-          @blur="
-            fieldItem.component === 'el-input'
-              ? handleBlur(row, fieldItem)
-              : undefined
-          "
-          @input="
-            fieldItem.component === 'el-input'
-              ? handleInput($event, row, fieldItem)
-              : undefined
-          "
-        >
-          <template v-if="fieldItem.component === 'el-select'">
-            <el-option
-              v-for="item in allOptions[fieldItem.prop]"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </template>
-        </component>
       </el-form-item>
       <!-- 格式化 -->
       <template v-else-if="fieldItem.formatter">{{
@@ -190,12 +176,15 @@ import {
   getMaxValidator,
   getMinValidator,
   getRandomId,
+  format,
 } from '../../utils/util'
 import wsButtons from '../../ws-buttons/index.vue'
+import wsTooltip from '../../ws-tooltip/index.vue'
 export default {
   name: 'tableColumn',
   components: {
     wsButtons,
+    wsTooltip,
   },
   props: {
     fieldItem: {
@@ -233,7 +222,18 @@ export default {
   data() {
     return {
       temRow: {},
+      property: '',
+      index: '',
     }
+  },
+  //自定义指令
+  directives: {
+    focus: {
+      inserted: function (el, { value }) {
+        if (!value) return
+        el.querySelector('input').focus()
+      },
+    },
   },
   methods: {
     getAttrs,
@@ -282,8 +282,10 @@ export default {
     // input框失焦处理
     handleBlur(row, fieldItem) {
       const { prop, blurHandler: handler } = fieldItem
-      this.index = ''
-      this.property = ''
+      setTimeout(() => {
+        this.property = ''
+        this.index = ''
+      }, 100)
       // 如果前后值相同则不处理
       if (row[prop] == this.temRow[prop]) {
         return
@@ -300,8 +302,6 @@ export default {
       if (typeof handler === 'function') {
         const newValue = handler(value)
         row[prop] = newValue
-      } else {
-        row[prop] = value
       }
     },
     // 表格内复选框变更
@@ -311,6 +311,23 @@ export default {
         fieldItem,
         row,
       })
+    },
+    // 获取组件模式对用的值
+    getComponentShowValue(row, fieldItem) {
+      if (!row[fieldItem.prop]) return fieldItem.placeholder || this.placeholder
+      const { prop, componentAttrs, component, formatter } = fieldItem
+      if (formatter) {
+        return formatter(row[prop])
+      }
+      if (component === 'el-date-picker') {
+        return format(new Date(row[prop]), componentAttrs.format)
+      }
+      if (component === 'el-select') {
+        const options = this.allOptions[prop] || []
+        const option = options.find((item) => item.value === row[prop])
+        return option ? option.label : ''
+      }
+      return row[prop]
     },
   },
 }
@@ -331,5 +348,14 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
+}
+.el-table__cell {
+  .el-form-item {
+    width: 100%;
+    /deep/ .el-form-item__content {
+      width: 100%;
+    }
+  }
 }
 </style>

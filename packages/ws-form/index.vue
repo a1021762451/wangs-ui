@@ -12,10 +12,13 @@
           : undefined,
       }"
       ref="formRef"
-      label-width="auto"
-      :model="formData"
-      :rules="rules"
-      v-bind="{ 'validate-on-rule-change': false, ...$attrs }"
+      v-bind="{
+        rules,
+        model: formData,
+        'label-width': 'auto',
+        'validate-on-rule-change': false,
+        ...$attrs,
+      }"
       v-on="$listeners"
     >
       <el-row :gutter="gutter" type="flex">
@@ -56,7 +59,6 @@
             <component
               v-if="fieldItem.component"
               :is="fieldItem.component"
-              :popper-class="fieldItem.timeDisabled ? 'hideCurrent' : ''"
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
               @blur="
@@ -69,7 +71,10 @@
                   ? handleInput($event, formData, fieldItem)
                   : undefined
               "
-              v-bind="getAttrs(fieldItem, formData, isDetail)"
+              v-bind="{
+                'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+                ...getAttrs(fieldItem, formData, isDetail)
+              }"
             >
               <template v-if="fieldItem.component === 'el-select'">
                 <el-option
@@ -342,7 +347,7 @@ export default {
     },
     showButtons() {
       // this.configList.length > 0 &&
-      return  this.buttonsList.length > 0
+      return this.buttonsList.length > 0
     },
   },
   mounted() {

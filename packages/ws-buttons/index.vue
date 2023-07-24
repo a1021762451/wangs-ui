@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-01 13:19:13
+ * @LastEditTime: 2023-07-24 16:50:25
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -18,10 +18,10 @@
         <el-link
           v-if="buttonItem.component === 'el-link' || isLinkButton"
           class="button-item"
-          :size="size"
           :key="buttonItem.method"
-          :type="buttonItem.type || 'primary'"
           v-bind="{
+            size,
+            type: 'primary',
             underline: false,
             ...buttonItem,
           }"
@@ -32,9 +32,11 @@
           v-if="buttonItem.component === 'el-button' || !isLinkButton"
           class="button-item"
           :key="buttonItem.label"
-          :size="size"
-          :type="buttonItem.type || 'primary'"
-          v-bind="buttonItem"
+          v-bind="{
+            size,
+            type: 'primary',
+            ...buttonItem,
+          }"
           @click="$emit('happenEvent', buttonItem)"
           >{{ buttonItem.label }}</el-button
         >

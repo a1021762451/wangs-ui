@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-14 11:15:45
+ * @LastEditTime: 2023-07-24 16:55:47
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -46,14 +46,14 @@
       <el-tree
         ref="tree"
         class="tree-ele"
-        highlight-current
         :style="{ backgroundColor }"
-        :filter-node-method="
-          excludeFirstSearch ? excludeFirstSearchFilterNode : filterNode
-        "
         @node-contextmenu="floderOption"
         v-bind="{
+          'filter-node-method': excludeFirstSearch
+            ? excludeFirstSearchFilterNode
+            : filterNode,
           'expand-on-click-node': false,
+          'highlight-current': true,
           ...$attrs,
           nodeKey,
           data: treeData,

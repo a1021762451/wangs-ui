@@ -2,16 +2,18 @@
   <div class="table-container">
     <ws-form
       v-if="showSearch"
-      :formData="searchData"
       @update:formData="
         (params) => {
           $emit('update:searchData', params)
         }
       "
-      isSearchList
       @happenEvent="(params) => $emit('happenEvent', params)"
       style="margin-bottom: 10px"
-      v-bind="seachConfig"
+      v-bind="{
+        formData: searchData,
+        isSearchList: true,
+        ...seachConfig,
+      }"
     >
       <!-- 将父组件插槽内容转发给子组件 -->
       <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -51,14 +53,15 @@
     >
       <!-- 表格 -->
       <el-table
-        border
-        tooltip-effect="dark"
         style="width: 100%"
-        height="100%"
         :data="tableForm.tableData"
         v-loading="loading"
         v-bind="{
           rowKey,
+          stripe: true,
+          border: true,
+          height: '100%',
+          'header-cell-style': { background: '#f3f3f3' },
           ...$attrs,
         }"
         @select="select"
@@ -79,7 +82,7 @@
         <!-- 列遍历， 可实现嵌套 -->
         <tableColumn
           v-for="fieldItem in columns"
-          :key="fieldItem.prop || fieldItem.label"
+          :key="fieldItem.label + fieldItem.prop + fieldItem.type"
           :fieldItem="fieldItem"
           :rules="rules"
           :allOptions="allOptions"
@@ -202,6 +205,11 @@ export default {
       default: true,
       type: Boolean,
     },
+    // 显示搜索栏
+    showSearch: {
+      default: false,
+      type: Boolean,
+    },
     // 表格单元格占位
     placeholder: {
       default: '',
@@ -213,21 +221,10 @@ export default {
       type: Boolean,
     },
   },
-  //自定义指令
-  directives: {
-    focus: {
-      inserted: function (el) {
-        el.querySelector('input').focus()
-      },
-    },
-  },
   data() {
     return {
       columns: [], // 列数据
       cloneColunms: [], // 复制列数据，用于列筛选
-      // 用于表格input组件
-      property: '',
-      index: '',
       // 用于el-from模式
       tableForm: {
         tableData: [],
@@ -291,9 +288,6 @@ export default {
       return utils.filter((item) => {
         return this.utilsList.includes(item.method)
       })
-    },
-    showSearch() {
-      return Object.keys(this.seachConfig).length
     },
     treeProps() {
       return this.$attrs['tree-props'] || {}

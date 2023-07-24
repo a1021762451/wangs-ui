@@ -11,6 +11,7 @@
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   padding: 20px;
+  height: calc(100vh - 60px);
 }
 
 nav {
