@@ -94,12 +94,12 @@ export default {
       if (this.data[0].data) {
         const arr = []
         this.data.forEach((item) => {
-          const subarr = this[callback](item.data, this.value)
+          const subarr = this[callback](item.data)
           arr.push(...subarr)
         })
         return arr
       }
-      return this[callback](this.data, this.allValue)
+      return this[callback](this.data)
     },
   },
   computed: {

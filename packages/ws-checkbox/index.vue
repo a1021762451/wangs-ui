@@ -20,7 +20,6 @@
       v-for="(item, index) in data"
       v-model="item.value"
       :key="item.name + String(index)"
-      :allValue="value"
       :props="props"
       @change="handleChange"
       @indeterminateChange="
