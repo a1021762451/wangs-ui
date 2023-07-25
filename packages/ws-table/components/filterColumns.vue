@@ -4,7 +4,7 @@
       :defaultCheckedData="defaultCheckedData"
       :checkboxData="checkboxData"
       :span="8"
-      allowControl
+      allowCheckAll
       ref="wsCheckbox"
     ></ws-checkbox>
     <div class="operation">

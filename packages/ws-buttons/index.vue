@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-24 16:50:25
+ * @LastEditTime: 2023-07-25 09:20:11
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -14,33 +14,21 @@
         :name="buttonItem.slotName"
         :buttonItem="buttonItem"
       ></slot>
-      <template v-else>
-        <el-link
-          v-if="buttonItem.component === 'el-link' || isLinkButton"
-          class="button-item"
-          :key="buttonItem.method"
-          v-bind="{
-            size,
-            type: 'primary',
-            underline: false,
-            ...buttonItem,
-          }"
-          @click="$emit('happenEvent', buttonItem)"
-          >{{ buttonItem.label }}</el-link
-        >
-        <el-button
-          v-if="buttonItem.component === 'el-button' || !isLinkButton"
-          class="button-item"
-          :key="buttonItem.label"
-          v-bind="{
-            size,
-            type: 'primary',
-            ...buttonItem,
-          }"
-          @click="$emit('happenEvent', buttonItem)"
-          >{{ buttonItem.label }}</el-button
-        >
-      </template>
+      <component
+        v-else
+        :is="buttonItem.component || (isLinkButton ? 'el-link' : 'el-button')"
+        class="button-item"
+        :key="buttonItem.method + buttonItem.label"
+        v-bind="{
+          size,
+          type: 'primary',
+          underline: false,
+          ...buttonItem,
+        }"
+        @click="$emit('happenEvent', buttonItem)"
+      >
+        {{ buttonItem.label }}
+      </component>
     </template>
     <slot></slot>
   </div>

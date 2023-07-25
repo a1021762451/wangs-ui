@@ -12,19 +12,22 @@
       <span class="title">全选</span>
       <el-checkbox
         :indeterminate="isIndeterminate"
-        v-model="checkAll"
+        v-model="isCheckAll"
         @change="toggleAllSelection"
       ></el-checkbox>
     </div>
     <wsCheckboxItem
-      v-for="(item, index) in checkboxData"
-      :key="index"
-      :defaultCheckedData="defaultCheckedDataAfter"
+      v-for="(item, index) in data"
+      v-model="item.value"
+      :key="item.name + String(index)"
+      :allValue="value"
       :props="props"
-      :noChangeCheckedValues="getNoChangeCheckedValues(item.data)"
-      :noChangeNoCheckedValues="getNoChangeNoCheckedValues(item.data)"
-      :allowChangeValues="getAllowChangeValues(item.data)"
       @change="handleChange"
+      @indeterminateChange="
+        (params) => {
+          $emit('indeterminateItemChange', { ...params, $index: index })
+        }
+      "
       v-bind="{
         ...item,
         ...$attrs,
@@ -34,199 +37,50 @@
 </template>
 
 <script>
-import { deepClone } from '../utils/util'
 import wsCheckboxItem from './components/ws-checkbox-item'
+import mixins from './mixins'
 export default {
   name: 'ws-checkbox',
   components: { wsCheckboxItem },
-  data() {
-    return {
-      checkedData: [],
-      defaultCheckedDataAfter: [],
-      isIndeterminate: false,
-      checkAll: false,
-    }
-  },
+  mixins: [mixins],
   props: {
-    // 所有数据
-    checkboxData: {
-      type: Array,
-      default() {
-        return []
-      },
-    },
-    // 初始化数据
-    defaultCheckedData: {
-      type: Array,
-      default() {
-        return []
-      },
-    },
     // 全选方式
     selectAllMode: {
       default: '',
       type: String,
     },
-    // label和value字段在数据中的映射字段
-    props: {
-      default() {
-        return {
-          label: 'label',
-          value: 'value',
-        }
-      },
-    },
-  },
-  watch: {
-    // 根据被勾选的数据判断
-    defaultCheckedData() {
-      this.init()
-    },
-  },
-  created() {
-    this.init()
-  },
-  computed: {
-    labelField() {
-      return this.props.label
-    },
-    valueField() {
-      return this.props.value
-    },
-    // 不允许变更的已勾选数据
-    noChangeCheckedValues() {
-      const arr = []
-      this.checkboxData.forEach((item) => {
-        const subarr = this.getNoChangeCheckedValues(item.data)
-        arr.push(...subarr)
-      })
-      return arr
-    },
-    // 允许变更的数据
-    allowChangeValues() {
-      const arr = []
-      this.checkboxData.forEach((item) => {
-        const subarr = this.getAllowChangeValues(item.data)
-        arr.push(...subarr)
-      })
-      return arr
-    },
   },
   methods: {
     init() {
-      this.defaultCheckedDataAfter = deepClone(this.defaultCheckedData)
-      this.checkedData = deepClone(this.defaultCheckedData)
-      this.judgeIsIndeterminate()
-    },
-    // 处理变更
-    handleChange(checkedData, notCheckedData) {
-      // 需要添加的
-      checkedData.forEach((item) => {
-        const findInd = this.checkedData.findIndex(
-          (nextitem) => item === nextitem
-        )
-        findInd == -1 && this.checkedData.push(item)
-      })
-      // 需要删除的
-      notCheckedData.forEach((item) => {
-        const findInd = this.checkedData.findIndex(
-          (nextitem) => item === nextitem
-        )
-        findInd !== -1 && this.checkedData.splice(findInd, 1)
+      // 动态添加value属性
+      this.data.forEach((item) => {
+        const itemAllId = item.data.map((item) => item[this.valueKey])
+        const arr = this.judgeArrayContain(this.value, itemAllId)
+        this.$set(item, 'value', arr)
       })
       this.judgeIsIndeterminate()
-      this.$emit('handleChange', {
-        checkAll: this.checkAll,
-        isIndeterminate: this.isIndeterminate,
-      })
     },
-    // 是否全选
-    toggleAllSelection(state) {
-      this.checkedData = state
-        ? [...this.noChangeCheckedValues, ...this.allowChangeValues]
-        : [...this.noChangeCheckedValues]
-      this.defaultCheckedDataAfter = deepClone(this.checkedData)
-      this.isIndeterminate = false
-    },
-    // 获取勾选id
-    getAllCheckedValues() {
-      return this.checkedData
-    },
-    // 获取勾选项
-    getAllCheckedItems() {
-      const arr = []
-      this.checkboxData.forEach((item) => {
-        item.data.forEach((nextitem) => {
-          if (this.checkedData.includes(nextitem[this.valueField])) {
-            arr.push(nextitem)
-          }
-        })
+    // 判断数组包含关系
+    judgeArrayContain(father, son) {
+      const arr = father.filter((item) => {
+        return son.includes(item)
       })
       return arr
     },
-    // 按组获取勾选id
-    getAllCheckedValuesByGroup(isIds = true) {
-      const groub = []
-      this.checkboxData.forEach((item) => {
-        const items = []
-        item.data.forEach((nextitem) => {
-          if (this.checkedData.includes(nextitem[this.valueField])) {
-            items.push(isIds ? nextitem[this.valueField] : nextitem)
-          }
-        })
-        groub.push({
-          name: item.name,
-          data: items,
-        })
+    // 处理变更
+    handleChange() {
+      const arr = []
+      this.data.forEach((item) => {
+        arr.push(...item.value)
       })
-      return groub
+      this.$emit('change', arr)
     },
-    // 按组获取勾选项
-    getAllCheckedItemsByGroup() {
-      return this.getAllCheckedValuesByGroup(false)
-    },
-    // 判断全选状态
-    judgeIsIndeterminate() {
-      let checkedCount = this.checkedData.filter((item) => {
-        return this.allowChangeValues.includes(item)
-      }).length
-      const needCount = this.allowChangeValues.length
-      this.checkAll = checkedCount === needCount
-      this.isIndeterminate = checkedCount > 0 && checkedCount < needCount
-    },
-    // 获取不允许变更的已勾选数据
-    getNoChangeCheckedValues(data) {
-      if (!this.defaultCheckedData.length) return []
-      return this.getValues(
-        data,
-        (item) =>
-          item.disabled &&
-          this.defaultCheckedData.includes(item[this.valueField])
-      )
-    },
-    // 获取不允许变更的未勾选数据
-    getNoChangeNoCheckedValues(data) {
-      if (!this.defaultCheckedData.length) return []
-      return this.getValues(
-        data,
-        (item) =>
-          item.disabled &&
-          !this.defaultCheckedData.includes(item[this.valueField])
-      )
-    },
-    // 获取允许变更的数据
-    getAllowChangeValues(data) {
-      return this.getValues(data, (item) => !item.disabled)
-    },
-    // 获取data中的值
-    getValues(data, conditionFn) {
-      return data
-        .filter((item) => {
-          return conditionFn(item)
-        })
-        .map((item) => {
-          return item[this.valueField]
-        })
+    // 是否全选
+    toggleAllSelection(flag) {
+      const arr = flag
+        ? [...this.noChangeCheckedValue, ...this.changeValue]
+        : [...this.noChangeCheckedValue]
+      this.$emit('change', arr)
     },
   },
 }

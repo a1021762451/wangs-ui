@@ -3,35 +3,22 @@
  * @Author: wang shuai
  * @Date: 2023-03-10 10:25:35
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-03-22 12:44:08
+ * @LastEditTime: 2023-07-25 14:38:56
 -->
 <template>
-  <div>
-    <el-button type="primary" size="default" @click="getChecked(1)"
-      >getChecked(1)</el-button
-    >
-    <el-button type="primary" size="default" @click="getChecked(2)"
-      >getChecked(2)</el-button
-    >
-    <el-button type="primary" size="default" @click="getChecked(3)"
-      >getChecked(3)</el-button
-    >
-    <el-button type="primary" size="default" @click="getChecked(4)"
-      >getChecked(4)</el-button
-    >
-    <ws-checkbox
-      allowControl
-      selectAllMode="checkbox"
-      :defaultCheckedData="defaultCheckedData"
-      :checkboxData="checkboxData"
-      :span="6"
-      ref="wsCheckbox"
-      :props="{
-        label: 'label',
-        value: 'id',
-      }"
-    ></ws-checkbox>
-  </div>
+  <ws-checkbox
+    ref="wsCheckbox"
+    selectAllMode="checkbox"
+    v-model="defaultCheckedData"
+    @change="change"
+    @indeterminateChange="indeterminateChange"
+    :data="checkboxData"
+    :span="6"
+    :props="{
+      label: 'label',
+      value: 'id',
+    }"
+  ></ws-checkbox>
 </template>
 
 <script>
@@ -49,6 +36,7 @@ export default {
               disabled: index % 2 === 0,
             }
           }),
+          allowCheckAll: true
         },
         {
           name: '二组',
@@ -59,29 +47,27 @@ export default {
               disabled: index % 2 === 1,
             }
           }),
+          allowCheckAll: true
         },
       ],
-      defaultCheckedData: ['一组3号 - id', '一组4号 - id', '一组10号 - id','一组15号 - id', '二组3号 - id', '二组4号 - id', '二组10号 - id','二组15号 - id'],
+      defaultCheckedData: [
+        '一组3号 - id',
+        '一组4号 - id',
+        '一组10号 - id',
+        '一组15号 - id',
+        '二组3号 - id',
+        '二组4号 - id',
+        '二组10号 - id',
+        '二组15号 - id',
+      ],
     }
   },
   methods: {
-    getChecked(type) {
-      switch (type) {
-        case 1:
-          console.log(this.$refs.wsCheckbox.getAllCheckedValues())
-          break
-        case 2:
-          console.log(this.$refs.wsCheckbox.getAllCheckedItems())
-          break
-        case 3:
-          console.log(this.$refs.wsCheckbox.getAllCheckedValuesByGroup())
-          break
-        case 4:
-          console.log(this.$refs.wsCheckbox.getAllCheckedItemsByGroup())
-          break
-        default:
-          break
-      }
+    change(val) {
+      console.log(val, 'change')
+    },
+    indeterminateChange(val) {
+      console.log(val, 'indeterminateChange')
     },
   },
 }
