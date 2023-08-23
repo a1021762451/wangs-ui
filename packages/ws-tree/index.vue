@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-24 16:55:47
+ * @LastEditTime: 2023-08-23 10:10:22
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -89,7 +89,9 @@
                 }"
               >
                 <i
-                  v-for="item in filterButtonsFn(operationsList, data, node)"
+                  v-for="item in filterButtonsFn
+                    ? filterButtonsFn(operationsList, optionData, node)
+                    : operationsList"
                   :key="item.label"
                   @click.stop="happenEvent(data, node, item)"
                   :class="`${item.icon}`"
@@ -227,11 +229,6 @@ export default {
       default: true,
       type: Boolean,
     },
-    // 数据
-    data: {
-      default: () => [],
-      type: Array,
-    },
     // 结点是否禁用的回调函数
     disabledFn: {
       type: Function,
@@ -239,6 +236,15 @@ export default {
     // 过滤操作按钮
     filterButtonsFn: {
       type: Function,
+    },
+    // 数据
+    data: {
+      default: () => [],
+      type: Array,
+    },
+    currentNodeKey: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -302,13 +308,24 @@ export default {
     },
     data: {
       handler(val) {
-        const data = this.data
-        this.treeData = this.dataIsFlat ? flatToTree(data, this.props) : data
+        const data = this.data || []
+        this.treeData = this.dataIsFlat
+          ? flatToTree(data, this.props, this.nodeKey)
+          : data
       },
       immediate: true,
     },
     extraOperations(val) {
       this.filterButtons()
+    },
+    currentNodeKey: {
+      handler(val) {
+        val &&
+          this.$nextTick(() => {
+            this.setCurrentKey(val)
+          })
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -375,10 +392,30 @@ export default {
     },
     // 判断节点是否禁用
     judgeDisabled(data, node) {
-      let disabled =
-        data.disabled ||
-        (typeof this.disabledFn === 'function' && this.disabledFn(data, node))
-      this.$set(data, 'disabled', disabled)
+      // 方案一, 可以利用节点的属性进行判断，包括isLeaf等
+      if (data.hasOwnProperty('disabled')) {
+        return data.disabled
+      }
+      if (typeof this.disabledFn === 'function') {
+        const disabled = this.disabledFn(data, node)
+        this.$set(data, 'disabled', disabled)
+        return disabled
+      }
+      return false
+      // 方案二--放弃，因为不能利用节点属性
+    //   if (!this.dataIsFlat) data = treeDataFlat(data, this.props, this.nodeKey)
+    //   data.forEach((item) => {
+    //     // 自带disabled权限最高
+    //     if (item.hasOwnProperty('disabled')) {
+    //       return
+    //     }
+    //     // 有disabledFn则执行
+    //     let disabled = false
+    //     if (typeof this.disabledFn === 'function') {
+    //       disabled = this.disabledFn(item, node)
+    //     }
+    //     this.$set(item, 'disabled', disabled)
+    //   })
     },
     // 滚动隐藏菜单
     scroll() {

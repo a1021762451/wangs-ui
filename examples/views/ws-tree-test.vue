@@ -3,14 +3,14 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-14 13:28:09
+ * @LastEditTime: 2023-08-23 10:10:39
 -->
 <template>
   <ws-tree
     showCheckbox
     draggable
     excludeFirstSearch
-    changeMode="contextMenu"
+    changeMode="hover"
     style="height: 300px; width: 240px"
     textEllipsis
     default-expand-all
@@ -19,6 +19,8 @@
     :data="treeData"
     :filterButtonsFn="filterButtonsFn"
     :disabledFn="disabledFn"
+    current-node-key="9"
+    :default-checked-keys="['9', '10']"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"

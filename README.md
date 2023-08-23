@@ -24,7 +24,7 @@ Vue.use(wangsUi)
 
 - 配置化开发
 - 带有搜索栏，分页栏
-- 嵌套 el-form 组件，支持单行和多行校验表单元素
+- 嵌套 el-form 组件，支持单行和多行校验表单元素, 支持双击切换表单元素
 - 可根据列内容自适应宽度
 - 封装工具栏，支持表格纯前端下载、列勾选功能
 - 保留`elementui el-table`原有功能
@@ -233,18 +233,22 @@ const allOptions = {
 
 #### 组件方法
 
-| 事件名           | 说明                     | 参数                                            |
-| ---------------- | ------------------------ | ----------------------------------------------- |
-| validateRow      | 校验单行                 | row：行数据                                     |
-| validateAll      | 校验全部行               | -                                               |
-| getRowsByRowKeys | 根据 id 数组获取多行数据 | rowKeys：id 数组                                |
-| getSelection     | 获取选中行               | -                                               |
-| setSelection     | 设置选择行               | selection: id 数组或者 row 数组, flag：是否选中 |
+| 事件名           | 说明                                | 参数                                            |
+| ---------------- | ----------------------------------- | ----------------------------------------------- |
+| validateRow      | 校验单行                            | row：行数据                                     |
+| validateAll      | 校验全部行                          | -                                               |
+| getRowsByRowKeys | 根据 id 数组获取多行数据,支持树结构 | rowKeys：id 数组                                |
+| getSelection     | 获取选中行                          | -                                               |
+| setSelection     | 设置选择行(处理了树形表格多选逻辑)  | selection: id 数组或者 row 数组, flag：是否选中 |
 
 #### slot 插槽
 
 tableColumns 配置 slotName 和 headerSlotName
 ，也支持按钮组 ws-buttons 配置的插槽
+
+#### 组件图片
+
+![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-table.png)
 
 ### ws-form
 
@@ -385,6 +389,11 @@ export const formConfigList = [
 
 formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
+#### 组件图片
+
+![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-form.png)
+![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-form-search.png)
+
 ### ws-tree
 
 #### 特点
@@ -437,34 +446,18 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
 #### 组件事件
 
-| 事件名  | 说明         | 参数                        |
-| ------- | ------------ | --------------------------- |
-| search  | 树搜索       | 搜索值                      |
-| nodeAdd | 依据节点新建 | node(树节点)/data(节点数据) |
-| delete  | 删除         | node(树节点)/data(节点数据) |
-| edit    | 编辑         | node(树节点)/data(节点数据) |
-| freeAdd | 任意新建节点 | node(树节点)/data(节点数据) |
+| 事件名      | 说明           | 参数      |
+| ----------- | -------------- | --------- |
+| happenEvent | 行按钮点击事件 | eventData |
 
-#### ws-table
-
-![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-table.png)
-
-#### ws-form-普通模式
-
-![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-form.png)
-
-#### ws-form-搜索模式
-
-![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-form-search.png)
-
-#### ws-checkbox
-
-![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-checkbox.png)
-
-#### ws-tree
+#### 组件图片
 
 ![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-tree.png)
 
-#### ws-echarts
+### ws-checkbox
+
+![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-checkbox.png)
+
+### ws-echarts
 
 ![](https://ws-ui.oss-cn-beijing.aliyuncs.com/ws-echarts.png)
