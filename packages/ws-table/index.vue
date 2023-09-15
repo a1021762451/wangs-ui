@@ -7,7 +7,7 @@
           $emit('update:searchData', params)
         }
       "
-      @happenEvent="(params) => $emit('happenEvent', params)"
+      @happenEvent="happenEvent"
       style="margin-bottom: 10px"
       v-bind="{
         formData: searchData,
@@ -61,7 +61,6 @@
           stripe: true,
           border: true,
           height: '100%',
-          'header-cell-style': { background: '#f3f3f3' },
           ...$attrs,
         }"
         @select="select"
@@ -88,7 +87,7 @@
           :allOptions="allOptions"
           :filterButtons="filterButtons"
           :placeholder="placeholder"
-          @happenEvent="(params) => $emit('happenEvent', params)"
+          @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
           <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -364,6 +363,11 @@ export default {
       this.$emit('happenEvent', {
         buttonItem: { method: 'search' },
       })
+    },
+    happenEvent(params) {
+      if (params.buttonItem.method === 'search')
+        this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+      this.$emit('happenEvent', params)
     },
     // 遍历列的所有内容，获取最宽一列的宽度
     getMaxLength(arr) {
