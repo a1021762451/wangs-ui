@@ -9,7 +9,7 @@ export const list = [
   'ws-fold',
   'test',
 ]
-// 按钮组配置同tableButtons
+// 按钮组配置同buttonConfigList
 export const formButtons = [
   {
     method: 'export',
@@ -281,7 +281,7 @@ export const tableColumns = [
   },
   {
     type: 'operation',
-    tableButtons: [
+    buttonConfigList: [
       {
         method: 'validateRow',
         label: '单验',
@@ -289,6 +289,14 @@ export const tableColumns = [
       {
         method: 'validateAll',
         label: '全验',
+      },
+      {
+        method: 'edit',
+        label: '编辑',
+      },
+      {
+        method: 'notEdit',
+        label: '不编辑',
       },
     ],
   },

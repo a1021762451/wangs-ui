@@ -8,13 +8,18 @@
     :data="tableData"
     :tableColumns="tableColumns"
     :allOptions="allOptions"
-    :utilsList="['setColumms', 'download']"
     :pageInfo.sync="pageInfo"
     :searchData.sync="formData"
+    :operationConfig="{
+      buttonConfigList: formButtons,
+    }"
     :seachConfig="{
       formConfigList,
-      formButtons,
+      buttonConfigList: formButtons,
       allOptions,
+    }"
+    :switchConfig="{
+      switchMode: 'rowControl',
     }"
     @happenEvent="happenEvent"
     @selection-change="selectionChange"
@@ -225,6 +230,12 @@ export default {
     selectionChange(selection) {
       console.log('selectionChange', selection)
       this.selection = selection
+    },
+    edit({ row }) {
+      this.$refs.wsTable.switchStatus(row, true)
+    },
+    notEdit({ row }) {
+      this.$refs.wsTable.switchStatus(row, false)
     },
   },
 }

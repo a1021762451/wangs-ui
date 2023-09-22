@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-25 09:20:11
+ * @LastEditTime: 2023-09-21 15:06:18
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -20,7 +20,7 @@
         class="button-item"
         :key="buttonItem.method + buttonItem.label"
         v-bind="{
-          size,
+          size: buttonSize,
           type: 'primary',
           underline: false,
           ...buttonItem,
@@ -51,7 +51,7 @@ export default {
       default: false,
     },
     // 按钮组尺寸
-    size: {
+    buttonSize: {
       default: 'small',
       type: String,
     },

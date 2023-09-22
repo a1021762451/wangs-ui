@@ -9,7 +9,7 @@ export const list = [
   'ws-fold',
   'test',
 ]
-// 按钮组配置同tableButtons
+// 按钮组配置同buttonConfigList
 export const formButtons = [
   {
     method: 'export',
@@ -225,7 +225,7 @@ export const tableColumns = [
     type: 'operation',
     label: '操作',
     width: 150,
-    tableButtons: [
+    buttonConfigList: [
       {
         method: 'gobackLastVersion',
         label: '返回上一版本',
@@ -303,7 +303,7 @@ export const tableColumnsRight = [
   //   type: 'operation',
   //   label: '操作',
   //   width: 150,
-  //   tableButtons: [
+  //   buttonConfigList: [
   //     {
   //       method: 'gobackLastVersion',
   //       label: '返回上一版本',

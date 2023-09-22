@@ -16,6 +16,7 @@
       :rules="rules"
       :allOptions="allOptions"
       :placeholder="placeholder"
+      :switchConfig="switchConfig"
       @happenEvent="(params) => $emit('happenEvent', params)"
     >
       <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -32,7 +33,7 @@
       fixed: 'right',
       align: 'center',
       resizable: true,
-      width: (fieldItem.tableButtons || []).length * 70,
+      width: (fieldItem.buttonConfigList || []).length * 70,
       ...fieldItem,
     }"
   >
@@ -44,9 +45,15 @@
     </template>
     <template v-slot="{ row, column, $index }">
       <ws-buttons
-        isLinkButton
-        :buttonConfigList="filterButtons(row, fieldItem.tableButtons || [])"
         @happenEvent="happenEvent($event, { row, column, $index })"
+        v-bind="{
+          isLinkButton: true,
+          ...fieldItem,
+          buttonConfigList: filterButtons(
+            row,
+            fieldItem.buttonConfigList || []
+          ),
+        }"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
           <slot :name="name" v-bind="{ ...scope, fieldItem }"></slot>
@@ -102,10 +109,11 @@
           <!-- 表单元素显示 -->
           <component
             v-if="
-              !fieldItem.allowToggle ||
-              (fieldItem.allowToggle &&
+              !switchMode ||
+              (switchMode === 'dblclick' &&
                 property === fieldItem.prop &&
-                index === $index)
+                index === $index) ||
+              (switchMode === 'rowControl' && row[switchKey])
             "
             :is="fieldItem.component"
             v-bind="{
@@ -114,7 +122,7 @@
               disabled: row[fieldItem.disabledKey],
               ...getAttrs(fieldItem, row),
             }"
-            v-focus="fieldItem.allowToggle"
+            v-focus="switchMode === 'dblclick'"
             v-model="row[fieldItem.prop]"
             @change="fieldItemChange(fieldItem, row)"
             @blur="handleBlur(row, fieldItem)"
@@ -208,8 +216,8 @@ export default {
     },
     // 过滤表格操作按钮
     filterButtons: {
-      default(row, tableButtons) {
-        return tableButtons
+      default(row, buttonConfigList) {
+        return buttonConfigList
       },
       type: Function,
     },
@@ -217,6 +225,24 @@ export default {
     placeholder: {
       default: '',
       type: String,
+    },
+    // 编辑配置
+    switchConfig: {
+      default() {
+        return {
+          // switchMode: '', // dblclick/rowControl
+          // switchKey: 'isEdit__table', // 切换键
+        }
+      },
+      type: Object,
+    },
+  },
+  computed: {
+    switchMode() {
+      return this.switchConfig.switchMode
+    },
+    switchKey() {
+      return this.switchConfig.switchKey || 'isEdit__table'
     },
   },
   data() {

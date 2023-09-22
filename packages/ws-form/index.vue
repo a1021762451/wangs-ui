@@ -11,7 +11,7 @@
           ? `translateY(-100%) translateY(${colHeight}px)`
           : undefined,
       }"
-      ref="formRef"
+      ref="form"
       v-bind="{
         rules,
         model: formData,
@@ -102,9 +102,9 @@
         >
           <ws-buttons
             :buttonConfigList="buttonsList"
+            :buttonSize="buttonSize"
             class="searchMode-ws-buttons"
             @happenEvent="happenEvent"
-            :size="buttonSize"
           >
             <template
               v-for="(index, name) in $scopedSlots"
@@ -140,8 +140,10 @@ import {
   getDefaultTime,
 } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
+import mixins from './mixins'
 export default {
   name: 'ws-form',
+  mixins: [mixins],
   components: { wsButtons },
   data() {
     return {
@@ -186,7 +188,7 @@ export default {
       type: Boolean,
     },
     // 按钮组配置
-    formButtons: {
+    buttonConfigList: {
       default() {
         return []
       },
@@ -273,7 +275,7 @@ export default {
       },
       immediate: true,
     },
-    formButtons: {
+    buttonConfigList: {
       handler() {
         if (this.isSearchList) {
           const defaultButtons = this.useDeafultButtons
@@ -289,9 +291,9 @@ export default {
                 },
               ]
             : []
-          this.buttonsList = [...defaultButtons, ...this.formButtons]
+          this.buttonsList = [...defaultButtons, ...this.buttonConfigList]
         } else {
-          this.buttonsList = [...this.formButtons]
+          this.buttonsList = [...this.buttonConfigList]
         }
       },
       immediate: true,
@@ -483,6 +485,9 @@ export default {
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  .searchMode-ws-buttons {
+    margin-right: 10px;
+  }
   /deep/ .el-form-item__content {
     margin-left: 0 !important;
   }

@@ -34,11 +34,27 @@
         ></i>
       </el-tooltip>
     </div>
+    <!-- 表格头部操作按钮 -->
+    <ws-buttons
+      v-if="
+        Array.isArray(operationConfig.buttonConfigList) &&
+        operationConfig.buttonConfigList.length
+      "
+      class="table-buttons"
+      @happenEvent="(buttonItem) => $emit('happenEvent', { buttonItem })"
+      v-bind="{
+        ...operationConfig,
+      }"
+    >
+      <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+        <slot :name="name" v-bind="{ ...scope }"></slot>
+      </template>
+    </ws-buttons>
     <!-- 表格 -->
     <component
       :is="
         columns.some((item) => {
-          return item.required
+          return item.component
         })
           ? 'el-form'
           : 'div'
@@ -87,6 +103,7 @@
           :allOptions="allOptions"
           :filterButtons="filterButtons"
           :placeholder="placeholder"
+          :switchConfig="switchConfig"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -180,8 +197,8 @@ export default {
     },
     // 过滤表格操作按钮
     filterButtons: {
-      default(row, tableButtons) {
-        return tableButtons
+      default(row, buttonConfigList) {
+        return buttonConfigList
       },
       type: Function,
     },
@@ -218,6 +235,23 @@ export default {
     checkStrictly: {
       default: false,
       type: Boolean,
+    },
+    // 表格头部操作按钮
+    operationConfig: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
+    // 编辑配置
+    switchConfig: {
+      default() {
+        return {
+          // switchMode: '', // dblclick/rowControl
+          // switchKey: 'isEdit__table', // 切换键
+        }
+      },
+      type: Object,
     },
   },
   data() {
@@ -297,6 +331,12 @@ export default {
     rowKey() {
       return this.$attrs['row-key'] || 'id'
     },
+    switchMode() {
+      return this.switchConfig.switchMode
+    },
+    switchKey() {
+      return this.switchConfig.switchKey || 'isEdit__table'
+    },
   },
   mounted() {
     window.addEventListener('resize', this.doLayout)
@@ -311,6 +351,10 @@ export default {
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {
           item.prop__table = `${prop__table}.${index}`
+          // 编辑模式下，增加切换键
+          this.switchMode === 'rowControl' &&
+            item[this.switchKey] === undefined &&
+            this.$set(item, this.switchKey, false)
           if (item.children) {
             iterateAddProp(
               item.children,
@@ -641,7 +685,11 @@ export default {
 /deep/ .el-date-editor.el-input {
   width: 100%;
 }
-
+/deep/ .table-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
 .table-container {
   display: flex;
   flex-direction: column;

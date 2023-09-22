@@ -163,7 +163,7 @@ export const tableColumns = [
   },
   {
     type: 'operation',
-    tableButtons: [
+    buttonConfigList: [
       {
         method: 'viewDetail',
         label: '查看',
@@ -186,44 +186,45 @@ const allOptions = {
 
 #### 组件属性
 
-| 参数           | 说明                                                     | 类型    | 可选值                                              | 默认值 |
-| -------------- | -------------------------------------------------------- | ------- | --------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                   | -      |
-| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                   | -      |
-| tableButtons   | 每行按钮组                                               | Array   | -                                                   | -      |
-| utilsList      | 工具栏                                                   | Array   | 'setColumms' - 对应列筛选 'download' - 对应表格下载 | -      |
-| showPagination | 展示分页组件                                             | Boolean | -                                                   | true   |
-| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                   | false  |
-| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                   | -      |
-| loading        | 加载样式                                                 | Boolean | -                                                   | false  |
-| placeholder    | 表格空单元占位                                           | String  | -                                                   | -      |
-| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                   | -      |
-| searchData     | 搜索栏数据                                               | Object  | -                                                   | -      |
+| 参数           | 说明                                                     | 类型    | 可选值                                               | 默认值 |
+| -------------- | -------------------------------------------------------- | ------- | ---------------------------------------------------- | ------ |
+| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                    | -      |
+| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                    | -      |
+| switchConfig   | 表单与普通内容切换的控制配置                             | Object  |                                                      | -      |
+| utilsList      | 工具栏                                                   | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
+| showPagination | 展示分页组件                                             | Boolean | -                                                    | true   |
+| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                    | false  |
+| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                    | -      |
+| loading        | 加载样式                                                 | Boolean | -                                                    | false  |
+| placeholder    | 表格空单元占位                                           | String  | -                                                    | -      |
+| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                    | -      |
+| searchData     | 搜索栏数据                                               | Object  | -                                                    | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
-| 参数           | 说明                                   | 类型     | 可选值 | 默认值 |
-| -------------- | -------------------------------------- | -------- | ------ | ------ |
-| slotName       | 对应列插槽名                           | String   | -      | -      |
-| headerSlotName | 对应列表头插槽名                       | String   | -      | -      |
-| children       | 多级表头配置                           | Array    | -      | -      |
-| formatter      | 同 el-table formatter                  | Function | -      | -      |
-| selfAdjust     | 列宽根据内容自调节                     | Boolean  | -      | false  |
-| component      | 组件名，用于表单组件                   | String   | -      | -      |
-| blurHandler    | el-input 组件失焦时值过滤              | Function | -      | -      |
-| inputHandler   | el-input 组件输入时值过滤              | Function | -      | -      |
-| required       | 是否必填                               | Boolean  | -      | false  |
-| alwaysVisible  | 列是否一直展示                         | Boolean  | -      | false  |
-| maxTimeProp    | 时间组件最大值对应的字段               | String   | -      | -      |
-| minTimeProp    | 时间组件最小值对应的字段               | String   | -      | -      |
-| minDate        | 固定的最小时间                         | String   | -      | -      |
-| maxDate        | 固定的最大时间                         | String   | -      | -      |
-| timeDisabled   | 时间限制精度是否到时分秒               | Boolean  | -      | -      |
-| minAllowEqual  | 允许和用于比较的最小时间相等, 精度到天 | Boolean  | -      | true   |
-| maxAllowEqual  | 允许和用于比较的最大时间相等, 精度到天 | Boolean  | -      | true   |
-| allowToggle    | 是否允许双击切换， 仅支持输入框        | Boolean  | -      | -      |
-| placeholder    | 表格空单元占位                         | String   | -      | -      |
-| componentAttrs | 组件对应的属性                         | Object   | -      | -      |
+| 参数             | 说明                                   | 类型     | 可选值 | 默认值 |
+| ---------------- | -------------------------------------- | -------- | ------ | ------ |
+| slotName         | 对应列插槽名                           | String   | -      | -      |
+| headerSlotName   | 对应列表头插槽名                       | String   | -      | -      |
+| children         | 多级表头配置                           | Array    | -      | -      |
+| formatter        | 同 el-table formatter                  | Function | -      | -      |
+| selfAdjust       | 列宽根据内容自调节                     | Boolean  | -      | false  |
+| component        | 组件名，用于表单组件                   | String   | -      | -      |
+| blurHandler      | el-input 组件失焦时值过滤              | Function | -      | -      |
+| inputHandler     | el-input 组件输入时值过滤              | Function | -      | -      |
+| required         | 是否必填                               | Boolean  | -      | false  |
+| alwaysVisible    | 列是否一直展示                         | Boolean  | -      | false  |
+| maxTimeProp      | 时间组件最大值对应的字段               | String   | -      | -      |
+| minTimeProp      | 时间组件最小值对应的字段               | String   | -      | -      |
+| minDate          | 固定的最小时间                         | String   | -      | -      |
+| maxDate          | 固定的最大时间                         | String   | -      | -      |
+| timeDisabled     | 时间限制精度是否到时分秒               | Boolean  | -      | -      |
+| minAllowEqual    | 允许和用于比较的最小时间相等, 精度到天 | Boolean  | -      | true   |
+| maxAllowEqual    | 允许和用于比较的最大时间相等, 精度到天 | Boolean  | -      | true   |
+| allowToggle      | 是否允许双击切换， 仅支持输入框        | Boolean  | -      | -      |
+| placeholder      | 表格空单元占位                         | String   | -      | -      |
+| componentAttrs   | 组件对应的属性                         | Object   | -      | -      |
+| buttonConfigList | 每行按钮组，type 为 operation 时生效   | Array    | -      | -      |
 
 #### 组件事件
 
@@ -352,7 +353,7 @@ export const formConfigList = [
 | ----------------- | ----------------------------------- | ------- | ------ | ------ |
 | allOptions        | 所有表单下拉框选项集合，同 ws-table | Object  | -      | -      |
 | formConfigList    | 表单元素配置数组                    | Array   | -      | -      |
-| formButtons       | 按钮组配置                          | Array   | -      | -      |
+| buttonConfigList  | 按钮组配置                          | Array   | -      | -      |
 | buttonSize        | 按钮组尺寸                          | String  | -      | small  |
 | formData          | 表单数据                            | Object  | -      | -      |
 | colon             | 标签后面是否有冒号                  | Boolean | -      | true   |

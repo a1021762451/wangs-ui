@@ -1,5 +1,9 @@
 export default {
   methods: {
+    switchStatus(row, status) {
+      if (this.switchMode !== 'rowControl') return
+      row[this.switchKey] = status
+    },
     clearSelection() {
       this.selection = []
       return this.$refs.table.clearSelection(...arguments)
