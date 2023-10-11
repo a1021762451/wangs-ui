@@ -9,7 +9,7 @@
     :tableColumns="tableColumns"
     :allOptions="allOptions"
     :pageInfo.sync="pageInfo"
-    :searchData.sync="formData"
+    :formData.sync="formData"
     :operationConfig="{
       buttonConfigList: formButtons,
     }"

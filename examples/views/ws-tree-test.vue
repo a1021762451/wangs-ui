@@ -3,24 +3,25 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-08-23 10:10:39
+ * @LastEditTime: 2023-10-10 16:37:40
 -->
 <template>
+  <!-- :filterButtonsFn="filterButtonsFn"
+  :disabledFn="disabledFn" -->
   <ws-tree
     showCheckbox
     draggable
     excludeFirstSearch
-    changeMode="hover"
+    changeMode="contextMenu"
     style="height: 300px; width: 240px"
     textEllipsis
     default-expand-all
     showHeader
     :dataIsFlat="false"
     :data="treeData"
-    :filterButtonsFn="filterButtonsFn"
-    :disabledFn="disabledFn"
     current-node-key="9"
     :default-checked-keys="['9', '10']"
+    :disabledContextmenuFn="disabledContextmenuFn"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"
@@ -118,6 +119,11 @@ export default {
       return []
     },
     disabledFn(data, node) {
+      if (!node.isLeaf) return true
+      return false
+    },
+    // 判断右键禁用
+    disabledContextmenuFn(data, node) {
       if (!node.isLeaf) return true
       return false
     },

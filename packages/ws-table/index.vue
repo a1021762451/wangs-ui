@@ -4,13 +4,13 @@
       v-if="showSearch"
       @update:formData="
         (params) => {
-          $emit('update:searchData', params)
+          $emit('update:formData', params)
         }
       "
       @happenEvent="happenEvent"
       style="margin-bottom: 10px"
       v-bind="{
-        formData: searchData,
+        formData: formData,
         isSearchList: true,
         ...seachConfig,
       }"
@@ -210,7 +210,7 @@ export default {
       type: Object,
     },
     // 搜索框数据
-    searchData: {
+    formData: {
       default() {
         return {}
       },

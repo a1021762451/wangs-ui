@@ -198,7 +198,7 @@ const allOptions = {
 | loading        | 加载样式                                                 | Boolean | -                                                    | false  |
 | placeholder    | 表格空单元占位                                           | String  | -                                                    | -      |
 | seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                    | -      |
-| searchData     | 搜索栏数据                                               | Object  | -                                                    | -      |
+| formData     | 搜索栏数据                                               | Object  | -                                                    | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 

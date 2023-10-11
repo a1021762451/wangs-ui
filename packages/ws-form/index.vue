@@ -56,8 +56,15 @@
                 <span v-if="colon">:</span>
               </template>
             </template>
+            <template v-if="fieldItem.slotName">
+              <slot
+                :name="fieldItem.slotName"
+                :formData="formData"
+                :fieldItem="fieldItem"
+              ></slot>
+            </template>
             <component
-              v-if="fieldItem.component"
+              v-else-if="fieldItem.component"
               :is="fieldItem.component"
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
@@ -85,13 +92,6 @@
                 ></el-option>
               </template>
             </component>
-            <template v-else-if="fieldItem.slotName">
-              <slot
-                :name="fieldItem.slotName"
-                :formData="formData"
-                :fieldItem="fieldItem"
-              ></slot>
-            </template>
           </el-form-item>
         </el-col>
         <!-- 按钮 -->

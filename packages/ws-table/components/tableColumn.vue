@@ -90,9 +90,22 @@
       v-slot="{ row, column, $index }"
       v-if="!fieldItem.type || (fieldItem.type && fieldItem.slotName)"
     >
+      <!-- 命名插槽 -->
+      <template v-if="fieldItem.slotName">
+        <slot
+          :name="fieldItem.slotName"
+          v-bind="{ row, column, $index, fieldItem }"
+        >
+          {{
+            row[fieldItem.prop] || row[fieldItem.prop] === 0
+              ? row[fieldItem.prop]
+              : fieldItem.placeholder || placeholder
+          }}
+        </slot>
+      </template>
       <!-- 表单元素 -->
       <el-form-item
-        v-if="fieldItem.component"
+        v-else-if="fieldItem.component"
         :prop="`${row.prop__table}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
@@ -160,18 +173,11 @@
         fieldItem.placeholder ||
         placeholder
       }}</template>
-      <!-- 命名插槽 -->
-      <template v-else-if="fieldItem.slotName">
-        <slot
-          :name="fieldItem.slotName"
-          v-bind="{ row, column, $index, fieldItem }"
-        >
-          {{ row[fieldItem.prop] || fieldItem.placeholder || placeholder }}
-        </slot>
-      </template>
       <!-- 默认 -->
       <template v-else>{{
-        row[fieldItem.prop] || fieldItem.placeholder || placeholder
+        row[fieldItem.prop] || row[fieldItem.prop] === 0
+          ? row[fieldItem.prop]
+          : fieldItem.placeholder || placeholder
       }}</template>
     </template>
   </el-table-column>

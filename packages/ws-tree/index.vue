@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-08-23 10:10:22
+ * @LastEditTime: 2023-10-11 15:51:00
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -233,6 +233,10 @@ export default {
     disabledFn: {
       type: Function,
     },
+    // 右键菜单是否禁用的回调函数
+    disabledContextmenuFn: {
+      type: Function,
+    },
     // 过滤操作按钮
     filterButtonsFn: {
       type: Function,
@@ -268,6 +272,13 @@ export default {
   computed: {
     // 树节点名称字段
     props() {
+      // 默认属性值
+      //  {
+      //   firstSpellKey: undefined,
+      //   label: 'label',
+      //   children: 'children',
+      //   parent: 'pid',
+      // }
       return this.$attrs.props || {}
     },
     titleTip() {
@@ -372,7 +383,8 @@ export default {
     },
     // 右键菜单属性设置
     floderOption(e, data, node, nodeRef) {
-      if (this.changeMode !== 'contextMenu') return
+      this.$emit('nodeContextmenu', e, data, node, nodeRef)
+      if (this.judgeDisabledContextmenu(data, node)) return
       const clientHeight = document.documentElement.clientHeight
       this.optionCardShow = false
       this.optionCardX = e.x + 10
@@ -383,11 +395,12 @@ export default {
       this.nodeRef = nodeRef
       this.optionCardShow = true
     },
-    // 判断节点是否能操作
-    judgeDisabledEdit(data, node) {
+    // 判断节点是否禁用右键
+    judgeDisabledContextmenu(data, node) {
       return (
-        typeof this.disabledEditFn === 'function' &&
-        this.disabledEditFn(data, node)
+        this.changeMode !== 'contextMenu' ||
+        (typeof this.disabledContextmenuFn === 'function' &&
+          this.disabledContextmenuFn(data, node))
       )
     },
     // 判断节点是否禁用
@@ -403,19 +416,19 @@ export default {
       }
       return false
       // 方案二--放弃，因为不能利用节点属性
-    //   if (!this.dataIsFlat) data = treeDataFlat(data, this.props, this.nodeKey)
-    //   data.forEach((item) => {
-    //     // 自带disabled权限最高
-    //     if (item.hasOwnProperty('disabled')) {
-    //       return
-    //     }
-    //     // 有disabledFn则执行
-    //     let disabled = false
-    //     if (typeof this.disabledFn === 'function') {
-    //       disabled = this.disabledFn(item, node)
-    //     }
-    //     this.$set(item, 'disabled', disabled)
-    //   })
+      //   if (!this.dataIsFlat) data = treeDataFlat(data, this.props, this.nodeKey)
+      //   data.forEach((item) => {
+      //     // 自带disabled权限最高
+      //     if (item.hasOwnProperty('disabled')) {
+      //       return
+      //     }
+      //     // 有disabledFn则执行
+      //     let disabled = false
+      //     if (typeof this.disabledFn === 'function') {
+      //       disabled = this.disabledFn(item, node)
+      //     }
+      //     this.$set(item, 'disabled', disabled)
+      //   })
     },
     // 滚动隐藏菜单
     scroll() {
