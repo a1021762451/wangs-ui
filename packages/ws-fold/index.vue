@@ -3,14 +3,21 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-27 12:10:32
+ * @LastEditTime: 2023-10-23 16:46:44
 -->
 <template>
-  <div class="resizable" ref="container" :style="{ width: width + 'px', height, paddingRight: width ? '4px': '0px' }">
+  <div
+    class="resizable"
+    ref="container"
+    :style="{
+      width: width + 'px',
+      paddingRight: width ? '4px' : '0px',
+    }"
+  >
     <!-- 组件内容 -->
     <slot></slot>
     <!-- 折叠按钮 -->
-    <div class="asideStow" @click="toggleCollapse" v-if="allowCollapse">
+    <div class="asideStow" @click="toggleCollapse(!collapsed)" v-if="allowCollapse">
       <i v-if="collapsed" class="el-icon-arrow-right"></i>
       <i v-else class="el-icon-arrow-left"></i>
     </div>
@@ -53,29 +60,18 @@ export default {
       type: Number,
       default: 0,
     },
-    height: {
-      type: String,
-      default: '100%',
-    },
   },
   data() {
     return {
-      width: sessionStorage.getItem(this.storageKey) || this.defaultWidth || this.maxwidth, // 组件宽度
+      width:
+        sessionStorage.getItem(this.storageKey) ||
+        this.defaultWidth ||
+        this.maxwidth, // 组件宽度
       collapsed: false, // 折叠状态
     }
   },
-  watch: {
-    width: {
-      handler() {
-        sessionStorage.setItem(this.storageKey, this.width)
-        if (this.width == this.minwidth) {
-          this.collapsed = true
-        } else {
-          this.collapsed = false
-        }
-      },
-      immediate: true,
-    },
+  created() {
+    this.changeWidth()
   },
   methods: {
     // 开始拖拽
@@ -96,9 +92,21 @@ export default {
       this.width = Math.max(this.minwidth, Math.min(this.maxwidth, width))
     },
     // 切换折叠状态
-    toggleCollapse() {
-      this.collapsed = !this.collapsed
-      this.width = this.collapsed ? this.minwidth : this.maxwidth
+    toggleCollapse(collapsed) {
+      this.collapsed = collapsed
+      this.width = this.collapsed
+        ? this.minwidth
+        : this.defaultWidth || this.maxwidth
+      this.$emit('collapse', this.collapsed)
+    },
+    // 变更宽度
+    changeWidth() {
+      sessionStorage.setItem(this.storageKey, this.width)
+      const collapsed = this.width == this.minwidth
+      if (collapsed != this.collapsed) {
+        this.collapsed = collapsed
+        this.$emit('collapse', this.collapsed)
+      }
     },
   },
 }
@@ -107,8 +115,8 @@ export default {
 <style scoped>
 .resizable {
   position: relative;
-  height: 200px;
-  background-color: #f0f0f0;
+  height: 100%;
+  /* background-color: #f0f0f0; */
 }
 .resize-handle {
   position: absolute;
@@ -139,6 +147,6 @@ export default {
   cursor: pointer;
   position: absolute;
   right: -12px;
-  z-index: 999;
+  z-index: 100;
 }
 </style>

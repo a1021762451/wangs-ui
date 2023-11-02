@@ -3,32 +3,38 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-10-11 15:51:00
+ * @LastEditTime: 2023-11-02 09:49:45
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
-    <div class="model-title" v-if="showHeader">
-      <span class="model-title-left">
-        <span>{{ headerConfig.title }}</span>
-        <el-tooltip
-          effect="dark"
-          placement="top"
-          :content="headerConfig.titleTip || titleTip"
-        >
-          <i class="el-icon-info"></i>
-        </el-tooltip>
-      </span>
-      <span class="model-title-right">
-        <el-tooltip
-          effect="dark"
-          placement="top"
-          :content="headerConfig.addTip"
-        >
-          <i class="el-icon-plus" style="cursor: pointer" @click="freeAdd"></i>
-        </el-tooltip>
-      </span>
-    </div>
+    <slot name="header">
+      <div class="model-title" v-if="showHeader">
+        <span class="model-title-left">
+          <span>{{ headerConfig.title }}</span>
+          <el-tooltip
+            effect="dark"
+            placement="top"
+            :content="headerConfig.titleTip || titleTip"
+          >
+            <i class="el-icon-info"></i>
+          </el-tooltip>
+        </span>
+        <span class="model-title-right">
+          <el-tooltip
+            effect="dark"
+            placement="top"
+            :content="headerConfig.addTip"
+          >
+            <i
+              class="el-icon-plus"
+              style="cursor: pointer"
+              @click="freeAdd"
+            ></i>
+          </el-tooltip>
+        </span>
+      </div>
+    </slot>
     <!-- 搜索框 -->
     <el-input
       v-if="showSearch"
@@ -38,7 +44,6 @@
       size="small"
     ></el-input>
     <!-- 树主体 -->
-
     <div
       :class="textEllipsis ? 'container-textEllipsis' : 'tree-container'"
       ref="container"
@@ -73,7 +78,7 @@
               <wsTooltip
                 :content="node.label"
                 overflow
-                :placement="changeMode === 'hover' ? 'top' : 'right'"
+                :placement="'right'"
               >
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
@@ -83,7 +88,7 @@
               </wsTooltip>
               <span
                 class="custom-tree-button"
-                v-if="changeMode === 'hover'"
+                v-if="changeByHover"
                 :style="{
                   visibility: iAct == data ? 'visible' : 'hidden',
                 }"
@@ -282,21 +287,27 @@ export default {
       return this.$attrs.props || {}
     },
     titleTip() {
-      return this.changeMode === 'contextMenu'
-        ? '鼠标右键可进行编辑'
-        : this.changeMode === 'hover'
-        ? '鼠标悬浮可进行编辑'
-        : ''
+      if (this.changeByHover && this.changeByContextMenu)
+        return '鼠标右键或悬浮可进行编辑'
+      if (this.changeByHover) return '鼠标悬浮可进行编辑'
+      if (this.changeByContextMenu) return '鼠标右键可进行编辑'
+      return ''
     },
     nodeKey() {
       return this.$attrs['node-key'] || 'id'
+    },
+    changeByHover() {
+      return this.changeMode.includes('hover')
+    },
+    changeByContextMenu() {
+      return this.changeMode.includes('contextMenu')
     },
   },
   created() {
     this.filterButtons()
   },
   mounted() {
-    if (this.changeMode === 'contextMenu') {
+    if (this.changeByContextMenu) {
       const container = this.$refs.container
       container.addEventListener('scroll', this.scroll)
       document.addEventListener('click', this.OptionCardClose)
@@ -318,11 +329,12 @@ export default {
       this.filterTextFn(val)
     },
     data: {
-      handler(val) {
+      handler() {
         const data = this.data || []
         this.treeData = this.dataIsFlat
           ? flatToTree(data, this.props, this.nodeKey)
           : data
+        this.setCurrentKeyByProp()
       },
       immediate: true,
     },
@@ -330,16 +342,22 @@ export default {
       this.filterButtons()
     },
     currentNodeKey: {
-      handler(val) {
-        val &&
-          this.$nextTick(() => {
-            this.setCurrentKey(val)
-          })
+      handler() {
+        this.setCurrentKeyByProp()
       },
       immediate: true,
     },
   },
   methods: {
+    // 自动设置当前选中节点
+    setCurrentKeyByProp() {
+      this.currentNodeKey &&
+        this.data.length &&
+        this.$nextTick(() => {
+          this.setCurrentKey(this.currentNodeKey)
+        })
+    },
+    // 搜索框过滤回调
     filterTextCallback(val) {
       this.$emit('search', val)
       !this.noFilter && this.filter(val)
@@ -398,7 +416,7 @@ export default {
     // 判断节点是否禁用右键
     judgeDisabledContextmenu(data, node) {
       return (
-        this.changeMode !== 'contextMenu' ||
+        !this.changeByContextMenu ||
         (typeof this.disabledContextmenuFn === 'function' &&
           this.disabledContextmenuFn(data, node))
       )
@@ -446,11 +464,11 @@ export default {
     },
     // 鼠标悬浮
     mouseenter(data) {
-      if (this.changeMode !== 'hover') return
+      if (!this.changeByHover) return
       this.iAct = data
     },
     mouseleave() {
-      if (this.changeMode !== 'hover') return
+      if (!this.changeByHover) return
       this.iAct = ''
     },
     // 自由新增

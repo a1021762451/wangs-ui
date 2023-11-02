@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-10-10 16:37:40
+ * @LastEditTime: 2023-11-02 09:44:48
 -->
 <template>
   <!-- :filterButtonsFn="filterButtonsFn"
@@ -12,7 +12,7 @@
     showCheckbox
     draggable
     excludeFirstSearch
-    changeMode="contextMenu"
+    changeMode="contextMenu, hover"
     style="height: 300px; width: 240px"
     textEllipsis
     default-expand-all
