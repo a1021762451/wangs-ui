@@ -281,21 +281,22 @@ export default {
     },
     // 动态获取校验
     getRules(fieldItem, row) {
-      if (!fieldItem.required) return
+      if (!fieldItem.required || row[fieldItem.disabledKey]) return
+      const ruleDateComponent = [
+        'el-date-picker',
+        'el-time-select',
+        'el-time-picker',
+      ]
       let rules = deepClone(this.rules[fieldItem.prop])
-      if (
-        fieldItem.component === 'el-date-picker' ||
-        fieldItem.component === 'el-time-select' ||
-        fieldItem.component === 'el-time-picker'
-      ) {
-        if (fieldItem.minTimeProp && !row[fieldItem.disabledKey]) {
+      if (ruleDateComponent.includes(fieldItem.component)) {
+        if (fieldItem.minTimeProp) {
           const minField = fieldItem.minTimeProp
           rules.push({
             validator: getMinValidator(fieldItem, row[minField]),
             trigger: 'change',
           })
         }
-        if (fieldItem.maxTimeProp && !row[fieldItem.disabledKey]) {
+        if (fieldItem.maxTimeProp) {
           const maxField = fieldItem.maxTimeProp
           rules.push({
             validator: getMaxValidator(fieldItem, row[maxField]),
@@ -344,14 +345,14 @@ export default {
         row,
       })
     },
-    // 获取组件模式对用的值
+    // 获取组件模式对应的值
     getComponentShowValue(row, fieldItem) {
       if (!row[fieldItem.prop]) return fieldItem.placeholder || this.placeholder
-      const { prop, componentAttrs, component, formatter } = fieldItem
+      const { prop, componentAttrs = {}, component, formatter } = fieldItem
       if (formatter) {
         return formatter(row[prop])
       }
-      if (component === 'el-date-picker') {
+      if (component === 'el-date-picker' && componentAttrs.format) {
         return format(new Date(row[prop]), componentAttrs.format)
       }
       if (component === 'el-select') {

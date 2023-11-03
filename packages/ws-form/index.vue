@@ -80,7 +80,7 @@
               "
               v-bind="{
                 'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-                ...getAttrs(fieldItem, formData, isDetail)
+                ...getAttrs(fieldItem, formData, isDetail),
               }"
             >
               <template v-if="fieldItem.component === 'el-select'">
@@ -303,40 +303,32 @@ export default {
     rules() {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
+      const ruleDateComponent = [
+        'el-date-picker',
+        'el-time-select',
+        'el-time-picker',
+      ]
       this.formConfigList.forEach((fieldItem) => {
-        if (fieldItem.required && !fieldItem.disabled) {
-          obj[fieldItem.prop] = [
-            {
-              required: true,
-              message: `请输入${fieldItem.label}`,
-              trigger: 'change',
-              // trigger: blurEletypes.includes(fieldItem.component)
-              //   ? 'blur'
-              //   : 'change',
-            },
-          ]
-        }
-        if (
-          fieldItem.component === 'el-date-picker' ||
-          fieldItem.component === 'el-time-select' ||
-          fieldItem.component === 'el-time-picker'
-        ) {
-          if (
-            fieldItem.required &&
-            fieldItem.minTimeProp &&
-            !fieldItem.disabled
-          ) {
+        if (!fieldItem.required || fieldItem.disabled) return
+        obj[fieldItem.prop] = fieldItem.rule || [
+          {
+            required: true,
+            message: `请输入${fieldItem.label}`,
+            trigger: 'change',
+            // trigger: blurEletypes.includes(fieldItem.component)
+            //   ? 'blur'
+            //   : 'change',
+          },
+        ]
+        if (ruleDateComponent.includes(fieldItem.component)) {
+          if (fieldItem.minTimeProp) {
             const minField = fieldItem.minTimeProp
             obj[fieldItem.prop].push({
               validator: getMinValidator(fieldItem, this.formData[minField]),
               trigger: 'change',
             })
           }
-          if (
-            fieldItem.required &&
-            fieldItem.maxTimeProp &&
-            !fieldItem.disabled
-          ) {
+          if (fieldItem.maxTimeProp) {
             const maxField = fieldItem.maxTimeProp
             obj[fieldItem.prop].push({
               validator: getMaxValidator(fieldItem, this.formData[maxField]),
