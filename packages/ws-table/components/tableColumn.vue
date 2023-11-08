@@ -314,6 +314,7 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
+      // this.fieldItemChange(fieldItem, row, 'tableFieldBlur')
       const { prop, blurHandler: handler } = fieldItem
       setTimeout(() => {
         this.property = ''
@@ -331,6 +332,7 @@ export default {
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
+      // this.fieldItemChange(fieldItem, row, 'tableFieldInput')
       const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
@@ -338,9 +340,9 @@ export default {
       }
     },
     // 表格内复选框变更
-    fieldItemChange(fieldItem, row) {
+    fieldItemChange(fieldItem, row, method = 'tableFieldChange') {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'tableFieldChange' },
+        buttonItem: { method },
         fieldItem,
         row,
       })

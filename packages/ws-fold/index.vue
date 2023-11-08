@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-10-23 16:46:44
+ * @LastEditTime: 2023-11-07 14:39:14
 -->
 <template>
   <div
@@ -15,11 +15,24 @@
     }"
   >
     <!-- 组件内容 -->
-    <slot></slot>
+    <div class="content">
+      <slot></slot>
+    </div>
     <!-- 折叠按钮 -->
-    <div class="asideStow" @click="toggleCollapse(!collapsed)" v-if="allowCollapse">
-      <i v-if="collapsed" class="el-icon-arrow-right"></i>
-      <i v-else class="el-icon-arrow-left"></i>
+    <template v-if="allowCollapse"> </template>
+    <div
+      class="asideStow"
+      @click="toggleCollapse(!collapsed)"
+      v-if="allowCollapse"
+    >
+      <slot name="collapse" :collapsed="collapsed">
+        <div class="collapsedContainer">
+          <slot name="collapseIcon" :collapsed="collapsed">
+            <i v-if="collapsed" class="el-icon-arrow-right"></i>
+            <i v-else class="el-icon-arrow-left"></i>
+          </slot>
+        </div>
+      </slot>
     </div>
     <!-- 右侧拖拽区域 -->
     <div class="resize-handle" @mousedown="startResize" v-if="allowDrag"></div>
@@ -116,7 +129,8 @@ export default {
 .resizable {
   position: relative;
   height: 100%;
-  /* background-color: #f0f0f0; */
+  background-color: #f0f0f0;
+  margin-right: 12px;
 }
 .resize-handle {
   position: absolute;
@@ -130,23 +144,25 @@ export default {
 .content {
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 .asideStow {
-  font-size: 12px;
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  z-index: 100;
+  transform: translateX(100%) translateY(-50%);
+  cursor: pointer;
+}
+.collapsedContainer {
   width: 12px;
-  max-height: 44px;
-  height: 100%;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  top: 50%;
-  transform: translateY(-50%);
   color: #fff;
   background: #a1a5ad;
+  font-size: 12px;
   border-radius: 0px 7px 7px 0px;
-  cursor: pointer;
-  position: absolute;
-  right: -12px;
-  z-index: 100;
 }
 </style>

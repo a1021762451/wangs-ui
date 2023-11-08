@@ -56,28 +56,19 @@
                 <span v-if="colon">:</span>
               </template>
             </template>
-            <template v-if="fieldItem.slotName">
-              <slot
-                :name="fieldItem.slotName"
-                :formData="formData"
-                :fieldItem="fieldItem"
-              ></slot>
-            </template>
+            <slot
+              v-if="fieldItem.slotName"
+              :name="fieldItem.slotName"
+              :formData="formData"
+              :fieldItem="fieldItem"
+            ></slot>
             <component
               v-else-if="fieldItem.component"
               :is="fieldItem.component"
               v-model="formData[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, formData)"
-              @blur="
-                fieldItem.component === 'el-input'
-                  ? handleBlur(formData, fieldItem)
-                  : undefined
-              "
-              @input="
-                fieldItem.component === 'el-input'
-                  ? handleInput($event, formData, fieldItem)
-                  : undefined
-              "
+              @blur="handleBlur(formData, fieldItem)"
+              @input="handleInput($event, formData, fieldItem)"
               v-bind="{
                 'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
                 ...getAttrs(fieldItem, formData, isDetail),
@@ -355,9 +346,9 @@ export default {
   methods: {
     getAttrs,
     // 表格内复选框变更
-    fieldItemChange(fieldItem, row) {
+    fieldItemChange(fieldItem, row, method = 'formFieldChange') {
       this.$emit('happenEvent', {
-        buttonItem: { method: 'formFieldChange' },
+        buttonItem: { method },
         fieldItem,
         row,
       })
@@ -400,16 +391,17 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
+      // this.fieldItemChange(fieldItem, row, 'formFieldBlur')
       const { prop, blurHandler: handler } = fieldItem
       // 自定义数据过滤
       if (typeof handler === 'function') {
         const newValue = handler(row[prop])
         row[prop] = newValue
       }
-      this.fieldItemChange(fieldItem, row)
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
+      // this.fieldItemChange(fieldItem, row, 'formFieldInput')
       const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
@@ -446,6 +438,7 @@ export default {
   /deep/ .el-form-item__content {
     margin-left: 0 !important;
     flex: 1;
+    line-height: normal;
   }
   .searchMode-ws-buttons {
     margin-left: 40px;

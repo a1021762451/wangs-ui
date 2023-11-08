@@ -117,14 +117,17 @@
     <el-pagination
       v-if="showPagination"
       class="common-table-pagination"
-      background
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="pageInfo.current"
-      :page-sizes="[10, 20, 50, 100]"
       :page-size.sync="pageInfo.size"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pageInfo.total"
+      v-bind="{
+        layout: 'total, sizes, prev, pager, next, jumper',
+        'page-sizes': [10, 20, 50, 100],
+        background: true,
+        total: pageInfo.total,
+        ...paginationConfig,
+      }"
     ></el-pagination>
     <!-- 列展示选择 -->
     <!-- <filterColumns
@@ -250,6 +253,13 @@ export default {
           // switchMode: '', // dblclick/rowControl
           // switchKey: 'isEdit__table', // 切换键
         }
+      },
+      type: Object,
+    },
+    // 分页配置
+    paginationConfig: {
+      default() {
+        return {}
       },
       type: Object,
     },
@@ -693,6 +703,7 @@ export default {
 .table-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .common-table {
