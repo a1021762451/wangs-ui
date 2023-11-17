@@ -374,7 +374,12 @@ export default {
       // method为reset则进行默认处理
       if (method === 'reset') {
         const obj = deepClone(this.cloneForm)
-        this.$emit('update:formData', deepClone(obj))
+        this.$emit('update:formData', obj)
+        // 同时触发重置事件，用于区分
+        this.$emit('happenEvent', {
+          buttonItem,
+          formData: obj,
+        })
         this.handleSearch()
         return
       }

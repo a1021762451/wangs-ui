@@ -45,7 +45,7 @@ export default {
   props: {
     // 全选方式
     selectAllMode: {
-      default: '',
+      default: 'checkbox',
       type: String,
     },
   },

@@ -73,15 +73,18 @@
         :data="tableForm.tableData"
         v-loading="loading"
         v-bind="{
-          rowKey,
           stripe: true,
           border: true,
           height: '100%',
+          'highlight-current-row': true,
+          'current-row-key': currentRow[rowKey],
           ...$attrs,
+          rowKey,
         }"
         @select="select"
         @select-all="selectAll"
         @selection-change="selectionChange"
+        @current-change="currentChange"
         v-on="{
           ...$listeners,
           ...(!checkStrictly
@@ -89,6 +92,7 @@
                 select: () => {},
                 'select-all': () => {},
                 'selection-change': () => {},
+                'current-change': () => {},
               }
             : {}),
         }"
@@ -132,7 +136,7 @@
     <!-- 列展示选择 -->
     <!-- <filterColumns
       v-if="utilsList.includes('setColumms')"
-      :tableColumns="tableColumns"
+      :originColunms="originColunms"
       :columns="columns"
       @filterColumnsConfirm="filterColumnsConfirm"
       ref="filterColumns"
@@ -141,7 +145,10 @@
 </template>
 
 <script>
-import { debounce, deepClone } from '../utils/util'
+let singleColunms = [] // 单条展示
+let temColumns = [] // 临时列配置
+let temTableData = [] // 临时数据
+import { debounce, deepClone, treeDataFlat } from '../utils/util'
 import { allUtils } from './contant.js'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
@@ -267,14 +274,15 @@ export default {
   data() {
     return {
       columns: [], // 列数据
-      cloneColunms: [], // 复制列数据，用于列筛选
+      originColunms: [], // 复制列数据，用于列筛选
       // 用于el-from模式
       tableForm: {
         tableData: [],
       },
-      tableData: [],
       filterColumnsVisable: false, // 列勾选弹窗
       selection: [],
+      currentRow: {},
+      showSingleStatus: false,
       selectionChange: debounce(this.selectionChangeCallback, 100),
     }
   },
@@ -282,7 +290,8 @@ export default {
     tableColumns: {
       handler(newData) {
         this.columns = deepClone(newData)
-        this.cloneColunms = deepClone(newData)
+        this.addLabelForColumns(this.columns)
+        this.originColunms = deepClone(this.columns)
       },
       immediate: true,
     },
@@ -295,8 +304,7 @@ export default {
       },
     },
     data: {
-      handler(newData) {
-        this.tableData = newData
+      handler(newData) {  
         this.tableForm.tableData = newData
         // 表格数据增加prop, 便于校验表单
         this.addFormPropForTable()
@@ -333,13 +341,13 @@ export default {
       })
     },
     treeProps() {
-      return this.$attrs['tree-props'] || {}
+      return this.$attrs['tree-props'] || this.$attrs['treeProps'] || {}
     },
     childrenKey() {
       return this.treeProps.children || 'children'
     },
     rowKey() {
-      return this.$attrs['row-key'] || 'id'
+      return this.$attrs['row-key'] || this.$attrs['rowKey'] || 'id'
     },
     switchMode() {
       return this.switchConfig.switchMode
@@ -349,14 +357,49 @@ export default {
     },
   },
   mounted() {
+    this.getSingleColunms()
     window.addEventListener('resize', this.doLayout)
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.doLayout)
   },
   methods: {
+    // 获取单行模式columns
+    getSingleColunms() {
+      singleColunms = [
+        // {
+        //   prop: 'prop',
+        //   label: '字段',
+        // },
+        {
+          prop: 'propName',
+          label: '字段名',
+        },
+        {
+          prop: 'propValue',
+          label: '字段值',
+        },
+      ]
+    },
+    // 迭代增加label__table，用于多级表头下label作区分
+    addLabelForColumns(dataList, fatherLabel = '') {
+      fatherLabel = fatherLabel ? `${fatherLabel}-` : ''
+      dataList.forEach((item) => {
+        const { type, label, prop, children } = item
+        if (type) return
+        if (children) {
+          this.addLabelForColumns(children, `${fatherLabel}` + label)
+          return
+        }
+        // 确保最后一级有label__table
+        if (prop) {
+          item.label__table = `${fatherLabel}` + label
+        }
+      })
+    },
     // 迭代增加prop
     addFormPropForTable() {
+      const { tableData } = this.tableForm
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {
@@ -374,15 +417,16 @@ export default {
           }
         })
       }
-      iterateAddProp(this.tableData, childrenKey, 'tableData')
+      iterateAddProp(tableData, childrenKey, 'tableData')
     },
     // 遍历获取动态宽度
     getDynamicWidth(columns) {
       const childrenKey = this.childrenKey
+      const { tableData } = this.tableForm
       columns.forEach((column) => {
         const conditon = column.selfAdjust
         if (conditon) {
-          const arr = this.getColumnData(this.tableData, column, childrenKey)
+          const arr = this.getColumnData(tableData, column, childrenKey)
           // 迭代获取每一列的所有数据
           arr.push(column.label) // 把每列的表头也加进去算
           this.$set(column, 'width', this.getMaxLength(arr) + 40)
@@ -483,7 +527,10 @@ export default {
     filterColumnsConfirm(values) {
       this.columns = []
       this.$nextTick(() => {
-        this.columns = this.iterateColumns(deepClone(this.cloneColunms), values)
+        this.columns = this.iterateColumns(
+          deepClone(this.originColunms),
+          values
+        )
       })
       this.$refs.filterColumns.dialogVisable = false
     },
@@ -529,7 +576,8 @@ export default {
     },
     // 全选
     selectAll(selection) {
-      this.tableData.forEach((item) => {
+      const { tableData } = this.tableForm
+      tableData.forEach((item) => {
         const condition = selection.includes(item)
         const childrenAndOwn = this.findChildrenAndOwnNode(item)
         this.toggleSelection(childrenAndOwn, condition)
@@ -538,18 +586,19 @@ export default {
     },
     // 手动勾选数据行的 Checkbox 时触发的事件
     select(selection, row) {
+      const { tableData } = this.tableForm
       this.selection = selection
       // 勾选子元素, 所有子元素
       const condition = selection.includes(row)
       const childrenAndOwn = this.findChildrenAndOwnNode(row)
       this.toggleSelection(childrenAndOwn, condition)
       // 判断父元素是否取消勾选， 循环往上找父元素
-      let parent = this.findParentNode(this.tableData, row)
+      let parent = this.findParentNode(tableData, row)
       while (parent) {
         const children = parent[this.childrenKey]
         const isAllChecked = children.every((item) => selection.includes(item))
         this.toggleSelection([parent], isAllChecked)
-        parent = this.findParentNode(this.tableData, parent)
+        parent = this.findParentNode(tableData, parent)
       }
       !this.checkStrictly && this.$emit('select', this.selection, row)
     },
@@ -587,10 +636,55 @@ export default {
       iterateFn(row.children || [])
       return hasOwn ? arr.concat(row) : arr
     },
+    currentChange(currentRow, oldCurrentRow) {
+      if (this.showSingleStatus) return
+      this.currentRow = currentRow
+      this.$emit('current-change', currentRow, oldCurrentRow)
+    },
     // 处理工具箱点击事件
     happenUtilEvent(util) {
       const { method } = util
       this[method]()
+    },
+    // 单条展示
+    showSingle() {
+      if (!Object.keys(this.currentRow).length) {
+        this.$message.warning('请先选中一条数据')
+        return
+      }
+      if (!this.showSingleStatus) {
+        const { tableData } = this.tableForm
+        temColumns = deepClone(this.columns)
+        temTableData = deepClone(tableData)
+        this.tableForm.tableData = this.getSingleTableData(this.currentRow)
+        this.columns = []
+        this.$nextTick(() => {
+          this.columns = singleColunms
+        })
+        // this.columns = singleColunms
+        this.showSingleStatus = true
+      } else {
+        // this.currentRow = {}
+        this.columns = temColumns
+        this.tableForm.tableData = temTableData
+        this.showSingleStatus = false
+      }
+    },
+    // 获取单条展示数据
+    getSingleTableData(row) {
+      const arr = []
+      const flatColums = treeDataFlat(deepClone(this.columns))
+      flatColums.forEach((item) => {
+        const { prop, label__table } = item
+        if (prop) {
+          arr.push({
+            prop,
+            propName: label__table,
+            propValue: this.getComponentShowValue(row, item),
+          })
+        }
+      })
+      return arr
     },
     // 列选择工具
     setColumms() {
@@ -598,6 +692,7 @@ export default {
     },
     // 下载工具
     download() {
+      const { tableData } = this.tableForm
       const formatterArr = []
       let hasSelection = false
       function getcolumn(column) {
@@ -631,7 +726,7 @@ export default {
           return
         }
         data = this.selection
-      } else data = deepClone(this.tableData)
+      } else data = deepClone(tableData)
       data.forEach((item) => {
         formatterArr.forEach(({ prop, formatter }) => {
           item[prop] = formatter(item[prop])
@@ -647,6 +742,23 @@ export default {
       } catch (error) {
         console.log('没有找到包')
       }
+    },
+    // 获取组件模式对应的值
+    getComponentShowValue(row, fieldItem) {
+      if (!row[fieldItem.prop]) return fieldItem.placeholder || this.placeholder
+      const { prop, componentAttrs = {}, component, formatter } = fieldItem
+      if (formatter) {
+        return formatter(row[prop])
+      }
+      if (component === 'el-date-picker' && componentAttrs.format) {
+        return format(new Date(row[prop]), componentAttrs.format)
+      }
+      if (component === 'el-select') {
+        const options = this.allOptions[prop] || []
+        const option = options.find((item) => item.value === row[prop])
+        return option ? option.label : ''
+      }
+      return row[prop]
     },
   },
 }

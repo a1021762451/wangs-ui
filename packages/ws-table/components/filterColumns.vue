@@ -1,8 +1,8 @@
 <template>
   <el-dialog title="显示的列" :visible.sync="dialogVisable">
     <ws-checkbox
-      :defaultCheckedData="defaultCheckedData"
-      :checkboxData="checkboxData"
+      v-model="defaultCheckedData"
+      :data="checkboxData"
       :span="8"
       allowCheckAll
       ref="wsCheckbox"
@@ -43,7 +43,7 @@ export default {
       },
       type: Array,
     },
-    tableColumns: {
+    originColunms: {
       default() {
         return []
       },
@@ -53,10 +53,10 @@ export default {
   methods: {
     // 初始化
     init() {
-      let data = this.handleData(this.tableColumns)
+      let data = this.handleData(this.originColunms)
       data = this.sortData(data)
       this.checkboxData[0].data = data
-      this.defaultCheckedData = this.handleData(this.columns, '', true)
+      this.defaultCheckedData = this.handleData(this.columns, true)
     },
     // 数据排序
     sortData(data) {
@@ -77,8 +77,7 @@ export default {
       return [...specialArr, ...alwaysVisibleArr, ...arr]
     },
     // 迭代处理列数据
-    handleData(dataList, fatherLabel = '', isGetValue = false) {
-      fatherLabel = fatherLabel ? `${fatherLabel}-` : ''
+    handleData(dataList, isGetValue = false) {
       const typeLableMap = {
         selection: '勾选列',
         index: '索引列',
@@ -91,9 +90,7 @@ export default {
       dataList.forEach((item) => {
         const { type, label, prop, children } = item
         if (children) {
-          arr.push(
-            ...this.handleData(children, `${fatherLabel}` + label, isGetValue)
-          )
+          arr.push(...this.handleData(children, isGetValue))
           return
         }
         if (type) {
@@ -111,7 +108,7 @@ export default {
           const value = isGetValue
             ? prop
             : {
-                label: `${fatherLabel}` + label,
+                label: item.label__table,
                 value: prop,
                 disabled: item.alwaysVisible,
               }
@@ -123,9 +120,7 @@ export default {
     },
     // 确认
     confirm() {
-      const wsCheckbox = this.$refs.wsCheckbox
-      const values = wsCheckbox.getAllCheckedValues()
-      this.$emit('filterColumnsConfirm', values)
+      this.$emit('filterColumnsConfirm', this.defaultCheckedData)
     },
     // 取消
     cancel() {

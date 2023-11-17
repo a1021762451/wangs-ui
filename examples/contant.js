@@ -117,6 +117,11 @@ export const tableColumns = [
   { type: 'selection' },
   { type: 'index', label: '序号' },
   { type: 'expand', slotName: 'expand' },
+  // 基本配置
+  {
+    prop: 'age',
+    label: '年龄',
+  },
   // 测试多级表头
   {
     label: '测试多级表头',
@@ -126,10 +131,6 @@ export const tableColumns = [
         label: '姓名',
         alwaysVisible: true, // 在列选择器中始终显示
         width: 100,
-      },
-      {
-        prop: 'age',
-        label: '年龄',
       },
       {
         label: '测试多级表头-1',
@@ -238,45 +239,6 @@ export const tableColumns = [
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
       format: 'yyyy-MM-dd HH:mm',
-    },
-  },
-  // {
-  //   prop: 'testMinDatetime',
-  //   label: '测试时间框小',
-  //   width: 200,
-  //   component: 'el-time-picker',
-  //   maxTimeProp: 'testMaxDatetime',
-  //   // minAllowEqual: false, // 不允许和对应的小时间相等
-  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
-  //   required: true,
-  //   // componentAttrs: {
-  //   //   valueFormat: 'HH:mm',
-  //   //   format: 'HH:mm'
-  //   // }
-  // },
-  // {
-  //   prop: 'testMaxDatetime',
-  //   label: '测试时间框大',
-  //   width: 200,
-  //   component: 'el-time-picker',
-  //   minTimeProp: 'testMinDatetime',
-  //   // minAllowEqual: false, // 不允许和对应的小时间相等
-  //   // maxAllowEqual: false, // 不允许和对应的大时间相等
-  //   required: true,
-  //   // componentAttrs: {
-  //   //   valueFormat: 'HH:mm',
-  //   //   format: 'HH:mm'
-  //   // }
-  // },
-  {
-    prop: 'testTime',
-    label: '测试时间框(time)',
-    width: 200,
-    component: 'el-time-select',
-    required: true,
-    alwaysVisible: true,
-    componentAttrs: {
-      valueFormat: 'HH:mm',
     },
   },
   {

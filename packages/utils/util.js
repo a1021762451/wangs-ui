@@ -193,13 +193,24 @@ export function generateColor() {
   return color
 }
 
-// 下划线转驼峰
-export function formatToHump(value) {
-  if (!value) return ''
-  const lowValue = value.toLowerCase()
-  return lowValue.replace(/\_(\w)/g, (_, letter) => letter.toUpperCase())
+// 横线命名法转换为驼峰命名法
+export function lineToHump(value) {
+  return value.replace(/-(\w)/g, function (all, letter) {
+    return letter.toUpperCase()
+  })
 }
-
+// 驼峰命名法转换为横线命名法
+export function humpToLine(value) {
+  return value.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+// 获取对象中的某个属性对应的值，支持驼峰、横线命名
+export function getObjAttr(obj, key) {
+  if (getObjType(obj) !== 'object' || !key) return ''
+  const humpKey = lineToHump(key)
+  const lineKey = humpToLine(key)
+  // console.log(humpKey, lineKey, 'humpKey, lineKey');
+  return obj[humpKey] || obj[lineKey]
+}
 // 根据时间格式判断时间类型
 export function judgeTimeType(limit) {
   const hasYear = limit.includes('yyyy')
@@ -545,6 +556,7 @@ export function treeDataFlat(data = [], props = {}, nodeKey = 'id') {
   if (!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
+      if(!item[nodeKey]) item[nodeKey] = getRandomId()
       item[parent] = parentId
       result.push(item)
       if (item[children] && item[children].length) {

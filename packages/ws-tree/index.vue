@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-02 09:49:45
+ * @LastEditTime: 2023-11-15 11:01:37
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -75,11 +75,7 @@
               @mouseenter="mouseenter(data)"
               @mouseleave="mouseleave"
             >
-              <wsTooltip
-                :content="node.label"
-                overflow
-                :placement="'right'"
-              >
+              <wsTooltip :content="node.label" overflow :placement="'right'">
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
                     {{ node.label }}
@@ -294,7 +290,7 @@ export default {
       return ''
     },
     nodeKey() {
-      return this.$attrs['node-key'] || 'id'
+      return this.$attrs['node-key'] || this.$attrs['nodeKey'] || 'id'
     },
     changeByHover() {
       return this.changeMode.includes('hover')

@@ -9,4 +9,9 @@ export const allUtils = [
     method: 'setColumms',
     icon: 'el-icon-setting',
   },
+  {
+    content: '单条展示',
+    method: 'showSingle',
+    icon: 'el-icon-c-scale-to-original',
+  },
 ]
