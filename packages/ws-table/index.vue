@@ -109,6 +109,9 @@
             <slot :name="name" v-bind="scope"></slot>
           </template>
         </tableColumn>
+        <template v-slot:append>
+          <slot name="append"> </slot>
+        </template>
       </el-table>
     </component>
     <!-- 分页 -->

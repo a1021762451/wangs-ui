@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-23 09:40:38
+ * @LastEditTime: 2023-11-23 21:28:58
 -->
 <template>
   <el-form
@@ -15,7 +15,6 @@
   >
     <el-form-item label="测试ws-select" prop="testvalue">
       <ws-select
-        prop="testvalue"
         selectMode="treeSelect"
         v-model="form.testvalue"
         :options="defaultOptions"
@@ -26,6 +25,11 @@
         }"
         clearable
       >
+        <!-- <template v-slot="{ label }">{{ label }} default </template> -->
+        <template v-slot:prefix>
+          <i class="el-icon-s-data"></i>
+        </template>
+        <template v-slot:empty> 空的 </template>
       </ws-select>
     </el-form-item>
   </el-form>
@@ -38,8 +42,6 @@ export default {
   name: 'ws-select-test',
   data() {
     return {
-      request,
-      // testvalue: 'Arkansas_value',
       form: { testvalue: [9], city: '南昌' },
       rules: {
         testvalue: [
@@ -57,17 +59,7 @@ export default {
           },
         ],
       },
-      defaultOptions: [
-        { label: '默认1', value: '1' },
-        { label: '默认2', value: '2' },
-        { label: '默认3', value: '3' },
-      ],
-      requestConfig: {
-        method: 'get',
-        params: {
-          test: '1',
-        },
-      },
+      defaultOptions: [],
       treeData: [
         {
           label: '根节点',
@@ -150,21 +142,6 @@ export default {
       const res = await getSelectData()
       console.log(res, 'getSelectData')
       this.defaultOptions = res.list
-    },
-    queryChange(query) {
-      this.$set(this.requestConfig.params, 'query', query)
-    },
-    async requestHandler(requestConfig, query, labelField, valueField) {
-      let arr = []
-      const res = await this.request(query)
-      const data = res.data
-      arr = data.map((item) => {
-        return {
-          label: item[labelField],
-          value: item[valueField],
-        }
-      })
-      return arr
     },
   },
 }

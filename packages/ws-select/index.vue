@@ -55,7 +55,15 @@
         :key="item.value"
         :label="item.label"
         :value="item.value"
-      />
+      >
+        <slot v-bind="item"></slot>
+      </el-option>
+    </template>
+    <template v-slot:empty>
+      <slot name="empty"></slot>
+    </template>
+    <template v-slot:prefix>
+      <slot name="prefix"></slot>
     </template>
   </el-select>
 </template>
@@ -112,8 +120,7 @@ export default {
     },
   },
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
     isCheckAll() {
@@ -162,12 +169,14 @@ export default {
     // 值变化，树回显
     playbackTree() {
       this.$nextTick(() => {
+        const wsTree = this.$refs.wsTree
+        if (!wsTree) return
+        const valueIsArray = Array.isArray(this.value)
         if (this.multiple) {
-          const value = Array.isArray(this.value) ? this.value : []
-          this.$refs.wsTree.setCheckedKeys(value)
+          const value = valueIsArray ? this.value : []
+          wsTree.setCheckedKeys(value)
         } else {
-          !Array.isArray(this.value) &&
-            this.$refs.wsTree.setCurrentKey(this.value)
+          !valueIsArray && wsTree.setCurrentKey(this.value)
         }
       })
     },
