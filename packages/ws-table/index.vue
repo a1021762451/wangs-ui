@@ -52,13 +52,7 @@
     </ws-buttons>
     <!-- 表格 -->
     <component
-      :is="
-        columns.some((item) => {
-          return item.component
-        })
-          ? 'el-form'
-          : 'div'
-      "
+      :is="containerIsForm ? 'el-form' : 'div'"
       :model="tableForm"
       ref="tableForm"
       label-width="80px"
@@ -134,13 +128,13 @@
       }"
     ></el-pagination>
     <!-- 列展示选择 -->
-    <!-- <filterColumns
+    <filterColumns
       v-if="utilsList.includes('setColumms')"
       :originColunms="originColunms"
       :columns="columns"
       @filterColumnsConfirm="filterColumnsConfirm"
       ref="filterColumns"
-    ></filterColumns> -->
+    ></filterColumns>
   </div>
 </template>
 
@@ -148,7 +142,7 @@
 let singleColunms = [] // 单条展示
 let temColumns = [] // 临时列配置
 let temTableData = [] // 临时数据
-import { debounce, deepClone, treeDataFlat } from '../utils/util'
+import { debounce, deepClone, getRandomId, treeToFlat } from '../utils/util'
 import { allUtils } from './contant.js'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
@@ -160,7 +154,7 @@ export default {
   components: {
     wsButtons,
     tableColumn,
-    // filterColumns: () => import('./components/filterColumns'),
+    filterColumns: () => import('./components/filterColumns'),
     wsForm,
   },
   props: {
@@ -284,6 +278,7 @@ export default {
       currentRow: {},
       showSingleStatus: false,
       selectionChange: debounce(this.selectionChangeCallback, 100),
+      dataOrColumnsChange: debounce(this.dataOrColumnsChangeCallback, 100, true),
     }
   },
   watch: {
@@ -298,23 +293,26 @@ export default {
     // 列表变更更新表单布局
     columns: {
       handler() {
+        this.dataOrColumnsChange()
         this.$nextTick(() => {
           this.doLayout()
         })
       },
     },
     data: {
-      handler(newData) {  
+      handler(newData) {
         this.tableForm.tableData = newData
-        // 表格数据增加prop, 便于校验表单
-        this.addFormPropForTable()
-        // 配置selfAdjust为true,则宽度自调节
-        this.getDynamicWidth(this.columns)
+        this.dataOrColumnsChange()
       },
       immediate: true,
     },
   },
   computed: {
+    containerIsForm() {
+      return this.columns.some((item) => {
+        return item.component
+      })
+    },
     rules() {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
@@ -364,6 +362,13 @@ export default {
     window.removeEventListener('resize', this.doLayout)
   },
   methods: {
+    // 数据或者表格列变更都要执行
+    dataOrColumnsChangeCallback() {
+      // 表格数据增加prop, 便于校验表单
+      this.containerIsForm && this.addFormPropForTable()
+      // 配置selfAdjust为true,则宽度自调节
+      this.getDynamicWidth(this.columns)
+    },
     // 获取单行模式columns
     getSingleColunms() {
       singleColunms = [
@@ -403,7 +408,9 @@ export default {
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {
-          item.prop__table = `${prop__table}.${index}`
+          this.$set(item, 'prop__table', `${prop__table}.${index}`)
+          // 增加主键
+          // item[this.rowKey] = item[this.rowKey] || getRandomId()
           // 编辑模式下，增加切换键
           this.switchMode === 'rowControl' &&
             item[this.switchKey] === undefined &&
@@ -673,7 +680,7 @@ export default {
     // 获取单条展示数据
     getSingleTableData(row) {
       const arr = []
-      const flatColums = treeDataFlat(deepClone(this.columns))
+      const flatColums = treeToFlat(deepClone(this.columns))
       flatColums.forEach((item) => {
         const { prop, label__table } = item
         if (prop) {

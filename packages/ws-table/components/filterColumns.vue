@@ -14,12 +14,18 @@
   </el-dialog>
 </template>
 
-<script>
+<script>  
 // import wsCheckbbox from '../../ws-checkbox/index'
 export default {
   name: 'filterColumns',
   components: {
-    wsCheckbbox,
+    wsCheckbox: () => {
+      try {
+        return require('../../ws-checkbox/index')
+      } catch (error) {
+        console.log('没有找到包')
+      }
+    },
   },
   data() {
     return {

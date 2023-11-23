@@ -83,146 +83,6 @@ export function getAttrs(fieldItem, formData = {}, isDetail) {
   obj.placeholder = obj.disabled ? '' : obj.placeholder
   return obj
 }
-/**
- * 对象深拷贝
- */
-export const deepClone = (data) => {
-  var type = getObjType(data)
-  var obj
-  if (type === 'array') {
-    obj = []
-  } else if (type === 'object') {
-    obj = {}
-  } else {
-    // 不再具有下一层次
-    return data
-  }
-  if (type === 'array') {
-    for (var i = 0, len = data.length; i < len; i++) {
-      obj.push(deepClone(data[i]))
-    }
-  } else if (type === 'object') {
-    for (var key in data) {
-      obj[key] = deepClone(data[key])
-    }
-  }
-  return obj
-}
-// 获取类型
-export const getObjType = (obj) => {
-  var toString = Object.prototype.toString
-  var map = {
-    '[object Boolean]': 'boolean',
-    '[object Number]': 'number',
-    '[object String]': 'string',
-    '[object Function]': 'function',
-    '[object Array]': 'array',
-    '[object Date]': 'date',
-    '[object RegExp]': 'regExp',
-    '[object Undefined]': 'undefined',
-    '[object Null]': 'null',
-    '[object Object]': 'object',
-  }
-  if (obj instanceof Element) {
-    return 'element'
-  }
-  return map[toString.call(obj)]
-}
-
-// 防抖
-export const debounce = (fn, delay = 500) => {
-  let timer
-  return function () {
-    let args = arguments //注意如果要传参的话 这句不能省略
-    if (timer) {
-      // console.log('防抖中')
-      clearTimeout(timer)
-    }
-    timer = setTimeout(() => {
-      timer = null
-      fn.apply(this, args)
-    }, delay)
-  }
-}
-// 节流
-export const throttle = (fn, delay = 500) => {
-  let timer
-  return function () {
-    let args = arguments //注意如果要传参的话 这句不能省略
-    if (timer) {
-      // console.log('节流中')
-      return
-    }
-    timer = setTimeout(() => {
-      timer = null
-      fn.apply(this, args)
-    }, delay)
-  }
-}
-// 深度合并两个对象
-export function deepMerge(obj1, obj2) {
-  let key
-  for (key in obj2) {
-    // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
-    // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
-    obj1[key] =
-      obj1[key] &&
-      obj1[key].toString() === '[object Object]' &&
-      obj2[key] &&
-      obj2[key].toString() === '[object Object]'
-        ? deepMerge(obj1[key], obj2[key])
-        : (obj1[key] = obj2[key])
-  }
-  return obj1
-}
-// 获取随机id
-export function getRandomId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-// 获取随机颜色
-export function generateColor() {
-  let color = ''
-  let r = Math.floor(Math.random() * 256)
-  let g = Math.floor(Math.random() * 256)
-  let b = Math.floor(Math.random() * 256)
-  color = `rgb(${r},${g},${b})`
-  return color
-}
-
-// 横线命名法转换为驼峰命名法
-export function lineToHump(value) {
-  return value.replace(/-(\w)/g, function (all, letter) {
-    return letter.toUpperCase()
-  })
-}
-// 驼峰命名法转换为横线命名法
-export function humpToLine(value) {
-  return value.replace(/([A-Z])/g, '-$1').toLowerCase()
-}
-// 获取对象中的某个属性对应的值，支持驼峰、横线命名
-export function getObjAttr(obj, key) {
-  if (getObjType(obj) !== 'object' || !key) return ''
-  const humpKey = lineToHump(key)
-  const lineKey = humpToLine(key)
-  // console.log(humpKey, lineKey, 'humpKey, lineKey');
-  return obj[humpKey] || obj[lineKey]
-}
-// 根据时间格式判断时间类型
-export function judgeTimeType(limit) {
-  const hasYear = limit.includes('yyyy')
-  const hasMonth = limit.includes('MM')
-  const hasDay = limit.includes('dd')
-  const hasHour = limit.includes('HH')
-  if (hasMonth && hasDay && hasHour) return 'datetime'
-  if (hasMonth && hasDay) return 'date'
-  if (hasYear && hasMonth) return 'month'
-  if (hasYear) return 'year'
-  if (hasHour) return 'time'
-}
 
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData) {
@@ -403,7 +263,163 @@ export function getMaxValidator(fieldItem, max) {
     }
   }
 }
+/**
+ * 对象深拷贝
+ */
+export const deepClone = (data) => {
+  var type = getObjType(data)
+  var obj
+  if (type === 'array') {
+    obj = []
+  } else if (type === 'object') {
+    obj = {}
+  } else {
+    // 不再具有下一层次
+    return data
+  }
+  if (type === 'array') {
+    for (var i = 0, len = data.length; i < len; i++) {
+      obj.push(deepClone(data[i]))
+    }
+  } else if (type === 'object') {
+    for (var key in data) {
+      obj[key] = deepClone(data[key])
+    }
+  }
+  return obj
+}
+// 获取类型
+export const getObjType = (obj) => {
+  var toString = Object.prototype.toString
+  var map = {
+    '[object Boolean]': 'boolean',
+    '[object Number]': 'number',
+    '[object String]': 'string',
+    '[object Function]': 'function',
+    '[object Array]': 'array',
+    '[object Date]': 'date',
+    '[object RegExp]': 'regExp',
+    '[object Undefined]': 'undefined',
+    '[object Null]': 'null',
+    '[object Object]': 'object',
+  }
+  if (obj instanceof Element) {
+    return 'element'
+  }
+  return map[toString.call(obj)]
+}
 
+// 防抖
+export const debounce = (fn, delay = 500, immediate) => {
+  let timer
+  return function () {
+    let args = arguments
+    if (timer) {
+      // console.log('防抖中')
+      clearTimeout(timer)
+    }
+    if (immediate) {
+      if (!timer) {
+        fn.apply(this, args)
+        // console.log('防抖立即执行');
+      }
+      timer = setTimeout(() => {
+        timer = null
+      }, delay)
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(this, args)
+        timer = null
+      }, delay)
+    }
+  }
+}
+// 节流
+export const throttle = (fn, delay = 500, immediate) => {
+  let timer
+  return function () {
+    let args = arguments
+    if (timer) {
+      // console.log('节流中')
+      return
+    }
+    if (immediate) {
+      fn.apply(this, args)
+      timer = setTimeout(() => {
+        timer = null
+      }, delay)
+    } else {
+      timer = setTimeout(() => {
+        timer = null
+        fn.apply(this, args)
+      }, delay)
+    }
+  }
+}
+// 深度合并两个对象
+export function deepMerge(obj1, obj2) {
+  let key
+  for (key in obj2) {
+    // 如果target(也就是obj1[key])存在，且是对象的话再去调用deepMerge，否则就是obj1[key]里面没这个对象，需要与obj2[key]合并
+    // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
+    obj1[key] =
+      obj1[key] &&
+      obj1[key].toString() === '[object Object]' &&
+      obj2[key] &&
+      obj2[key].toString() === '[object Object]'
+        ? deepMerge(obj1[key], obj2[key])
+        : (obj1[key] = obj2[key])
+  }
+  return obj1
+}
+// 获取随机id
+export function getRandomId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+// 获取随机颜色
+export function generateColor() {
+  let color = ''
+  let r = Math.floor(Math.random() * 256)
+  let g = Math.floor(Math.random() * 256)
+  let b = Math.floor(Math.random() * 256)
+  color = `rgb(${r},${g},${b})`
+  return color
+}
+
+// 横线命名法转换为驼峰命名法
+export function lineToHump(value) {
+  return value.replace(/-(\w)/g, function (all, letter) {
+    return letter.toUpperCase()
+  })
+}
+// 驼峰命名法转换为横线命名法
+export function humpToLine(value) {
+  return value.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+// 获取对象中的某个属性对应的值，支持驼峰、横线命名
+export function getObjAttr(obj, key) {
+  if (getObjType(obj) !== 'object' || !key) return ''
+  const humpKey = lineToHump(key)
+  const lineKey = humpToLine(key)
+  // console.log(humpKey, lineKey, 'humpKey, lineKey');
+  return obj[humpKey] || obj[lineKey]
+}
+// 根据时间格式判断时间类型
+export function judgeTimeType(limit) {
+  const hasYear = limit.includes('yyyy')
+  const hasMonth = limit.includes('MM')
+  const hasDay = limit.includes('dd')
+  const hasHour = limit.includes('HH')
+  if (hasMonth && hasDay && hasHour) return 'datetime'
+  if (hasMonth && hasDay) return 'date'
+  if (hasYear && hasMonth) return 'month'
+  if (hasYear) return 'year'
+  if (hasHour) return 'time'
+}
 // 根据时间对象和格式，转换时间
 export function format(date, fmt = 'yyyy-MM-dd') {
   var o = {
@@ -550,13 +566,13 @@ export function getDefaultTime(defaultTimeType, formatStr) {
 }
 
 // 树数据扁平化
-export function treeDataFlat(data = [], props = {}, nodeKey = 'id') {
+export function treeToFlat(data = [], props = {}, nodeKey = 'id') {
   let { children = 'children', parent = 'pid' } = props
   const result = []
   if (!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
-      if(!item[nodeKey]) item[nodeKey] = getRandomId()
+      if (!item[nodeKey]) item[nodeKey] = getRandomId()
       item[parent] = parentId
       result.push(item)
       if (item[children] && item[children].length) {

@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-15 11:01:37
+ * @LastEditTime: 2023-11-22 17:11:36
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -165,7 +165,7 @@ export default {
     // 增删改查模式
     changeMode: {
       default: '', // contextMenu / hover
-      type: String,
+      type: String | Array,
     },
     // 后续搜索 不被第一次的搜索操作影响
     excludeFirstSearch: {
@@ -430,7 +430,7 @@ export default {
       }
       return false
       // 方案二--放弃，因为不能利用节点属性
-      //   if (!this.dataIsFlat) data = treeDataFlat(data, this.props, this.nodeKey)
+      //   if (!this.dataIsFlat) data = treeToFlat(data, this.props, this.nodeKey)
       //   data.forEach((item) => {
       //     // 自带disabled权限最高
       //     if (item.hasOwnProperty('disabled')) {

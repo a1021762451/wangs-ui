@@ -1,242 +1,237 @@
-<!-- 组件特点
-1.有默认选项使用默认选项， 有默认值使用默认值
-2.无默认值，无默认选项，则懒加载获取选项
-3.可以根据搜索值本地过滤选项，也可以根据搜索值实时接口过滤选项
-4.兼容el-form组件
-5.兼容el-select组件原有属性和事件
-6.选项存入vuex中，通过prop字段取值，实现选项接口调用一次功能
- -->
-
 <template>
   <el-select
-    v-model="ownValue"
-    :loading="loading"
-    @focus="selectFocus"
+    ref="wsSelect"
+    :value="value"
     v-bind="{
-      clearable: true,
+      multiple,
       filterable: true,
-      remote: true,
-      'remote-method': remoteMethod,
-      placeholder: $attrs.disabled ? '' : '请选择',
+      'popper-class': isTreeSelect ? 'ws-treeSelect' : 'ws-select',
       ...$attrs,
     }"
     v-on="$listeners"
+    @clear="clear"
+    :filter-method="filterMethod"
   >
-    <el-option
-      v-for="item in options"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value"
-    >
-    </el-option>
+    <template v-if="isTreeSelect">
+      <el-option value="treeOptionValue">
+        <ws-tree
+          ref="wsTree"
+          v-bind="{
+            showSearch: false,
+            textEllipsis: true,
+            'default-expand-all': true,
+            ...treeConfig,
+            showCheckbox: multiple,
+          }"
+          @node-click="handleNodeClick"
+          @check="handleCheck"
+          v-on="$listeners"
+        >
+          <!-- 将父组件插槽内容转发给子组件 -->
+          <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+            <slot :name="name" v-bind="scope"></slot>
+          </template>
+        </ws-tree>
+      </el-option>
+      <el-option
+        style="display: none"
+        v-for="item in flatTreeData"
+        :key="item[treeNodeKey]"
+        :label="item[treeLabelKey]"
+        :value="item[treeNodeKey]"
+      />
+    </template>
+    <template v-else>
+      <el-checkbox
+        :value="isCheckAll"
+        :indeterminate="indeterminate"
+        @change="selectAll"
+        v-if="isNeedSelectAll && multiple && options.length > 0"
+        class="ws-select__checkbox"
+      >
+        全选
+      </el-checkbox>
+      <el-option
+        v-for="item in options"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      />
+    </template>
   </el-select>
 </template>
-
 <script>
-import { deepClone } from '../utils/util'
+import { treeToFlat } from '../utils/util'
+import wsTree from '../ws-tree/index.vue'
 export default {
   name: 'ws-select',
+  components: {
+    wsTree,
+  },
   model: {
     prop: 'value',
     event: 'change',
   },
   props: {
-    // 封装的接口请求对象，axios等
-    request: {
-      type: Function,
-    },
-    // 对请求进行特殊处理，需要返回options
-    requestHandler: {
-      type: Function,
-    },
-    // 接口配置
-    requestConfig: {
-      default() {
-        return {
-          url: '',
-          method: 'get',
-          params: {},
-          data: {},
-        }
-      },
-      type: Object,
-    },
-    // 默认值
+    // 绑定值
     value: {
       default: '',
       type: String | Number | Array,
     },
-    // 使用options第几个作为默认数据 -- 非必传
-    defaultIndex: {
-      type: Number | String,
-      default: -1,
-    },
-    // 默认选项，有则不使用接口
-    defaultOptions: {
+    // 下拉选项
+    options: {
       type: Array,
       default() {
         return []
       },
     },
-    // label和value字段在数据中的映射字段
-    props: {
-      default() {
-        return {
-          label: 'label',
-          value: 'value',
-        }
-      },
-    },
-    // 实时搜索 - 重要属性，为真功能类似el-autocomplete
-    isActualTime: {
-      default: false,
+    // 多选模式是否需要全选
+    isNeedSelectAll: {
       type: Boolean,
+      default: false,
     },
-    // vuex allOptions取值键名
-    prop: {
-      type: String,
+    // 下拉框模式  treeSelect | ''
+    selectMode: {
+      type: String | Array,
       default: '',
     },
-  },
-  watch: {
-    defaultOptions: {
-      handler(newValue) {
-        this.options = newValue
-        this.cloneOptions = deepClone(newValue)
+    // 树配置
+    treeConfig: {
+      type: Object,
+      default() {
+        return {}
       },
-      immediate: true,
     },
-    value: {
-      handler(newValue) {
-        this.ownValue = newValue
-      },
-      immediate: true,
+    // 单选或者多选时，是否只能选择叶子节点
+    treeLeafOnly: {
+      type: Boolean,
+      default: true,
     },
-    // 请求变更，重新初始化
-    requestConfig: {
-      handler(newValue) {
-        this.options = []
-      },
-      deep: true,
+    multiple: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
     return {
-      ownValue: '',
-      options: [],
-      cloneOptions: [],
-      loading: false,
+      checkboxLeftPadding: 0, // checkbox的左边距,
     }
   },
-  created() {
-    this.init()
-  },
   computed: {
-    // 有没有默认值
-    hasDefaultValue() {
-      return (
-        (Array.isArray(this.value) && this.value.length) ||
-        (!Array.isArray(this.value) && this.value)
-      )
+    isCheckAll() {
+      return this.value.length === this.options.length
     },
-    allOptions() {
-      return this.$store.state.allOptions
+    indeterminate() {
+      return this.value.length > 0 && this.value.length < this.options.length
+    },
+    isTreeSelect() {
+      return this.selectMode.includes('treeSelect')
+    },
+    treeNodeKey() {
+      const treeConfig = this.treeConfig
+      return treeConfig['node-key'] || treeConfig['nodeKey'] || 'id'
+    },
+    treeProps() {
+      const treeConfig = this.treeConfig
+      return treeConfig.props || {}
+    },
+    treeLabelKey() {
+      return this.treeProps['label'] || 'label'
+    },
+    flatTreeData() {
+      const { data, dataIsFlat } = this.treeConfig
+      if (dataIsFlat) {
+        return data
+      } else {
+        return treeToFlat(data, this.treeProps, this.treeNodeKey)
+      }
+    },
+  },
+  watch: {
+    value: {
+      handler() {
+        if (this.isTreeSelect) {
+          this.playbackTree()
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
-    // 初始化选项
-    async init() {
-      const hasOptions = this.options.length
-      // 实时则清空选项
-      if (this.isActualTime) {
-        this.options = []
-        return
-      }
-      // state中allOptions有，则使用
-      if (this.allOptions[this.prop] && !hasOptions) {
-        this.options = this.allOptions[this.prop]
-      }
-      // 有默认值索引，，按索引取默认值
-      if (this.defaultIndex !== -1) {
-        if (!hasOptions) await this.getOpitons()
-        this.ownValue = this.options[this.defaultIndex]
-          ? this.options[this.defaultIndex].value
-          : ''
-        this.$emit('change', this.ownValue)
-      }
-      // 有默认值并且没有选项，则获取远程选项
-      if (this.hasDefaultValue && !hasOptions) this.getOpitons()
-    },
-    // 获取选项的接口调用
-    async getOpitons(query) {
-      this.loading = true
-      const { label: labelField, value: valueField } = this.props
-      // 获取request,没有直接返回
-      const request = window.request || this.request
-      if (!request) return []
-      let arr = []
-      // 优先使用接口处理逻辑
-      if (this.requestHandler) {
-        arr = await this.requestHandler(
-          this.requestConfig,
-          query,
-          labelField,
-          valueField
-        )
-      } else {
-        const res = await request(this.requestConfig)
-        const data = res.data
-        arr = data.map((item) => {
-          return {
-            label: item[labelField],
-            value: item[valueField],
-          }
-        })
-      }
-      this.loading = false
-      this.options = arr
-      this.cloneOptions = deepClone(arr)
-      this.$store.commit('setAllOptions', {
-        prop: this.prop,
-        options: deepClone(arr),
+    playbackTree() {
+      console.log('playbackTree', this.value)
+      this.$nextTick(() => {
+        if (this.multiple) {
+          const value = Array.isArray(this.value) ? this.value : []
+          this.$refs.wsTree.setCheckedKeys(value)
+        } else {
+          !Array.isArray(this.value) &&
+            this.$refs.wsTree.setCurrentKey(this.value)
+        }
       })
-      return arr
-      // this.$store.setAllOptions()
     },
-    // 远程搜索
-    async remoteMethod(query) {
-      const { label: labelField } = this.props
-      if (this.isActualTime) {
-        this.$emit('queryChange', query)
-        // 实时状态远程过滤
-        if (!query) {
-          this.options = []
-        } else {
-          this.getOpitons(query)
-        }
-      } else {
-        // 非实时状态本地过滤
-        if (!this.cloneOptions.length) {
-          this.getOpitons()
-        } else {
-          if (!query) {
-            this.options = this.cloneOptions
-            return
-          }
-          this.options = this.cloneOptions.filter((item) => {
-            return item[labelField].includes(query)
-          })
-        }
+    selectAll(checked) {
+      const selectValue = checked ? this.options.map((d) => d.value) : []
+      this.$emit('change', selectValue)
+    },
+    clear() {
+      this.$emit('change', '')
+    },
+    filterMethod(data) {
+      if (data !== undefined) {
+        this.$refs.wsTree.filterTextFn(data)
       }
     },
-    // 监听聚焦状态，如果是非实时状态，聚焦时也进行远程搜索
-    selectFocus() {
-      if (!this.isActualTime) {
-        this.remoteMethod()
-      }
+    handleNodeClick(data, node, el) {
+      if (this.multiple) return
+      if (this.treeLeafOnly && !node.isLeaf) return
+      console.log('handleNodeClick', data, node, el)
+      const dataValue = data[this.treeNodeKey]
+      this.$emit('change', dataValue)
+      this.$refs.wsSelect.blur()
+    },
+    handleCheck(
+      data,
+      { checkedNodes, checkedKeys, halfCheckedNodes, halfCheckedKey }
+    ) {
+      const checkedValues = this.$refs.wsTree.getCheckedKeys(this.treeLeafOnly)
+      this.$emit('change', checkedValues)
+      console.log('handleCheck', data, checkedNodes, checkedKeys)
     },
   },
 }
 </script>
-
-<style lang="less" scoped></style>
+<style lang="less">
+.ws-select__checkbox {
+  padding-left: 20px;
+}
+.ws-treeSelect {
+  max-width: 260px;
+  .el-select-dropdown__item,
+  .el-select-dropdown__item.selected,
+  .el-select-dropdown__item.hover,
+  .el-select-dropdown__item:hover {
+    height: auto;
+    padding: 0;
+    margin: 0 6px;
+  }
+  .custom-tree-node {
+    position: relative;
+  }
+  .el-scrollbar__wrap {
+    max-height: 350px !important;
+  }
+  // .el-tree {
+  //   max-height: 300px;
+  //   overflow-y: auto;
+  // }
+}
+</style>
+<style lang="less" scoped>
+// .ws-select {
+//   height: auto;
+//   max-height: 200px;
+//   overflow-y: auto;
+//   padding: 0;
+// }
+</style>

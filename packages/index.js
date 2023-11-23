@@ -2,32 +2,21 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-06-07 16:18:35
+ * @LastEditTime: 2023-11-17 15:02:52
  * @FilePath: \ws-ui\packages\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import wsForm from './ws-form'
-import wsTable from './ws-table'
-import wsTree from './ws-tree'
-import wsEcharts from './ws-echarts'
-import wsCheckbox from './ws-checkbox'
-import wsTooltip from './ws-tooltip'
-import wsSelect from './ws-select'
-import wsButtons from './ws-buttons'
-import wsFold from './ws-fold'
-
-// 存储组件列表
-const components = [
-  wsForm,
-  wsTable,
-  wsTree,
-  wsEcharts,
-  wsCheckbox,
-  wsTooltip,
-  wsSelect,
-  wsButtons,
-  wsFold
-]
+const components = []
+// 获取所有组件的模块 ID 列表
+const context = require.context('./', true, /\index.js$/)
+const componentKeys = context.keys()
+componentKeys.shift()
+// 遍历组件列表， 获取所有组件配置components
+componentKeys.forEach((componentKey) => {
+  // 根据模块 ID 获取组件的配置对象
+  const componentConfig = context(componentKey)
+  components.push(componentConfig.default || componentConfig)
+})
 // 定义 install 方法，接收 Vue 作为参数。如果使用 use 注册插件，则所有的组件都将被注册
 const install = function (Vue, opts) {
   // 判断是否安装
@@ -43,13 +32,5 @@ if (typeof window !== 'undefined' && window.Vue) {
 export default {
   install,
   // 以下是单个导出的组件
-  wsForm,
-  wsTable,
-  wsTree,
-  wsEcharts,
-  wsCheckbox,
-  wsTooltip,
-  wsSelect,
-  wsButtons,
-  wsFold
+  ...components,
 }

@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/a1021762451/wangs-ui.git"
-  },  
+  },
   "author": {
     "name": "wangshuai"
   },
@@ -23,9 +23,12 @@
     "push": "npm run lib && npm publish"
   },
   "dependencies": {
+    "axios": "1.6.2",
     "core-js": "^3.8.3",
     "echarts": "5.4.1",
     "element-ui": "2.15.13",
+    "mockjs": "1.1.0",
+    "nprogress": "0.2.0",
     "table-excel": "2.0.2",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1",
