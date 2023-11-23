@@ -2,6 +2,7 @@
   <el-select
     ref="wsSelect"
     :value="value"
+    :filter-method="isTreeSelect ? filterMethodToTree : undefined"
     v-bind="{
       multiple,
       filterable: true,
@@ -9,8 +10,6 @@
       ...$attrs,
     }"
     v-on="$listeners"
-    @clear="clear"
-    :filter-method="filterMethod"
   >
     <template v-if="isTreeSelect">
       <el-option value="treeOptionValue">
@@ -114,7 +113,6 @@ export default {
   },
   data() {
     return {
-      checkboxLeftPadding: 0, // checkbox的左边距,
     }
   },
   computed: {
@@ -140,11 +138,9 @@ export default {
     },
     flatTreeData() {
       const { data, dataIsFlat } = this.treeConfig
-      if (dataIsFlat) {
-        return data
-      } else {
-        return treeToFlat(data, this.treeProps, this.treeNodeKey)
-      }
+      return dataIsFlat
+        ? data
+        : treeToFlat(data, this.treeProps, this.treeNodeKey)
     },
   },
   watch: {
@@ -158,8 +154,13 @@ export default {
     },
   },
   methods: {
+    // 全选操作
+    selectAll(checked) {
+      const selectValue = checked ? this.options.map((d) => d.value) : []
+      this.$emit('change', selectValue)
+    },
+    // 值变化，树回显
     playbackTree() {
-      console.log('playbackTree', this.value)
       this.$nextTick(() => {
         if (this.multiple) {
           const value = Array.isArray(this.value) ? this.value : []
@@ -170,33 +171,22 @@ export default {
         }
       })
     },
-    selectAll(checked) {
-      const selectValue = checked ? this.options.map((d) => d.value) : []
-      this.$emit('change', selectValue)
+    // 转成树搜索
+    filterMethodToTree(data) {
+      this.$refs.wsTree.filterTextFn(data)
     },
-    clear() {
-      this.$emit('change', '')
-    },
-    filterMethod(data) {
-      if (data !== undefined) {
-        this.$refs.wsTree.filterTextFn(data)
-      }
-    },
+    // 树节点点击事件。
     handleNodeClick(data, node, el) {
       if (this.multiple) return
       if (this.treeLeafOnly && !node.isLeaf) return
-      console.log('handleNodeClick', data, node, el)
       const dataValue = data[this.treeNodeKey]
       this.$emit('change', dataValue)
       this.$refs.wsSelect.blur()
     },
-    handleCheck(
-      data,
-      { checkedNodes, checkedKeys, halfCheckedNodes, halfCheckedKey }
-    ) {
+    // 树节点选中事件
+    handleCheck() {
       const checkedValues = this.$refs.wsTree.getCheckedKeys(this.treeLeafOnly)
       this.$emit('change', checkedValues)
-      console.log('handleCheck', data, checkedNodes, checkedKeys)
     },
   },
 }

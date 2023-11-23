@@ -70,6 +70,9 @@ export function getAttrs(fieldItem, formData = {}, isDetail) {
   ) {
     obj['picker-options'] = getPicker(fieldItem, formData)
   }
+  if(fieldItem.component === 'el-date-picker') {
+    obj['popper-class'] = fieldItem.timeDisabled ? 'hideCurrent' : ''
+  }
   const allTypes = commonAttrs[fieldItem.component] || {}
   const componentAttrs = fieldItem.componentAttrs || {}
   const type = componentAttrs.type

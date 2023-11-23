@@ -70,7 +70,6 @@
               @blur="handleBlur(formData, fieldItem)"
               @input="handleInput($event, formData, fieldItem)"
               v-bind="{
-                'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
                 ...getAttrs(fieldItem, formData, isDetail),
               }"
             >
@@ -205,6 +204,13 @@ export default {
       default: 12,
       type: Number,
     },
+    // 额外的引入的组件
+    extraComponents: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
   },
   //自定义指令
   directives: {
@@ -335,6 +341,9 @@ export default {
       return this.buttonsList.length > 0
     },
   },
+  created() {
+    this.addComponents()
+  },
   mounted() {
     this.judgeOneRow()
     window.addEventListener('resize', this.judgeOneRow)
@@ -345,6 +354,12 @@ export default {
   },
   methods: {
     getAttrs,
+    // 增加额外的组件
+    addComponents() {
+      for (const key in this.extraComponents) {
+        this.$options.components[key] = this.extraComponents[key]
+      }
+    },
     // 表格内复选框变更
     fieldItemChange(fieldItem, row, method = 'formFieldChange') {
       this.$emit('happenEvent', {
