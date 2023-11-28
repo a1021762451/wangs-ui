@@ -52,9 +52,9 @@
       </el-checkbox>
       <el-option
         v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value"
+        :key="item[valueKey]"
+        :label="item[labelKey]"
+        :value="item[valueKey]"
       >
         <slot v-bind="item"></slot>
       </el-option>
@@ -90,6 +90,12 @@ export default {
       type: Array,
       default() {
         return []
+      },
+    },
+    props: {
+      type: Object,
+      default() {
+        return {}
       },
     },
     // 多选模式是否需要全选
@@ -132,6 +138,12 @@ export default {
     isTreeSelect() {
       return this.selectMode.includes('treeSelect')
     },
+    labelKey() {
+      return this.props['label'] || 'label'
+    },
+    valueKey() {
+      return this.props['value'] || 'value'
+    },
     treeNodeKey() {
       const treeConfig = this.treeConfig
       return treeConfig['node-key'] || treeConfig['nodeKey'] || 'id'
@@ -163,7 +175,9 @@ export default {
   methods: {
     // 全选操作
     selectAll(checked) {
-      const selectValue = checked ? this.options.map((d) => d.value) : []
+      const selectValue = checked
+        ? this.options.map((d) => d[this.valueKey])
+        : []
       this.$emit('change', selectValue)
     },
     // 值变化，树回显
@@ -205,7 +219,7 @@ export default {
   padding-left: 20px;
 }
 .ws-treeSelect {
-  max-width: 260px;
+  // max-width: 260px;
   .el-select-dropdown__item,
   .el-select-dropdown__item.selected,
   .el-select-dropdown__item.hover,
@@ -214,23 +228,9 @@ export default {
     padding: 0;
     margin: 0 6px;
   }
-  .custom-tree-node {
-    position: relative;
-  }
   .el-scrollbar__wrap {
     max-height: 350px !important;
   }
-  // .el-tree {
-  //   max-height: 300px;
-  //   overflow-y: auto;
-  // }
 }
 </style>
-<style lang="less" scoped>
-// .ws-select {
-//   height: auto;
-//   max-height: 200px;
-//   overflow-y: auto;
-//   padding: 0;
-// }
-</style>
+<style lang="less" scoped></style>
