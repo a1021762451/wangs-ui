@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
 import "./mock";
+import './reset.less'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'nprogress/nprogress.css' // progress bar style
 Vue.config.productionTip = false

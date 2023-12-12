@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-04-20 12:13:03
+ * @LastEditTime: 2023-12-04 11:15:29
  * @FilePath: \ws-ui\examples\router\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,11 +11,11 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
-const routes = [
+export const routes = [
   {
     path: '/',
     name: 'home',
-    component: () => import(/* webpackChunkName: "about" */ '../views/index.vue')
+    redirect: '/ws-table'
   },
   {
     path: '/ws-form',
