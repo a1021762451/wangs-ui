@@ -85,6 +85,7 @@ export default {
           name: '爷',
           age: 18,
           id: '1',
+          testRich: '<span style="color: red">富文本\n换行</span>',
           children: [
             {
               plantName: '一号机组 - 2',

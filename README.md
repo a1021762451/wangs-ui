@@ -186,19 +186,21 @@ const allOptions = {
 
 #### 组件属性
 
-| 参数           | 说明                                                     | 类型    | 可选值                                               | 默认值 |
-| -------------- | -------------------------------------------------------- | ------- | ---------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                    | -      |
-| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                    | -      |
-| switchConfig   | 表单与普通内容切换的控制配置                             | Object  |                                                      | -      |
-| utilsList      | 工具栏                                                   | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
-| showPagination | 展示分页组件                                             | Boolean | -                                                    | true   |
-| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                    | false  |
-| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                    | -      |
-| loading        | 加载样式                                                 | Boolean | -                                                    | false  |
-| placeholder    | 表格空单元占位                                           | String  | -                                                    | -      |
-| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                    | -      |
-| formData     | 搜索栏数据                                               | Object  | -                                                    | -      |
+| 参数           | 说明                         | 类型    | 可选值                                               | 默认值 |
+| -------------- | ---------------------------- | ------- | ---------------------------------------------------- | ------ |
+| allOptions     | 所有表单下拉框选项集合       | Object  | -                                                    | -      |
+| tableColumns   | 所有列的对象集合数组         | Array   | -                                                    | -      |
+| switchConfig   | 表单与普通内容切换的控制配置 | Object  |                                                      | -      |
+| utilsList      | 工具栏                       | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
+| showPagination | 展示分页组件                 | Boolean | -                                                    | true   |
+| showSearch     | 是否显示搜索框               | Boolean | -                                                    | false |
+
+| checkStrictly | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | - | false |
+| pageInfo | 分页数据, 不传则没有分页栏 | Object | - | - |
+| loading | 加载样式 | Boolean | - | false |
+| placeholder | 表格空单元占位 | String | - | - |
+| seachConfig | 搜索栏配置， 同 ws-form, 不传则没有搜索栏 | Object | - | - |
+| formData | 搜索栏数据 | Object | - | - |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
@@ -209,6 +211,7 @@ const allOptions = {
 | children         | 多级表头配置                           | Array    | -      | -      |
 | formatter        | 同 el-table formatter                  | Function | -      | -      |
 | selfAdjust       | 列宽根据内容自调节                     | Boolean  | -      | false  |
+| rich             | 列内容是富文本                         | Boolean  | -      | false  |
 | component        | 组件名，用于表单组件                   | String   | -      | -      |
 | blurHandler      | el-input 组件失焦时值过滤              | Function | -      | -      |
 | inputHandler     | el-input 组件输入时值过滤              | Function | -      | -      |

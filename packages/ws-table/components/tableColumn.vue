@@ -96,11 +96,7 @@
           :name="fieldItem.slotName"
           v-bind="{ row, column, $index, fieldItem }"
         >
-          {{
-            row[fieldItem.prop] || row[fieldItem.prop] === 0
-              ? row[fieldItem.prop]
-              : fieldItem.placeholder || placeholder
-          }}
+          {{ getShowValue(row, column, $index, fieldItem) }}
         </slot>
       </template>
       <!-- 表单元素 -->
@@ -115,7 +111,7 @@
             :name="fieldItem.slotName"
             v-bind="{ row, column, $index, fieldItem }"
           >
-            {{ row[fieldItem.prop] }}
+            {{ getShowValue(row, column, $index, fieldItem) }}
           </slot>
         </template>
         <template v-else>
@@ -153,7 +149,7 @@
           <!--allowToggle控制是否能够双击切换-->
           <ws-tooltip
             placement="top"
-            :content="getComponentShowValue(row, fieldItem)"
+            :content="getComponentShowValue(row, column, $index, fieldItem)"
             overflow
             v-else
           >
@@ -162,22 +158,21 @@
               @dblclick="toggleInput(row, column, $index)"
               class="overflow_tip"
             >
-              {{ getComponentShowValue(row, fieldItem) }}
+              {{ getComponentShowValue(row, column, $index, fieldItem) }}
             </div>
           </ws-tooltip>
         </template>
       </el-form-item>
-      <!-- 格式化 -->
-      <template v-else-if="fieldItem.formatter">{{
-        fieldItem.formatter(row[fieldItem.prop], row, column, $index) ||
-        fieldItem.placeholder ||
-        placeholder
-      }}</template>
-      <!-- 默认 -->
+      <!-- 富文本 -->
+      <template v-else-if="fieldItem.rich">
+        <div
+          class="rich-text"
+          v-html="getShowValue(row, column, $index, fieldItem)"
+        ></div>
+      </template>
+      <!-- 默认 包括了格式化 -->
       <template v-else>{{
-        row[fieldItem.prop] || row[fieldItem.prop] === 0
-          ? row[fieldItem.prop]
-          : fieldItem.placeholder || placeholder
+        getShowValue(row, column, $index, fieldItem)
       }}</template>
     </template>
   </el-table-column>
@@ -348,13 +343,10 @@ export default {
       })
     },
     // 获取组件模式对应的值
-    getComponentShowValue(row, fieldItem) {
-      if (!row[fieldItem.prop]) return fieldItem.placeholder || this.placeholder
-      const { prop, componentAttrs = {}, component, formatter } = fieldItem
-      if (formatter) {
-        return formatter(row[prop])
-      }
-      if (component === 'el-date-picker' && componentAttrs.format) {
+    getComponentShowValue(row, column, $index, fieldItem) {
+      const { prop, componentAttrs = {}, component } = fieldItem
+      const value = row[fieldItem.prop]
+      if (value && component === 'el-date-picker' && componentAttrs.format) {
         return format(new Date(row[prop]), componentAttrs.format)
       }
       if (component === 'el-select') {
@@ -362,7 +354,16 @@ export default {
         const option = options.find((item) => item.value === row[prop])
         return option ? option.label : ''
       }
-      return row[prop]
+      return this.getShowValue(row, column, $index, fieldItem)
+    },
+    // 获取普通模式对应的值
+    getShowValue(row, column, $index, fieldItem) {
+      const value = row[fieldItem.prop]
+      return fieldItem.formatter
+        ? fieldItem.formatter(row, column, value, $index)
+        : value || value === 0
+        ? value
+        : fieldItem.placeholder || this.placeholder
     },
   },
 }
@@ -384,6 +385,10 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+}
+.rich-text {
+  white-space: normal;
+  text-align: start;
 }
 .el-table__cell {
   .el-form-item {

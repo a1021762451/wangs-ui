@@ -159,10 +159,16 @@ export const tableColumns = [
   {
     prop: 'testFormatter',
     label: '测试过滤',
-    formatter: function (cellValue, row, column, index) {
+    formatter: function (row, column, cellValue, index) {
       return cellValue + '-过滤'
     },
     showOverflowTooltip: true,
+  },
+  // 富文本举例
+  {
+    prop: 'testRich',
+    label: '富文本',
+    rich: true,
   },
   // 宽度自调节举例
   { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
