@@ -3,12 +3,22 @@
  * @Author: wang shuai
  * @Date: 2023-03-05 17:52:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-11 11:29:19
+ * @LastEditTime: 2023-12-18 10:27:35
 -->
 <template>
   <div style="height: 90vh; width: 90vw">
-    <ws-echarts :options="options" :imageSize="40" style="height: 10vh; width: 10vw"></ws-echarts>
-    <ws-echarts :options="options" :imageSize="40" style="height: 10vh; width: 10vw"></ws-echarts>
+    <ws-echarts
+      :options="options"
+      :imageSize="40"
+      :eventsList="eventsList"
+      @init="echartsInit"
+      style="height: 10vh; width: 10vw"
+    ></ws-echarts>
+    <ws-echarts
+      :options="options"
+      :imageSize="40"
+      style="height: 10vh; width: 10vw"
+    ></ws-echarts>
   </div>
 </template>
 
@@ -76,7 +86,21 @@ export default {
           },
         ],
       },
+      eventsList: [
+        {
+          type: 'click',
+          handler: this.echartsClick,
+        },
+      ],
     }
+  },
+  methods: {
+    echartsClick(e) {
+      console.log('echarts点击事件', e, this)
+    },
+    echartsInit(e) {
+      console.log('echarts实例', e)
+    },
   },
 }
 </script>

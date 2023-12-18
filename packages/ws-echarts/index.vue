@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-07-12 14:59:10
+ * @LastEditTime: 2023-12-18 10:28:04
 -->
 <template>
   <div style="width: 100%; height: 100%">
@@ -48,6 +48,16 @@ export default {
       type: Boolean,
       default: true,
     },
+    // 图表监听事件
+    eventsList: {
+      type: Array,
+      default: () => [],
+    },
+    // 图表触发的事件
+    actionsList: {
+      type: Array,
+      default: () => [],
+    },
   },
   watch: {
     options: {
@@ -80,11 +90,23 @@ export default {
       // myChart.hideLoading()
       // 基于准备好的dom，初始化echarts实例
       this.myChart = this.$echarts.init(document.getElementById(this.chartId))
+      // 用于获取echarts实例
+      this.$emit('init', this.myChart)
       this.updateEcharts()
+      // 监听窗口变化，自适应图表
       window.addEventListener('resize', this.resizeEcharts)
+      // 监听点击事件
       this.myChart.on('click', (params) => {
-        console.log('this.myChart.on', params)
-        this.$emit('echartsClick', params)
+        this.$emit('click', params)
+      })
+      // 监听的事件
+      this.eventsList.forEach((item) => {
+        const { type, handler } = item
+        this.myChart.on(type, handler)
+      })
+      // 默认触发的事件
+      this.actionsList.forEach((action) => {
+        this.myChart.dispatchAction(action)
       })
     },
     // 更新echarts视图
