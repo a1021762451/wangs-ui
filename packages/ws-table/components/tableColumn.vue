@@ -140,10 +140,31 @@
             <template v-if="fieldItem.component === 'el-select'">
               <el-option
                 v-for="item in allOptions[fieldItem.prop]"
-                :key="item.label"
-                :label="item.label"
-                :value="item.value"
+                :key="item.value"
+                v-bind="item"
               ></el-option>
+            </template>
+            <template v-if="fieldItem.component === 'el-radio-group'">
+              <el-radio
+                v-for="item in allOptions[fieldItem.prop]"
+                :key="item.value"
+                v-bind="{
+                  ...item,
+                  label: item.value,
+                }"
+                >{{ item.label }}</el-radio
+              >
+            </template>
+            <template v-if="fieldItem.component === 'el-checkbox-group'">
+              <el-checkbox
+                v-for="item in allOptions[fieldItem.prop]"
+                :key="item.value"
+                v-bind="{
+                  ...item,
+                  label: item.value,
+                }"
+                >{{ item.label }}</el-checkbox
+              >
             </template>
           </component>
           <!--allowToggle控制是否能够双击切换-->
@@ -309,7 +330,6 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
-      // this.fieldItemChange(fieldItem, row, 'tableFieldBlur')
       const { prop, blurHandler: handler } = fieldItem
       setTimeout(() => {
         this.property = ''
@@ -324,15 +344,16 @@ export default {
         const newValue = handler(row[prop])
         row[prop] = newValue
       }
+      // this.fieldItemChange(fieldItem, row, 'tableFieldBlur')
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
-      // this.fieldItemChange(fieldItem, row, 'tableFieldInput')
       const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
         row[prop] = newValue
       }
+      // this.fieldItemChange(fieldItem, row, 'tableFieldInput')
     },
     // 表格内复选框变更
     fieldItemChange(fieldItem, row, method = 'tableFieldChange') {

@@ -27,13 +27,13 @@ export const formConfigList = [
   {
     component: 'el-select',
     prop: 'applyComId',
-    label: '申请单位申请单位申请单位',
+    label: '下拉框',
     required: true,
   },
   {
     component: 'el-input',
     prop: 'equipName',
-    label: '停电设备',
+    label: '输入框',
     required: true,
     // '如果输入格式为数字加小数点， 去掉小数点'
     blurHandler: function (value) {
@@ -49,15 +49,9 @@ export const formConfigList = [
     },
   },
   {
-    component: 'el-input-number',
-    prop: 'equipNum',
-    label: '设备数量',
-    required: true,
-  },
-  {
     component: 'el-input',
     prop: 'protectContent',
-    label: '检修内容',
+    label: '文本域',
     componentAttrs: {
       type: 'textarea',
     },
@@ -65,7 +59,7 @@ export const formConfigList = [
   {
     component: 'el-date-picker',
     prop: 'endTime_min',
-    label: '竣工日期小',
+    label: '小时间',
     required: true,
     maxTimeProp: 'endTime_max', // 用于比较的最大时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
@@ -78,7 +72,7 @@ export const formConfigList = [
   {
     component: 'el-date-picker',
     prop: 'endTime_max',
-    label: '竣工日期大',
+    label: '大时间',
     required: true,
     minTimeProp: 'endTime_min', // 用于比较的最小时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
@@ -91,9 +85,21 @@ export const formConfigList = [
     },
   },
   {
+    component: 'el-radio-group',
+    prop: 'testRadio',
+    label: '单选框',
+    required: true,
+  },
+  {
+    component: 'el-checkbox-group',
+    prop: 'testCheckbox',
+    label: '复选框',
+    required: true,
+  },
+  {
     slotName: 'lightOut',
     prop: 'lightOut',
-    label: '光年之外',
+    label: '插槽',
     required: true,
   },
 ]
@@ -110,6 +116,14 @@ export const allOptions = {
     { label: '苹果', value: 'apple' },
     { label: '香蕉', value: 'banana' },
   ],
+  testRadio: [
+    { label: '苹果', value: 'apple' },
+    { label: '香蕉', value: 'banana' },
+  ],
+  testCheckbox: [
+    { label: '苹果', value: 'apple' },
+    { label: '香蕉', value: 'banana' },
+  ],
 }
 
 // 表格列配置
@@ -120,28 +134,28 @@ export const tableColumns = [
   // 基本配置
   {
     prop: 'age',
-    label: '年龄',
+    label: '一般情况',
   },
   // 测试多级表头
   {
-    label: '测试多级表头',
+    label: '多级表头',
     children: [
       {
         prop: 'name',
-        label: '姓名',
+        label: '多级表头-1',
         alwaysVisible: true, // 在列选择器中始终显示
         width: 100,
       },
       {
-        label: '测试多级表头-1',
+        label: '多级表头-2',
         children: [
           {
             prop: 'adress',
-            label: '地址',
+            label: '表头-2-1',
           },
           {
             prop: 'work',
-            label: '工作',
+            label: '表头-2-2',
           },
         ],
       },
@@ -152,13 +166,13 @@ export const tableColumns = [
     headerSlotName: 'plantName_header',
     slotName: 'plantName',
     prop: 'plantName',
-    label: '测试插槽',
+    label: '插槽',
     showOverflowTooltip: true,
   },
   // 过滤举例
   {
     prop: 'testFormatter',
-    label: '测试过滤',
+    label: '过滤',
     formatter: function (row, column, cellValue, index) {
       return cellValue + '-过滤'
     },
@@ -175,7 +189,7 @@ export const tableColumns = [
   // 输入框模式举例
   {
     prop: 'testInput',
-    label: '测试输入框',
+    label: '输入框',
     component: 'el-input',
     allowToggle: true, // 是否允许切换显示
     // '如果输入格式为数字加小数点， 去掉小数点'
@@ -196,24 +210,24 @@ export const tableColumns = [
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
     prop: 'testCheckBox',
-    label: '测试复选框',
+    label: '复选框',
     component: 'el-checkbox',
     alwaysVisible: true,
   },
   // 测试下拉框
   {
     prop: 'testSelect',
-    label: '测试下拉框',
+    label: '下拉框',
     component: 'el-select',
     width: 200,
     required: true,
-    allowToggle: true
+    allowToggle: true,
   },
   // 测试时间框模式
   {
     allowToggle: true,
     prop: 'testMinDatetime',
-    label: '测试时间框小',
+    label: '小时间',
     width: 200,
     component: 'el-date-picker',
     required: true,
@@ -231,7 +245,7 @@ export const tableColumns = [
   },
   {
     prop: 'testMaxDatetime',
-    label: '测试时间框大',
+    label: '大时间',
     width: 200,
     component: 'el-date-picker',
     required: true,

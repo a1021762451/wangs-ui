@@ -32,10 +32,10 @@
       </div>
     </template>
     <template v-slot:plantName_header="{ column }">
-      {{ column.label + '--插槽' }}
+      {{ column.label + '--表头插槽' }}
     </template>
     <template v-slot:plantName="{ row, fieldItem }">
-      {{ row.plantName + '--插槽' + fieldItem.prop }}
+      {{ row.plantName + '--内容插槽' }}
     </template>
     <!-- 指向ws-form组件的插槽 -->
     <template #lightOut="{ fieldItem, formData }">

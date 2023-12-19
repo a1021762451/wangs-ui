@@ -77,9 +77,30 @@
                 <el-option
                   v-for="item in allOptions[fieldItem.prop]"
                   :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-bind="item"
                 ></el-option>
+              </template>
+              <template v-if="fieldItem.component === 'el-radio-group'">
+                <el-radio
+                  v-for="item in allOptions[fieldItem.prop]"
+                  :key="item.value"
+                  v-bind="{
+                    ...item,
+                    label: item.value,
+                  }"
+                  >{{ item.label }}</el-radio
+                >
+              </template>
+              <template v-if="fieldItem.component === 'el-checkbox-group'">
+                <el-checkbox
+                  v-for="item in allOptions[fieldItem.prop]"
+                  :key="item.value"
+                  v-bind="{
+                    ...item,
+                    label: item.value,
+                  }"
+                  >{{ item.label }}</el-checkbox
+                >
               </template>
             </component>
           </el-form-item>
@@ -263,6 +284,7 @@ export default {
         let remain = 0
         let total = 0
         configList.forEach((item, index) => {
+          const { component } = item
           // 搜索模式下判断表单元素是否在最左边
           if (this.isSearchList) {
             const col = item.col || 6
@@ -289,6 +311,9 @@ export default {
           // 判断是否需要初始化表单值
           !this.formData.hasOwnProperty(item.prop) &&
             this.$set(this.formData, item.prop, '')
+          // 特殊情况
+          component === 'el-checkbox-group' &&
+            this.$set(this.formData, item.prop, [])
         })
         this.configList = configList
       },
@@ -425,24 +450,22 @@ export default {
     },
     // input框失焦处理
     handleBlur(row, fieldItem) {
-      // this.fieldItemChange(fieldItem, row, 'formFieldBlur')
       const { prop, blurHandler: handler } = fieldItem
       // 自定义数据过滤
       if (typeof handler === 'function') {
         const newValue = handler(row[prop])
         row[prop] = newValue
       }
+      // this.fieldItemChange(fieldItem, row, 'formFieldBlur')
     },
     // input框输入处理
     handleInput(value, row, fieldItem) {
-      // this.fieldItemChange(fieldItem, row, 'formFieldInput')
       const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)
         row[prop] = newValue
-      } else {
-        row[prop] = value
       }
+      // this.fieldItemChange(fieldItem, row, 'formFieldInput')
     },
   },
 }
@@ -532,6 +555,12 @@ export default {
 }
 /deep/ .el-select {
   width: 100%;
+}
+/deep/ .el-radio-group,
+.el-checkbox-group {
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 /deep/ .el-date-editor.el-input__inner {
   width: 100%;
