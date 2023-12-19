@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-19 13:39:59
+ * @LastEditTime: 2023-12-19 23:12:52
 -->
 <template>
   <div>
@@ -18,7 +18,7 @@
       ref="wsForm"
     >
      <!-- 指向ws-form组件的插槽 -->
-      <template #lightOut="{ fieldItem, formData }">
+      <template #testSlot="{ fieldItem, formData }">
         <el-input
           clearable
           v-model="formData[fieldItem.prop]"

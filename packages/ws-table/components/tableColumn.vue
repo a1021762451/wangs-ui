@@ -64,9 +64,9 @@
   <!-- 内容列 -->
   <el-table-column
     v-else
-    align="center"
     v-bind="{
       showOverflowTooltip: !fieldItem.component,
+      align: 'center',
       resizable: true,
       ...fieldItem,
     }"
@@ -96,7 +96,7 @@
           :name="fieldItem.slotName"
           v-bind="{ row, column, $index, fieldItem }"
         >
-          {{ getShowValue(row, column, $index, fieldItem) }}
+          <!-- 用了插槽就不会显示默认的内容 -->
         </slot>
       </template>
       <!-- 表单元素 -->
@@ -111,7 +111,7 @@
             :name="fieldItem.slotName"
             v-bind="{ row, column, $index, fieldItem }"
           >
-            {{ getShowValue(row, column, $index, fieldItem) }}
+            <!-- 用了插槽就不会显示默认的内容 -->
           </slot>
         </template>
         <template v-else>
@@ -170,7 +170,16 @@
           <!--allowToggle控制是否能够双击切换-->
           <ws-tooltip
             placement="top"
-            :content="getComponentShowValue(row, column, $index, fieldItem)"
+            :content="
+              getShowValue(
+                row,
+                column,
+                $index,
+                fieldItem,
+                allOptions,
+                placeholder
+              )
+            "
             overflow
             v-else
           >
@@ -179,7 +188,16 @@
               @dblclick="toggleInput(row, column, $index)"
               class="overflow_tip"
             >
-              {{ getComponentShowValue(row, column, $index, fieldItem) }}
+              {{
+                getShowValue(
+                  row,
+                  column,
+                  $index,
+                  fieldItem,
+                  allOptions,
+                  placeholder
+                )
+              }}
             </div>
           </ws-tooltip>
         </template>
@@ -188,12 +206,21 @@
       <template v-else-if="fieldItem.rich">
         <div
           class="rich-text"
-          v-html="getShowValue(row, column, $index, fieldItem)"
+          v-html="
+            getShowValue(
+              row,
+              column,
+              $index,
+              fieldItem,
+              allOptions,
+              placeholder
+            )
+          "
         ></div>
       </template>
       <!-- 默认 包括了格式化 -->
       <template v-else>{{
-        getShowValue(row, column, $index, fieldItem)
+        getShowValue(row, column, $index, fieldItem, allOptions, placeholder)
       }}</template>
     </template>
   </el-table-column>
@@ -206,7 +233,7 @@ import {
   getMaxValidator,
   getMinValidator,
   getRandomId,
-  format,
+  getShowValue,
 } from '../../utils/util'
 import wsButtons from '../../ws-buttons/index.vue'
 import wsTooltip from '../../ws-tooltip/index.vue'
@@ -286,6 +313,7 @@ export default {
   methods: {
     getAttrs,
     getRandomId,
+    getShowValue,
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
       this.$emit('happenEvent', {
@@ -362,29 +390,6 @@ export default {
         fieldItem,
         row,
       })
-    },
-    // 获取组件模式对应的值
-    getComponentShowValue(row, column, $index, fieldItem) {
-      const { prop, componentAttrs = {}, component } = fieldItem
-      const value = row[fieldItem.prop]
-      if (value && component === 'el-date-picker' && componentAttrs.format) {
-        return format(new Date(row[prop]), componentAttrs.format)
-      }
-      if (component === 'el-select') {
-        const options = this.allOptions[prop] || []
-        const option = options.find((item) => item.value === row[prop])
-        return option ? option.label : fieldItem.placeholder || this.placeholder
-      }
-      return this.getShowValue(row, column, $index, fieldItem)
-    },
-    // 获取普通模式对应的值
-    getShowValue(row, column, $index, fieldItem) {
-      const value = row[fieldItem.prop]
-      return fieldItem.formatter
-        ? fieldItem.formatter(row, column, value, $index)
-        : value || value === 0
-        ? value
-        : fieldItem.placeholder || this.placeholder
     },
   },
 }

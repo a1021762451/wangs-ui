@@ -20,7 +20,7 @@ Mock.mock('/data/getTableData', 'post', {
       // 属性 id 是一个自增数，起始值为 1，每次增 1
       plantName: '四号机组',
       testInput: '3',
-      widthAdjust: '宽度宽度宽度宽度宽度宽度',
+      testAdjust: '宽度宽度宽度宽度宽度宽度',
       testSelect: '',
       testMinDatetime: '',
       testMaxDatetime: '',

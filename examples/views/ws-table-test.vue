@@ -31,14 +31,14 @@
         {{ JSON.stringify(row) }}
       </div>
     </template>
-    <template v-slot:plantName_header="{ column }">
+    <template v-slot:testTableSlot_header="{ column }">
       {{ column.label + '--表头插槽' }}
     </template>
-    <template v-slot:plantName="{ row, fieldItem }">
-      {{ row.plantName + '--内容插槽' }}
+    <template v-slot:testTableSlot="{ row, column }">
+      {{ row[column.property] + '--内容插槽' }}
     </template>
     <!-- 指向ws-form组件的插槽 -->
-    <template #lightOut="{ fieldItem, formData }">
+    <template #testSlot="{ fieldItem, formData }">
       <el-input
         clearable
         v-model="formData[fieldItem.prop]"
@@ -74,95 +74,95 @@ export default {
       selection: [],
       tableData: [
         {
-          plantName: '一号机组',
+          id: '1',
+          testTableSlot: '一号机组',
           testInput: '1',
-          widthAdjust: '宽度宽度宽度',
-          testCheckBox: '0',
-          testSelect: 'apple',
+          testAdjust: '宽度宽度宽度',
+          testCheckbox: '0',
+          testSelect: '2',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
-          name: '爷',
-          age: 18,
-          id: '1',
-          testRich: '<span style="color: red">富文本\n换行</span>',
+          testHeader1: '爷',
+          testNormal: 18,
+          testRich: '<div style="color: red;">富文本<br>换行</div>',
           children: [
             {
-              plantName: '一号机组 - 2',
+              id: '1-2',
+              testTableSlot: '一号机组 - 2',
               testInput: '2 -2',
-              widthAdjust: '宽度宽度宽度 -2',
+              testAdjust: '宽度宽度宽度 -2',
               testSelect: '',
               testMinDatetime: '',
               testMaxDatetime: '',
               testTime: '',
               testFormatter: '内容 -2',
-              adress: '北京 -2',
-              work: '程序员 -2',
-              id: '1-2',
-              name: '父',
+              testHeader21: '北京 -2',
+              testHeader22: '程序员 -2',
+              testHeader1: '父',
               children: [
                 {
-                  name: '孙',
-                  plantName: '一号机组 - 1',
+                  id: '1-2-1',
+                  testHeader1: '孙',
+                  testTableSlot: '一号机组 - 1',
                   testInput: '1-1',
-                  widthAdjust: '宽度宽度宽度 -1',
+                  testAdjust: '宽度宽度宽度 -1',
                   testSelect: '',
                   testMinDatetime: '',
                   testMaxDatetime: '',
                   testTime: '',
                   testFormatter: '内容-1',
-                  adress: '北京-1',
-                  work: '程序员-1',
-                  id: '1-2-1',
+                  testHeader21: '北京-1',
+                  testHeader22: '程序员-1',
                 },
                 {
-                  name: '孙',
-                  plantName: '一号机组 - 2',
+                  id: '1-2-2',
+                  testHeader1: '孙',
+                  testTableSlot: '一号机组 - 2',
                   testInput: '2 -2',
-                  widthAdjust: '宽度宽度宽度 -2',
+                  testAdjust: '宽度宽度宽度 -2',
                   testSelect: '',
                   testMinDatetime: '',
                   testMaxDatetime: '',
                   testTime: '',
                   testFormatter: '内容 -2',
-                  adress: '北京 -2',
-                  work: '程序员 -2',
-                  id: '1-2-2',
+                  testHeader21: '北京 -2',
+                  testHeader22: '程序员 -2',
                 },
               ],
             },
           ],
         },
         {
-          plantName: '二号机组',
+          id: '2',
+          testTableSlot: '二号机组',
           testInput: '2',
-          widthAdjust: '宽度宽度宽度',
-          testSelect: 'banana',
+          testAdjust: '宽度宽度宽度',
+          testSelect: '1',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
-          adress: '北京',
-          work: '程序员',
-          id: '2',
-          age: 28,
+          testHeader21: '北京',
+          testHeader22: '程序员',
+          testNormal: 28,
         },
         {
-          plantName: '二号机组',
+          id: '3',
+          testTableSlot: '二号机组',
           testInput: '2',
-          widthAdjust: '宽度宽度宽度',
-          testSelect: 'banana',
+          testAdjust: '宽度宽度宽度',
+          testSelect: '2',
           testMinDatetime: '',
           testMaxDatetime: '',
           testTime: '',
           testFormatter: '内容',
-          id: '3',
-          age: 38,
+          testNormal: 38,
         },
       ],
       loading: false,
-      formData: { applyComId: '南昌', equipName: '4号' },
+      formData: { testSelect: '1', testInput: '4' },
       pageInfo: {
         size: 10,
         current: 1,
@@ -174,16 +174,16 @@ export default {
     // this.getInitParams()
     setTimeout(() => {
       this.tableData.push({
-        plantName: '四号机组',
+        id: '4',
+        testTableSlot: '四号机组',
         testInput: '3',
-        widthAdjust: '宽度宽度宽度宽度宽度宽度',
+        testAdjust: '宽度宽度宽度宽度宽度宽度',
         testSelect: '',
         testMinDatetime: '',
         testMaxDatetime: '',
         testTime: '',
         testFormatter: '内容',
-        id: '4',
-        age: 48,
+        testNormal: 48,
       })
     }, '1000')
   },

@@ -162,7 +162,7 @@ const allUtils = [
     icon: 'el-icon-c-scale-to-original',
   },
 ]
-import { debounce, deepClone, getRandomId, treeToFlat } from '../utils/util'
+import { debounce, deepClone, getShowValue, treeToFlat } from '../utils/util'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
@@ -703,15 +703,25 @@ export default {
     getSingleTableData(row) {
       const arr = []
       const flatColums = treeToFlat(deepClone(this.columns))
-      flatColums.forEach((item) => {
-        const { prop, label__table } = item
-        const { tableData } = this.tableForm
-        const $index = tableData.indexOf(row)
+      // 先不做$index处理
+      // const { tableData } = this.tableForm
+      // const flatData = treeToFlat(deepClone(tableData))
+      flatColums.forEach((column) => {
+        const { prop, label__table } = column
+        // const $index = flatData.indexOf(row)
+        const $index = 0
         if (prop) {
           arr.push({
             prop,
             propName: label__table,
-            propValue: this.getComponentShowValue(row, item, $index, item),
+            propValue: getShowValue(
+              row,
+              column,
+              $index,
+              column,
+              this.allOptions,
+              this.placeholder
+            ),
           })
         }
       })
@@ -724,7 +734,6 @@ export default {
     // 下载工具
     download() {
       const { tableData } = this.tableForm
-      const formatterArr = []
       let hasSelection = false
       function getcolumn(columns) {
         const arr = []
@@ -732,15 +741,13 @@ export default {
         columns.forEach((column) => {
           const obj = {}
           if (!column.type) {
-            const { label, prop, children, formatter } = column
+            const { label, prop, children } = column
             if (label) obj.title = label
             if (prop) {
               obj.dataIndex = prop
               // propMap[prop] = column
             }
-            if (formatter) formatterArr.push(column)
             if (children) obj.children = getcolumn(children)
-
             arr.push(obj)
           }
           if (column.type === 'selection') hasSelection = true
@@ -763,15 +770,16 @@ export default {
         const { prop } = column
         data.forEach((row, $index) => {
           prop &&
-            (row[prop] = this.getComponentShowValue(
+            (row[prop] = getShowValue(
               row,
               column,
               $index,
-              column
+              column,
+              this.allOptions,
+              this.placeholder
             ))
         })
       })
-      console.log(columns, data, 'columns, data')
       try {
         const ElMapExportTable = require('table-excel').ElMapExportTable
         const instance = new ElMapExportTable(
@@ -782,29 +790,6 @@ export default {
       } catch (error) {
         console.log('没有找到包')
       }
-    },
-    // 获取组件模式对应的值
-    getComponentShowValue(row, column, $index, fieldItem) {
-      const { prop, componentAttrs = {}, component } = fieldItem
-      const value = row[fieldItem.prop]
-      if (value && component === 'el-date-picker' && componentAttrs.format) {
-        return format(new Date(row[prop]), componentAttrs.format)
-      }
-      if (component === 'el-select') {
-        const options = this.allOptions[prop] || []
-        const option = options.find((item) => item.value === row[prop])
-        return option ? option.label : fieldItem.placeholder || this.placeholder
-      }
-      return this.getShowValue(row, column, $index, fieldItem)
-    },
-    // 获取普通模式对应的值
-    getShowValue(row, column, $index, fieldItem) {
-      const value = row[fieldItem.prop]
-      return fieldItem.formatter
-        ? fieldItem.formatter(row, column, value, $index)
-        : value || value === 0
-        ? value
-        : fieldItem.placeholder || this.placeholder
     },
   },
 }

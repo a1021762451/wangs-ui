@@ -26,7 +26,8 @@ Vue.use(wangsUi)
 - 带有搜索栏，分页栏
 - 嵌套 el-form 组件，支持单行和多行校验表单元素, 支持双击切换表单元素
 - 可根据列内容自适应宽度
-- 封装工具栏，支持表格纯前端下载、列勾选功能
+- 封装工具栏，支持表格纯前端下载、列勾选功能、单行展示
+- 解决树形表格，复选框勾选不联动问题
 - 保留`elementui el-table`原有功能
 
 #### 使用方式
@@ -35,28 +36,57 @@ Vue.use(wangsUi)
 
 ```html
 <ws-table
-  style="height: 450px"
+  ref="wsTable"
+  showSearch
+  style="height: 100%"
+  placeholder="-"
   :loading="loading"
-  :tableData="tableData"
+  utilsList="download,showSingle"
+  :data="tableData"
   :tableColumns="tableColumns"
   :allOptions="allOptions"
-  :utilsList="['setColumms', 'download']"
-  :header-cell-style="{ background: '#f3f3f3' }"
   :pageInfo.sync="pageInfo"
+  :formData.sync="formData"
+  :operationConfig="{
+      buttonConfigList: formButtons,
+    }"
+  :seachConfig="{
+      formConfigList,
+      buttonConfigList: formButtons,
+      allOptions,
+    }"
+  :switchConfig="{
+      switchMode: 'rowControl',
+    }"
   @happenEvent="happenEvent"
   @selection-change="selectionChange"
-  ref="wsTable"
-  row-key="id"
 >
+  <!-- 指向table组件的插槽 -->
   <template v-slot:expand="{ row }">
     <div>{{ JSON.stringify(row) }}</div>
   </template>
-  <template v-slot:plantName_header="{ column }">
-    {{ column.label + '--插槽' }}
+  <template v-slot:testTableSlot_header="{ column }">
+    {{ column.label + '--表头插槽' }}
   </template>
-  <template v-slot:plantName="{ row, fieldItem }">
-    {{ row.plantName + '--插槽' + fieldItem.prop }}
+  <template v-slot:testTableSlot="{ row, column }">
+    {{ row[column.property] + '--内容插槽' }}
   </template>
+  <!-- 指向ws-form组件的插槽 -->
+  <template #testSlot="{ fieldItem, formData }">
+    <el-input
+      clearable
+      v-model="formData[fieldItem.prop]"
+      :placeholder="fieldItem.disabled ? '' : '请输入内容'"
+      :disabled="fieldItem.disabled"
+    ></el-input>
+  </template>
+  <!-- 指向ws-buttons组件的插槽 -->
+  <template #download="scope">
+    <el-button type="primary" size="small" @click="happenEvent(scope)"
+      >下载</el-button
+    >
+  </template>
+  <!-- <template v-slot:append> append </template> -->
 </ws-table>
 ```
 
@@ -66,42 +96,69 @@ Vue.use(wangsUi)
 // 表格列配置
 export const tableColumns = [
   { type: 'selection' },
+  { type: 'index', label: '序号' },
+  { type: 'expand', slotName: 'expand' },
+  // 基本配置
+  {
+    prop: 'testNormal',
+    label: '一般情况',
+  },
   // 测试多级表头
   {
-    label: '测试多级表头',
+    label: '多级表头',
     children: [
       {
-        prop: 'name',
-        label: '姓名',
-        alwaysVisible: true,
+        prop: 'testHeader1',
+        label: '多级表头-1',
+        alwaysVisible: true, // 在列选择器中始终显示
+        width: 100,
+      },
+      {
+        label: '多级表头-2',
+        children: [
+          {
+            prop: 'testHeader21',
+            label: '表头-2-1',
+          },
+          {
+            prop: 'testHeader22',
+            label: '表头-2-2',
+          },
+        ],
       },
     ],
   },
   // 自定义表头，内容
   {
-    headerSlotName: 'plantName_header',
-    slotName: 'plantName',
-    prop: 'plantName',
-    label: '测试插槽',
+    headerSlotName: 'testTableSlot_header',
+    slotName: 'testTableSlot',
+    prop: 'testTableSlot',
+    label: '插槽',
     showOverflowTooltip: true,
   },
   // 过滤举例
   {
     prop: 'testFormatter',
-    label: '测试过滤',
-    formatter: function (cellValue, row, column, index) {
+    label: '过滤',
+    formatter: function (row, column, cellValue, index) {
       return cellValue + '-过滤'
     },
     showOverflowTooltip: true,
   },
+  // 富文本举例
+  {
+    prop: 'testRich',
+    label: '富文本',
+    rich: true,
+  },
   // 宽度自调节举例
-  { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
+  { prop: 'testAdjust', label: '宽度自调节', selfAdjust: true },
   // 输入框模式举例
   {
     prop: 'testInput',
-    label: '测试输入框',
+    label: '输入框',
     component: 'el-input',
-    allowToggle: true,
+    allowToggle: true, // 是否允许切换显示
     // '如果输入格式为数字加小数点， 去掉小数点'
     blurHandler: function (value) {
       if (/^\d*\.$/.test(value)) {
@@ -111,23 +168,33 @@ export const tableColumns = [
     },
     // 限制输入6位小数
     inputHandler: function (value) {
+      value = value.replace(/[^0-9.]/g, '')
       return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
     },
     width: 200,
     required: true,
   },
+  // 复选框模式 对应的值不等于0或者1则代表禁用
+  {
+    prop: 'testCheckbox',
+    label: '复选框',
+    component: 'el-checkbox',
+    alwaysVisible: true,
+  },
   // 测试下拉框
   {
     prop: 'testSelect',
-    label: '测试下拉框',
+    label: '下拉框',
     component: 'el-select',
     width: 200,
     required: true,
+    allowToggle: true,
   },
   // 测试时间框模式
   {
+    allowToggle: true,
     prop: 'testMinDatetime',
-    label: '测试时间框小',
+    label: '小时间',
     width: 200,
     component: 'el-date-picker',
     required: true,
@@ -135,8 +202,8 @@ export const tableColumns = [
     minDate: '2022-01-01', // 用于比较的最小时间固定值
     maxDate: '2024-01-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    minAllowEqual: false, // 不允许和用于比较的最小时间相等
-    maxAllowEqual: false, // 不允许和用于比较的最大时间相等
+    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -145,7 +212,7 @@ export const tableColumns = [
   },
   {
     prop: 'testMaxDatetime',
-    label: '测试时间框大',
+    label: '大时间',
     width: 200,
     component: 'el-date-picker',
     required: true,
@@ -153,8 +220,8 @@ export const tableColumns = [
     minDate: '2022-01-01', // 用于比较的最小时间固定值
     maxDate: '2024-01-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    minAllowEqual: false, // 不允许和用于比较的最小时间相等
-    maxAllowEqual: false, // 不允许和用于比较的最大时间相等
+    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -165,8 +232,20 @@ export const tableColumns = [
     type: 'operation',
     buttonConfigList: [
       {
-        method: 'viewDetail',
-        label: '查看',
+        method: 'validateRow',
+        label: '单验',
+      },
+      {
+        method: 'validateAll',
+        label: '全验',
+      },
+      {
+        method: 'edit',
+        label: '编辑',
+      },
+      {
+        method: 'notEdit',
+        label: '不编辑',
       },
     ],
   },
@@ -178,29 +257,28 @@ export const tableColumns = [
 ```javascript
 const allOptions = {
   testSelect: [
-    { label: '苹果', value: '苹果' },
-    { label: '香蕉', value: '香蕉' },
+    { label: '选项一', value: '1' },
+    { label: '选项二', value: '2' },
   ],
 }
 ```
 
 #### 组件属性
 
-| 参数           | 说明                         | 类型    | 可选值                                               | 默认值 |
-| -------------- | ---------------------------- | ------- | ---------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合       | Object  | -                                                    | -      |
-| tableColumns   | 所有列的对象集合数组         | Array   | -                                                    | -      |
-| switchConfig   | 表单与普通内容切换的控制配置 | Object  |                                                      | -      |
-| utilsList      | 工具栏                       | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
-| showPagination | 展示分页组件                 | Boolean | -                                                    | true   |
-| showSearch     | 是否显示搜索框               | Boolean | -                                                    | false  |
-
-| checkStrictly | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | - | false |
-| pageInfo | 分页数据, 不传则没有分页栏 | Object | - | - |
-| loading | 加载样式 | Boolean | - | false |
-| placeholder | 表格空单元占位 | String | - | - |
-| seachConfig | 搜索栏配置， 同 ws-form, 不传则没有搜索栏 | Object | - | - |
-| formData | 搜索栏数据 | Object | - | - |
+| 参数           | 说明                                                     | 类型    | 可选值                                               | 默认值 |
+| -------------- | -------------------------------------------------------- | ------- | ---------------------------------------------------- | ------ |
+| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                    | -      |
+| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                    | -      |
+| switchConfig   | 表单与普通内容切换的控制配置                             | Object  |                                                      | -      |
+| utilsList      | 工具栏                                                   | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
+| showPagination | 展示分页组件                                             | Boolean | -                                                    | true   |
+| showSearch     | 是否显示搜索框                                           | Boolean | -                                                    | false  |
+| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                    | false  |
+| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                    | -      |
+| loading        | 加载样式                                                 | Boolean | -                                                    | false  |
+| placeholder    | 表格空单元占位                                           | String  | -                                                    | -      |
+| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                    | -      |
+| formData       | 搜索栏数据                                               | Object  | -                                                    | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
@@ -261,6 +339,7 @@ tableColumns 配置 slotName 和 headerSlotName
 - 配置化开发
 - 支持搜索栏模式和普通表单模式
 - 搜索栏模式自适应增加折叠按钮
+- 增加默认按钮，默认进行校验
 - 保留`elementui el-form`原有功能
 
 #### 使用方式
@@ -270,17 +349,16 @@ tableColumns 配置 slotName 和 headerSlotName
 ```html
 <ws-form
   :formConfigList="formConfigList"
-  :formButtons="formButtons"
+  :buttonConfigList="formButtons"
   :allOptions="allOptions"
-  :formData.sync="formData"
-  buttonSize="small"
   isSearchList
   @happenEvent="happenEvent"
-  style="margin-bottom: 10px"
+  :formData.sync="formData"
+  :extraComponents="extraComponents"
   ref="wsForm"
 >
   <!-- 指向ws-form组件的插槽 -->
-  <template #lightOut="{ fieldItem, formData }">
+  <template #testSlot="{ fieldItem, formData }">
     <el-input
       clearable
       v-model="formData[fieldItem.prop]"
@@ -304,24 +382,42 @@ tableColumns 配置 slotName 和 headerSlotName
 export const formConfigList = [
   {
     component: 'el-select',
-    prop: 'applyComId',
-    label: '申请单位申请单位申请单位',
+    prop: 'testSelect',
+    label: '下拉框',
     required: true,
   },
   {
     component: 'el-input',
-    prop: 'protectContent',
-    label: '检修内容',
+    prop: 'testInput',
+    label: '输入框',
+    required: true,
+    // '如果输入格式为数字加小数点， 去掉小数点'
+    blurHandler: function (value) {
+      if (/^\d*\.$/.test(value)) {
+        return value.replace('.', '')
+      }
+      return value
+    },
+    // 限制输入6位小数
+    inputHandler: function (value) {
+      value = value.replace(/[^0-9.]/g, '')
+      return value.replace(/^\D*((0|[1-9][0-9]*)(?:\.\d{0,6})?).*$/g, '$1')
+    },
+  },
+  {
+    component: 'el-input',
+    prop: 'testTextarea',
+    label: '文本域',
     componentAttrs: {
       type: 'textarea',
     },
   },
   {
     component: 'el-date-picker',
-    prop: 'endTime_min',
-    label: '竣工日期小',
+    prop: 'testMinDatetime',
+    label: '小时间',
     required: true,
-    maxTimeProp: 'endTime_max',
+    maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
     defaultTimeType: 'today', // 默认当前时间
     componentAttrs: {
@@ -331,20 +427,35 @@ export const formConfigList = [
   },
   {
     component: 'el-date-picker',
-    prop: 'endTime_max',
-    label: '竣工日期大',
+    prop: 'testMaxDatetime',
+    label: '大时间',
     required: true,
-    minTimeProp: 'endTime_min',
+    minTimeProp: 'testMinDatetme', // 用于比较的最小时间对应字段
+    timeDisabled: true, // 时间限制精度是否到时分秒
     // isShowCurrent: true,
+    minAllowEqual: false, // 允许和用于比较的最小时间相等 精度到天
+    maxAllowEqual: false, // 允许和用于比较的最大时间相等 精度到天
     componentAttrs: {
       type: 'date',
       valueFormat: 'yyyy-MM-dd',
     },
   },
   {
-    slotName: 'lightOut',
-    prop: 'lightOut',
-    label: '光年之外',
+    component: 'el-radio-group',
+    prop: 'testRadio',
+    label: '单选框',
+    required: true,
+  },
+  {
+    component: 'el-checkbox-group',
+    prop: 'testCheckbox',
+    label: '复选框',
+    required: true,
+  },
+  {
+    slotName: 'testSlot',
+    prop: 'testSlot',
+    label: '插槽',
     required: true,
   },
 ]
@@ -402,7 +513,7 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
 #### 特点
 
-- 增删改查功能
+- 支持悬浮和鼠标右键控制按钮显示
 - 搜索功能
 - 支持拼音首字母搜索
 - 支持文字超出浮动显示
@@ -415,39 +526,52 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 ```html
 <ws-tree
   showCheckbox
+  draggable
   excludeFirstSearch
-  changeMode="hover"
+  changeMode="contextMenu, hover"
   style="height: 300px; width: 240px"
   textEllipsis
   default-expand-all
+  showHeader
+  :dataIsFlat="false"
   :data="treeData"
-  @nodeAdd="nodeAdd"
-  @nodeDelete="nodeDelete"
-  @nodeEdit="nodeEdit"
-  @freeAdd="freeAdd"
+  current-node-key="9"
+  :default-checked-keys="['9', '10']"
+  :disabledFn="disabledFn"
+  :disabledContextmenuFn="disabledContextmenuFn"
+  :filterButtonsFn="filterButtonsFn"
+  :useDefaultButtons="false"
+  :extraOperations="extraOperations"
   @check-change="handleCheckChange"
-></ws-tree>
+  @node-click="handleNodeClick"
+  @check="handleCheck"
+  @happenEvent="happenEvent"
+>
+  <template v-slot="{ data }">
+    <i class="el-icon-s-tools" style="font-size: 10px"></i>
+    <span>{{ data.label + '插槽' }}</span>
+  </template>
+</ws-tree>
 ```
 
 #### 组件属性
 
-| 参数               | 说明                                                   | 类型     | 可选值                                      | 默认值                                |
-| ------------------ | ------------------------------------------------------ | -------- | ------------------------------------------- | ------------------------------------- |
-| changeMode         | 增删改查模式                                           | String   | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |                                       |
-| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean  | -                                           | false                                 |
-| operations         | 有哪些按钮                                             | Array    | -                                           | ['nodeAdd', 'nodeDelete', 'nodeEdit'] |
-| extraOperations    | 额外的按钮                                             | Array    | -                                           | -                                     |
-| backgroundColor    | 组件背景色，包括树                                     | String   | -                                           | -                                     |
-| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean  | -                                           | false                                 |
-| headerConfig       | 头部内容配置                                           | Object   | -                                           | -                                     |
-| showHeader         | 是否显示头部                                           | Boolean  | -                                           | false                                 |
-| showSearch         | 是否显示搜索框                                         | Boolean  | -                                           | true                                  |
-| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean  | -                                           | false                                 |
-| textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean  | -                                           | false                                 |
-| dataIsFlat         | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean  | -                                           | true                                  |
-| useDefaultButtons  | 是否使用默认的增删改按钮                               | Boolean  | -                                           | true                                  |
-| disabledFn         | 结点是否禁用的回调函数,会自动添加 disabled 属性        | Function | -                                           | -                                     |
-| filterButtonsFn    | 过滤操作按钮回调函数                                   | Function | -                                           | -                                     |
+| 参数               | 说明                                                   | 类型     | 可选值                                      | 默认值 |
+| ------------------ | ------------------------------------------------------ | -------- | ------------------------------------------- | ------ |
+| changeMode         | 增删改查模式                                           | String   | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |        |
+| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean  | -                                           | false  |
+| extraOperations    | 额外的按钮                                             | Array    | -                                           | -      |
+| backgroundColor    | 组件背景色，包括树                                     | String   | -                                           | -      |
+| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean  | -                                           | false  |
+| headerConfig       | 头部内容配置                                           | Object   | -                                           | -      |
+| showHeader         | 是否显示头部                                           | Boolean  | -                                           | false  |
+| showSearch         | 是否显示搜索框                                         | Boolean  | -                                           | true   |
+| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean  | -                                           | false  |
+| textEllipsis       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean  | -                                           | false  |
+| dataIsFlat         | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean  | -                                           | true   |
+| useDefaultButtons  | 是否使用默认的增删改按钮                               | Boolean  | -                                           | true   |
+| disabledFn         | 结点是否禁用的回调函数,会自动添加 disabled 属性        | Function | -                                           | -      |
+| filterButtonsFn    | 过滤操作按钮回调函数                                   | Function | -                                           | -      |
 
 #### 组件事件
 

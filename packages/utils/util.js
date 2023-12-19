@@ -70,7 +70,7 @@ export function getAttrs(fieldItem, formData = {}, isDetail) {
   ) {
     obj['picker-options'] = getPicker(fieldItem, formData)
   }
-  if(fieldItem.component === 'el-date-picker') {
+  if (fieldItem.component === 'el-date-picker') {
     obj['popper-class'] = fieldItem.timeDisabled ? 'hideCurrent' : ''
   }
   const allTypes = commonAttrs[fieldItem.component] || {}
@@ -265,6 +265,31 @@ export function getMaxValidator(fieldItem, max) {
       callback()
     }
   }
+}
+// 获取表格显示的值
+export function getShowValue(
+  row,
+  column,
+  $index,
+  fieldItem,
+  allOptions,
+  placeholder
+) {
+  const { prop, componentAttrs = {}, component } = fieldItem
+  let value = row[prop]
+  if (value && component === 'el-date-picker' && componentAttrs.format) {
+    value && (value = format(new Date(value), componentAttrs.format))
+  }
+  if (component === 'el-select') {
+    const options = allOptions[prop] || []
+    const option = options.find((item) => item.value === row[prop])
+    option && (value = option.label)
+  }
+  return fieldItem.formatter
+    ? fieldItem.formatter(row, column, value, $index)
+    : value || value === 0
+    ? value
+    : fieldItem.placeholder || placeholder
 }
 /**
  * 对象深拷贝

@@ -26,13 +26,13 @@ export const formButtons = [
 export const formConfigList = [
   {
     component: 'el-select',
-    prop: 'applyComId',
+    prop: 'testSelect',
     label: '下拉框',
     required: true,
   },
   {
     component: 'el-input',
-    prop: 'equipName',
+    prop: 'testInput',
     label: '输入框',
     required: true,
     // '如果输入格式为数字加小数点， 去掉小数点'
@@ -50,7 +50,7 @@ export const formConfigList = [
   },
   {
     component: 'el-input',
-    prop: 'protectContent',
+    prop: 'testTextarea',
     label: '文本域',
     componentAttrs: {
       type: 'textarea',
@@ -58,10 +58,10 @@ export const formConfigList = [
   },
   {
     component: 'el-date-picker',
-    prop: 'endTime_min',
+    prop: 'testMinDatetime',
     label: '小时间',
     required: true,
-    maxTimeProp: 'endTime_max', // 用于比较的最大时间对应字段
+    maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
     defaultTimeType: 'today', // 默认当前时间
     componentAttrs: {
@@ -71,10 +71,10 @@ export const formConfigList = [
   },
   {
     component: 'el-date-picker',
-    prop: 'endTime_max',
+    prop: 'testMaxDatetime',
     label: '大时间',
     required: true,
-    minTimeProp: 'endTime_min', // 用于比较的最小时间对应字段
+    minTimeProp: 'testMinDatetme', // 用于比较的最小时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
     // isShowCurrent: true,
     minAllowEqual: false, // 允许和用于比较的最小时间相等 精度到天
@@ -97,8 +97,8 @@ export const formConfigList = [
     required: true,
   },
   {
-    slotName: 'lightOut',
-    prop: 'lightOut',
+    slotName: 'testSlot',
+    prop: 'testSlot',
     label: '插槽',
     required: true,
   },
@@ -106,23 +106,17 @@ export const formConfigList = [
 
 // 下拉框选项
 export const allOptions = {
-  applyComId: [
-    { label: '南昌', value: '南昌' },
-    { label: '宁波', value: '宁波' },
-    { label: '鹰潭', value: '鹰潭' },
-    { label: '上饶', value: '上饶' },
-  ],
   testSelect: [
-    { label: '苹果', value: 'apple' },
-    { label: '香蕉', value: 'banana' },
+    { label: '选项一', value: '1' },
+    { label: '选项二', value: '2' },
   ],
   testRadio: [
-    { label: '苹果', value: 'apple' },
-    { label: '香蕉', value: 'banana' },
+    { label: '选项一', value: '1' },
+    { label: '选项二', value: '2' },
   ],
   testCheckbox: [
-    { label: '苹果', value: 'apple' },
-    { label: '香蕉', value: 'banana' },
+    { label: '选项一', value: '1' },
+    { label: '选项二', value: '2' },
   ],
 }
 
@@ -133,7 +127,7 @@ export const tableColumns = [
   { type: 'expand', slotName: 'expand' },
   // 基本配置
   {
-    prop: 'age',
+    prop: 'testNormal',
     label: '一般情况',
   },
   // 测试多级表头
@@ -141,7 +135,7 @@ export const tableColumns = [
     label: '多级表头',
     children: [
       {
-        prop: 'name',
+        prop: 'testHeader1',
         label: '多级表头-1',
         alwaysVisible: true, // 在列选择器中始终显示
         width: 100,
@@ -150,11 +144,11 @@ export const tableColumns = [
         label: '多级表头-2',
         children: [
           {
-            prop: 'adress',
+            prop: 'testHeader21',
             label: '表头-2-1',
           },
           {
-            prop: 'work',
+            prop: 'testHeader22',
             label: '表头-2-2',
           },
         ],
@@ -163,9 +157,9 @@ export const tableColumns = [
   },
   // 自定义表头，内容
   {
-    headerSlotName: 'plantName_header',
-    slotName: 'plantName',
-    prop: 'plantName',
+    headerSlotName: 'testTableSlot_header',
+    slotName: 'testTableSlot',
+    prop: 'testTableSlot',
     label: '插槽',
     showOverflowTooltip: true,
   },
@@ -185,7 +179,7 @@ export const tableColumns = [
     rich: true,
   },
   // 宽度自调节举例
-  { prop: 'widthAdjust', label: '宽度自调节', selfAdjust: true },
+  { prop: 'testAdjust', label: '宽度自调节', selfAdjust: true },
   // 输入框模式举例
   {
     prop: 'testInput',
@@ -209,7 +203,7 @@ export const tableColumns = [
   },
   // 复选框模式 对应的值不等于0或者1则代表禁用
   {
-    prop: 'testCheckBox',
+    prop: 'testCheckbox',
     label: '复选框',
     component: 'el-checkbox',
     alwaysVisible: true,
