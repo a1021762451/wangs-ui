@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-22 17:11:36
+ * @LastEditTime: 2023-12-19 12:20:43
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -75,6 +75,7 @@
               @mouseenter="mouseenter(data)"
               @mouseleave="mouseleave"
             >
+              <!-- 内容 -->
               <wsTooltip :content="node.label" overflow :placement="'right'">
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
@@ -82,6 +83,7 @@
                   </slot>
                 </span>
               </wsTooltip>
+              <!-- 悬浮按钮 -->
               <span
                 class="custom-tree-button"
                 v-if="changeByHover"
@@ -89,21 +91,53 @@
                   visibility: iAct == data ? 'visible' : 'hidden',
                 }"
               >
-                <i
+                <template
                   v-for="item in filterButtonsFn
-                    ? filterButtonsFn(operationsList, optionData, node)
+                    ? filterButtonsFn(operationsList, data, node, 'hover')
                     : operationsList"
-                  :key="item.label"
-                  @click.stop="happenEvent(data, node, item)"
-                  :class="`${item.icon}`"
-                  :title="item.label"
-                ></i>
+                >
+                  <span @click.stop v-if="item.children" :key="item.icon">
+                    <el-dropdown
+                      trigger="click"
+                      size="small"
+                      @command="
+                        happenCommand($event, data, node, item.children)
+                      "
+                    >
+                      <i :class="`${item.icon}`" :title="item.label"></i>
+                      <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item
+                          v-for="child in item.children"
+                          :key="child.label"
+                          :icon="child.icon"
+                          :command="child.method"
+                          @click.native.stop
+                          >{{ child.label }}</el-dropdown-item
+                        >
+                      </el-dropdown-menu>
+                    </el-dropdown>
+                  </span>
+                  <i
+                    v-else
+                    :key="item.icon"
+                    @click.stop="happenEvent(data, node, item)"
+                    :class="`${item.icon}`"
+                    :title="item.label"
+                  ></i>
+                </template>
               </span>
-              <div
-                v-if="judgeDisabled(data, node)"
-                class="disabled"
-                @click.stop
-              ></div>
+              <!-- 禁用蒙层 -->
+              <wsTooltip
+                :content="node.label"
+                :overflow="false"
+                :placement="'top'"
+              >
+                <div
+                  v-if="judgeDisabled(data, node)"
+                  class="disabled"
+                  @click.stop
+                ></div>
+              </wsTooltip>
             </div>
           </slot>
         </template>
@@ -121,7 +155,7 @@
     >
       <el-button
         v-for="item in filterButtonsFn
-          ? filterButtonsFn(operationsList, optionData, node)
+          ? filterButtonsFn(operationsList, optionData, node, 'contextMenu')
           : operationsList"
         :key="item.label"
         @click="happenEvent(optionData, node, item)"
@@ -135,26 +169,27 @@
 </template>
 
 <script>
-// 防抖
-export const debounce = (fn, t) => {
-  const delay = t || 500
-  let timer
-  return function () {
-    const args = arguments
-    if (timer) {
-      console.log('防抖中')
-      clearTimeout(timer)
-    }
-    timer = setTimeout(() => {
-      timer = null
-      fn.apply(this, args)
-    }, delay)
-  }
-}
-
+// 默认操作按钮
+const defaultButtons = [
+  {
+    label: '新建',
+    method: 'nodeAdd',
+    icon: 'el-icon-plus',
+  },
+  {
+    label: '删除',
+    method: 'nodeDelete',
+    icon: 'el-icon-delete',
+  },
+  {
+    label: '编辑',
+    method: 'nodeEdit',
+    icon: 'el-icon-edit',
+  },
+]
 import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
-import { flatToTree } from '../utils/util.js'
+import { flatToTree, debounce } from '../utils/util.js'
 export default {
   name: 'ws-tree',
   mixins: [mixins],
@@ -171,11 +206,6 @@ export default {
     excludeFirstSearch: {
       default: false,
       type: Boolean,
-    },
-    // 有哪些按钮
-    operations: {
-      default: () => ['nodeAdd', 'nodeDelete', 'nodeEdit'],
-      type: Array,
     },
     // 额外操作按钮
     extraOperations: {
@@ -247,6 +277,12 @@ export default {
       default: () => [],
       type: Array,
     },
+    // 使用默认按钮
+    useDefaultButtons: {
+      default: true,
+      type: Boolean,
+    },
+    // 当前选中节点
     currentNodeKey: {
       type: String,
       default: '',
@@ -299,9 +335,6 @@ export default {
       return this.changeMode.includes('contextMenu')
     },
   },
-  created() {
-    this.filterButtons()
-  },
   mounted() {
     if (this.changeByContextMenu) {
       const container = this.$refs.container
@@ -334,8 +367,9 @@ export default {
       },
       immediate: true,
     },
-    extraOperations(val) {
-      this.filterButtons()
+    extraOperations: {
+      handler: 'initButtons',
+      immediate: true,
     },
     currentNodeKey: {
       handler() {
@@ -345,6 +379,14 @@ export default {
     },
   },
   methods: {
+    happenCommand(command, data, node, children) {
+      const buttonItem = children.find((item) => item.method === command)
+      this.$emit('happenEvent', {
+        buttonItem,
+        node,
+        data,
+      })
+    },
     // 自动设置当前选中节点
     setCurrentKeyByProp() {
       this.currentNodeKey &&
@@ -367,32 +409,9 @@ export default {
         data,
       })
     },
-    // 过滤操作按钮
-    filterButtons() {
-      const operationsList = [
-        {
-          label: '新建',
-          method: 'nodeAdd',
-          icon: 'el-icon-plus',
-        },
-        {
-          label: '删除',
-          method: 'nodeDelete',
-          icon: 'el-icon-delete',
-        },
-        {
-          label: '编辑',
-          method: 'nodeEdit',
-          icon: 'el-icon-edit',
-        },
-      ]
-      const arr = []
-      this.operations.forEach((item) => {
-        const finditem = operationsList.find((i) => i.method === item)
-        if (finditem) {
-          arr.push(finditem)
-        }
-      })
+    // 确认操作按钮列表
+    initButtons() {
+      const arr = this.useDefaultButtons ? defaultButtons : []
       this.operationsList = arr.concat(this.extraOperations)
     },
     // 右键菜单属性设置

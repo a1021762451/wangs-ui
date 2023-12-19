@@ -21,7 +21,7 @@
       </template>
     </ws-form>
     <!-- 工具箱 -->
-    <div class="talbe-utils" v-if="utilsList.length">
+    <div class="talbe-utils" v-if="utils.length">
       <el-tooltip
         placement="top"
         v-for="util in utils"
@@ -145,8 +145,24 @@
 let singleColunms = [] // 单条展示
 let temColumns = [] // 临时列配置
 let temTableData = [] // 临时数据
+const allUtils = [
+  {
+    content: '下载',
+    method: 'download',
+    icon: 'el-icon-download',
+  },
+  {
+    content: '列设置',
+    method: 'setColumms',
+    icon: 'el-icon-setting',
+  },
+  {
+    content: '单条展示',
+    method: 'showSingle',
+    icon: 'el-icon-c-scale-to-original',
+  },
+]
 import { debounce, deepClone, getRandomId, treeToFlat } from '../utils/util'
-import { allUtils } from './contant.js'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
@@ -174,7 +190,7 @@ export default {
       default() {
         return []
       },
-      type: Array,
+      type: Array | String,
     },
     // 表格数据
     data: {
@@ -281,7 +297,11 @@ export default {
       currentRow: {},
       showSingleStatus: false,
       selectionChange: debounce(this.selectionChangeCallback, 100),
-      dataOrColumnsChange: debounce(this.dataOrColumnsChangeCallback, 100, true),
+      dataOrColumnsChange: debounce(
+        this.dataOrColumnsChangeCallback,
+        100,
+        true
+      ),
     }
   },
   watch: {
@@ -336,8 +356,7 @@ export default {
       return obj
     },
     utils() {
-      const utils = deepClone(allUtils)
-      return utils.filter((item) => {
+      return allUtils.filter((item) => {
         return this.utilsList.includes(item.method)
       })
     },
@@ -686,11 +705,13 @@ export default {
       const flatColums = treeToFlat(deepClone(this.columns))
       flatColums.forEach((item) => {
         const { prop, label__table } = item
+        const { tableData } = this.tableForm
+        const $index = tableData.indexOf(row)
         if (prop) {
           arr.push({
             prop,
             propName: label__table,
-            propValue: this.getComponentShowValue(row, item),
+            propValue: this.getComponentShowValue(row, item, $index, item),
           })
         }
       })
@@ -705,29 +726,29 @@ export default {
       const { tableData } = this.tableForm
       const formatterArr = []
       let hasSelection = false
-      function getcolumn(column) {
+      function getcolumn(columns) {
         const arr = []
         // const propMap = {}
-        column.forEach((item) => {
+        columns.forEach((column) => {
           const obj = {}
-          if (!item.type) {
-            const { label, prop, children, formatter } = item
+          if (!column.type) {
+            const { label, prop, children, formatter } = column
             if (label) obj.title = label
             if (prop) {
               obj.dataIndex = prop
-              // propMap[prop] = item
+              // propMap[prop] = column
             }
-            if (formatter) formatterArr.push(item)
+            if (formatter) formatterArr.push(column)
             if (children) obj.children = getcolumn(children)
 
             arr.push(obj)
           }
-          if (item.type === 'selection') hasSelection = true
+          if (column.type === 'selection') hasSelection = true
         })
         return arr
       }
       // 点击导出触发的函数
-      const column = getcolumn(deepClone(this.columns))
+      const columns = getcolumn(deepClone(this.columns))
       let data = []
       if (hasSelection) {
         const length = this.selection.length
@@ -735,17 +756,26 @@ export default {
           this.$message.warning('请先勾选需要导出的数据')
           return
         }
-        data = this.selection
-      } else data = deepClone(tableData)
-      data.forEach((item) => {
-        formatterArr.forEach(({ prop, formatter }) => {
-          item[prop] = formatter(item[prop])
+        data = deepClone(this.selection)
+      } else data = treeToFlat(deepClone(tableData))
+      const flatColums = treeToFlat(deepClone(this.columns))
+      flatColums.forEach((column) => {
+        const { prop } = column
+        data.forEach((row, $index) => {
+          prop &&
+            (row[prop] = this.getComponentShowValue(
+              row,
+              column,
+              $index,
+              column
+            ))
         })
       })
+      console.log(columns, data, 'columns, data')
       try {
         const ElMapExportTable = require('table-excel').ElMapExportTable
         const instance = new ElMapExportTable(
-          { column, data }
+          { column: columns, data }
           // { progress: (progress) => console.log(progress) } // 进度条回调
         )
         instance.download('表格数据')
@@ -754,21 +784,27 @@ export default {
       }
     },
     // 获取组件模式对应的值
-    getComponentShowValue(row, fieldItem) {
-      if (!row[fieldItem.prop]) return fieldItem.placeholder || this.placeholder
-      const { prop, componentAttrs = {}, component, formatter } = fieldItem
-      if (formatter) {
-        return formatter(row[prop])
-      }
-      if (component === 'el-date-picker' && componentAttrs.format) {
+    getComponentShowValue(row, column, $index, fieldItem) {
+      const { prop, componentAttrs = {}, component } = fieldItem
+      const value = row[fieldItem.prop]
+      if (value && component === 'el-date-picker' && componentAttrs.format) {
         return format(new Date(row[prop]), componentAttrs.format)
       }
       if (component === 'el-select') {
         const options = this.allOptions[prop] || []
         const option = options.find((item) => item.value === row[prop])
-        return option ? option.label : ''
+        return option ? option.label : fieldItem.placeholder || this.placeholder
       }
-      return row[prop]
+      return this.getShowValue(row, column, $index, fieldItem)
+    },
+    // 获取普通模式对应的值
+    getShowValue(row, column, $index, fieldItem) {
+      const value = row[fieldItem.prop]
+      return fieldItem.formatter
+        ? fieldItem.formatter(row, column, value, $index)
+        : value || value === 0
+        ? value
+        : fieldItem.placeholder || this.placeholder
     },
   },
 }

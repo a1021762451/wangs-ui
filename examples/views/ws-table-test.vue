@@ -5,6 +5,7 @@
     style="height: 100%"
     placeholder="-"
     :loading="loading"
+    utilsList="download,showSingle"
     :data="tableData"
     :tableColumns="tableColumns"
     :allOptions="allOptions"

@@ -352,7 +352,7 @@ export default {
       if (component === 'el-select') {
         const options = this.allOptions[prop] || []
         const option = options.find((item) => item.value === row[prop])
-        return option ? option.label : ''
+        return option ? option.label : fieldItem.placeholder || this.placeholder
       }
       return this.getShowValue(row, column, $index, fieldItem)
     },

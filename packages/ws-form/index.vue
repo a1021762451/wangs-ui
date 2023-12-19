@@ -122,6 +122,28 @@
 </template>
 
 <script>
+const defaultButtons = [
+  {
+    method: 'search',
+    label: '查询',
+  },
+  {
+    method: 'reset',
+    label: '重置',
+    type: 'plain',
+  },
+]
+const defaultButtonsForForm = [
+  {
+    method: 'comfirm',
+    label: '确认',
+  },
+  {
+    method: 'cancel',
+    label: '取消',
+    type: 'plain',
+  },
+]
 import {
   deepClone,
   getAttrs,
@@ -195,7 +217,7 @@ export default {
       type: Boolean,
     },
     // 是否显示默认查询重置按钮
-    useDeafultButtons: {
+    useDefaultButtons: {
       default: true,
       type: Boolean,
     },
@@ -274,24 +296,12 @@ export default {
     },
     buttonConfigList: {
       handler() {
-        if (this.isSearchList) {
-          const defaultButtons = this.useDeafultButtons
-            ? [
-                {
-                  method: 'search',
-                  label: '查询',
-                },
-                {
-                  method: 'reset',
-                  label: '重置',
-                  type: 'plain',
-                },
-              ]
-            : []
-          this.buttonsList = [...defaultButtons, ...this.buttonConfigList]
-        } else {
-          this.buttonsList = [...this.buttonConfigList]
-        }
+        const arr = this.useDefaultButtons
+          ? this.isSearchList
+            ? defaultButtons
+            : defaultButtonsForForm
+          : []
+        this.buttonsList = this.buttonConfigList.concat(arr)
       },
       immediate: true,
     },
@@ -384,19 +394,23 @@ export default {
       })
     },
     // 集中处理事件
-    happenEvent(buttonItem) {
+    async happenEvent(buttonItem) {
       const { method } = buttonItem
       // method为reset则进行默认处理
       if (method === 'reset') {
         const obj = deepClone(this.cloneForm)
         this.$emit('update:formData', obj)
+        await this.$refs.form.validate()
         // 同时触发重置事件，用于区分
-        this.$emit('happenEvent', {
-          buttonItem,
-          formData: obj,
-        })
         this.handleSearch()
-        return
+      }
+      // method为search则进行默认处理
+      if (method === 'search') {
+        await this.$refs.form.validate()
+      }
+      // method为comfirm则进行默认处理
+      if (method === 'comfirm') {
+        await this.$refs.form.validate()
       }
       this.$emit('happenEvent', {
         buttonItem,

@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-23 15:44:49
+ * @LastEditTime: 2023-12-19 13:39:59
 -->
 <template>
   <div>
@@ -15,7 +15,7 @@
       @happenEvent="happenEvent"
       :formData.sync="formData"
       :extraComponents="extraComponents"
-      ref="form"
+      ref="wsForm"
     >
      <!-- 指向ws-form组件的插槽 -->
       <template #lightOut="{ fieldItem, formData }">

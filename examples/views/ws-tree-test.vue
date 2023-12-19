@@ -3,11 +3,9 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-02 09:44:48
+ * @LastEditTime: 2023-12-19 12:13:04
 -->
 <template>
-  <!-- :filterButtonsFn="filterButtonsFn"
-  :disabledFn="disabledFn" -->
   <ws-tree
     showCheckbox
     draggable
@@ -21,7 +19,11 @@
     :data="treeData"
     current-node-key="9"
     :default-checked-keys="['9', '10']"
+    :disabledFn="disabledFn" 
     :disabledContextmenuFn="disabledContextmenuFn"
+    :filterButtonsFn="filterButtonsFn"
+    :useDefaultButtons="false"
+    :extraOperations="extraOperations"
     @check-change="handleCheckChange"
     @node-click="handleNodeClick"
     @check="handleCheck"
@@ -111,16 +113,44 @@ export default {
           ],
         },
       ],
+      extraOperations: [
+        {
+          label: '右键操作',
+          method: 'contextMenuAction',
+        },
+        {
+          method: 'add',
+          icon: 'el-icon-plus',
+        },
+        {
+          icon: 'el-icon-more',
+          label: '更多',
+          children: [
+            {
+              method: 'edit',
+              // icon: 'el-icon-edit',
+              label: '编辑',
+            },
+            {
+              method: 'remove',
+              // icon: 'el-icon-delete',
+              label: '删除',
+            },
+          ],
+        },
+      ],
     }
   },
   methods: {
-    filterButtonsFn(buttons, data, node) {
-      if (node.isLeaf) return buttons
-      return []
+    filterButtonsFn(operationsList, data, node, from) {
+      if (from === 'contextMenu')
+        return operationsList.filter(
+          (item) => item.method == 'contextMenuAction'
+        )
+      else return operationsList.filter((item) => item.method !== 'edit')
     },
     disabledFn(data, node) {
-      if (!node.isLeaf) return true
-      return false
+       if(data.label === '三级 3-2-2三级 3-2-2') return true
     },
     // 判断右键禁用
     disabledContextmenuFn(data, node) {
@@ -132,7 +162,7 @@ export default {
       const {
         buttonItem: { method },
       } = eventData
-      console.log('method', method)
+      console.log('eventData', eventData)
       this[method] && this[method](eventData)
     },
     freeAdd() {
