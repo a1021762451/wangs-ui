@@ -33,7 +33,7 @@
       fixed: 'right',
       align: 'center',
       resizable: true,
-      width: (fieldItem.buttonConfigList || []).length * 70,
+      width: (fieldItem.buttonConfigList || []).length * 55,
       ...fieldItem,
     }"
   >
@@ -100,77 +100,99 @@
         </slot>
       </template>
       <!-- 表单元素 -->
-      <el-form-item
-        v-else-if="fieldItem.component"
-        :prop="`${row.prop__table}.${fieldItem.prop}`"
-        :rules="getRules(fieldItem, row)"
-      >
-        <!-- 命名插槽 -->
-        <template v-if="fieldItem.slotName">
-          <slot
-            :name="fieldItem.slotName"
-            v-bind="{ row, column, $index, fieldItem }"
+      <template v-else-if="fieldItem.component">
+        <!-- 表单元素编辑模式 -->
+        <el-form-item
+          v-if="
+            !switchMode ||
+            (switchMode === 'dblclick' &&
+              property === fieldItem.prop &&
+              index === $index) ||
+            (switchMode === 'rowControl' && row[switchKey])
+          "
+          :prop="`${row.prop__table}.${fieldItem.prop}`"
+          :rules="getRules(fieldItem, row)"
+        >
+          <!-- 命名插槽 -->
+          <template v-if="fieldItem.slotName">
+            <slot
+              :name="fieldItem.slotName"
+              v-bind="{ row, column, $index, fieldItem }"
+            >
+              <!-- 用了插槽就不会显示默认的内容 -->
+            </slot>
+          </template>
+          <template v-else>
+            <!-- 表单元素显示 -->
+            <component
+              :is="fieldItem.component"
+              v-bind="{
+                size: 'mini',
+                'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+                disabled: row[fieldItem.disabledKey],
+                ...getAttrs(fieldItem, row),
+              }"
+              v-focus="switchMode === 'dblclick'"
+              v-model="row[fieldItem.prop]"
+              @change="fieldItemChange(fieldItem, row)"
+              @blur="handleBlur(row, fieldItem)"
+              @input="handleInput($event, row, fieldItem)"
+            >
+              <template v-if="fieldItem.component === 'el-select'">
+                <el-option
+                  v-for="item in allOptions[fieldItem.prop]"
+                  :key="item.value"
+                  v-bind="item"
+                ></el-option>
+              </template>
+              <template v-if="fieldItem.component === 'el-radio-group'">
+                <el-radio
+                  v-for="item in allOptions[fieldItem.prop]"
+                  :key="item.value"
+                  v-bind="{
+                    ...item,
+                    label: item.value,
+                  }"
+                  >{{ item.label }}</el-radio
+                >
+              </template>
+              <template v-if="fieldItem.component === 'el-checkbox-group'">
+                <el-checkbox
+                  v-for="item in allOptions[fieldItem.prop]"
+                  :key="item.value"
+                  v-bind="{
+                    ...item,
+                    label: item.value,
+                  }"
+                  >{{ item.label }}</el-checkbox
+                >
+              </template>
+            </component>
+          </template>
+        </el-form-item>
+        <!-- 表单元素非编辑模式 -->
+        <!--allowToggle控制是否能够双击切换-->
+        <ws-tooltip
+          v-else
+          placement="top"
+          :content="
+            getShowValue(
+              row,
+              column,
+              $index,
+              fieldItem,
+              allOptions,
+              placeholder
+            )
+          "
+          overflow
+        >
+          <div
+            style="min-height: 23px"
+            @dblclick="toggleInput(row, column, $index)"
+            class="overflow_tip"
           >
-            <!-- 用了插槽就不会显示默认的内容 -->
-          </slot>
-        </template>
-        <template v-else>
-          <!-- 表单元素显示 -->
-          <component
-            v-if="
-              !switchMode ||
-              (switchMode === 'dblclick' &&
-                property === fieldItem.prop &&
-                index === $index) ||
-              (switchMode === 'rowControl' && row[switchKey])
-            "
-            :is="fieldItem.component"
-            v-bind="{
-              size: 'mini',
-              'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-              disabled: row[fieldItem.disabledKey],
-              ...getAttrs(fieldItem, row),
-            }"
-            v-focus="switchMode === 'dblclick'"
-            v-model="row[fieldItem.prop]"
-            @change="fieldItemChange(fieldItem, row)"
-            @blur="handleBlur(row, fieldItem)"
-            @input="handleInput($event, row, fieldItem)"
-          >
-            <template v-if="fieldItem.component === 'el-select'">
-              <el-option
-                v-for="item in allOptions[fieldItem.prop]"
-                :key="item.value"
-                v-bind="item"
-              ></el-option>
-            </template>
-            <template v-if="fieldItem.component === 'el-radio-group'">
-              <el-radio
-                v-for="item in allOptions[fieldItem.prop]"
-                :key="item.value"
-                v-bind="{
-                  ...item,
-                  label: item.value,
-                }"
-                >{{ item.label }}</el-radio
-              >
-            </template>
-            <template v-if="fieldItem.component === 'el-checkbox-group'">
-              <el-checkbox
-                v-for="item in allOptions[fieldItem.prop]"
-                :key="item.value"
-                v-bind="{
-                  ...item,
-                  label: item.value,
-                }"
-                >{{ item.label }}</el-checkbox
-              >
-            </template>
-          </component>
-          <!--allowToggle控制是否能够双击切换-->
-          <ws-tooltip
-            placement="top"
-            :content="
+            {{
               getShowValue(
                 row,
                 column,
@@ -179,29 +201,10 @@
                 allOptions,
                 placeholder
               )
-            "
-            overflow
-            v-else
-          >
-            <div
-              style="min-height: 23px"
-              @dblclick="toggleInput(row, column, $index)"
-              class="overflow_tip"
-            >
-              {{
-                getShowValue(
-                  row,
-                  column,
-                  $index,
-                  fieldItem,
-                  allOptions,
-                  placeholder
-                )
-              }}
-            </div>
-          </ws-tooltip>
-        </template>
-      </el-form-item>
+            }}
+          </div>
+        </ws-tooltip>
+      </template>
       <!-- 富文本 -->
       <template v-else-if="fieldItem.rich">
         <div
@@ -421,6 +424,7 @@ export default {
     width: 100%;
     /deep/ .el-form-item__content {
       width: 100%;
+      line-height: initial;
     }
   }
 }

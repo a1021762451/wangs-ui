@@ -3,10 +3,10 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:56:21
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-06 16:04:04
+ * @LastEditTime: 2023-12-20 10:33:10
 -->
 <template>
-  <ws-fold>
+  <ws-fold @collapse="collapse">
     <div>test</div>
     <!-- <template v-slot:collapse="{ collapsed }">
        <div>test{{ collapsed }}</div>
@@ -21,6 +21,11 @@
 <script>
 export default {
   name: 'ws-fold-test',
+  methods: {
+    collapse(collapsed) {
+      console.log(collapsed, 'collapsed')
+    },
+  },
 }
 </script>
 

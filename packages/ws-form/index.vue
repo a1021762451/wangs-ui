@@ -556,11 +556,35 @@ export default {
 /deep/ .el-select {
   width: 100%;
 }
-/deep/ .el-radio-group,
-.el-checkbox-group {
+/deep/ .el-checkbox-group {
   height: 100%;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  .el-checkbox {
+    margin-right: 10px;
+  }
+  .el-checkbox:last-child {
+    margin-right: 0;
+  }
+  .el-checkbox__label {
+    padding-left: 2px;
+  }
+}
+/deep/ .el-radio-group {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  .el-radio {
+    margin-right: 10px;
+  }
+  .el-radio:last-child {
+    margin-right: 0;
+  }
+  .el-radio__label {
+    padding-left: 2px;
+  }
 }
 /deep/ .el-date-editor.el-input__inner {
   width: 100%;

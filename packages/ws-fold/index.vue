@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-07 14:39:14
+ * @LastEditTime: 2023-12-20 10:30:52
 -->
 <template>
   <div
@@ -83,6 +83,11 @@ export default {
       collapsed: false, // 折叠状态
     }
   },
+  watch: {
+    width() {
+      this.changeWidth()
+    },
+  },
   created() {
     this.changeWidth()
   },
@@ -106,15 +111,15 @@ export default {
     },
     // 切换折叠状态
     toggleCollapse(collapsed) {
-      this.collapsed = collapsed
-      this.width = this.collapsed
+      this.width = collapsed
         ? this.minwidth
         : this.defaultWidth || this.maxwidth
-      this.$emit('collapse', this.collapsed)
     },
     // 变更宽度
     changeWidth() {
+      // 保存宽度
       sessionStorage.setItem(this.storageKey, this.width)
+      // 判断是否折叠
       const collapsed = this.width == this.minwidth
       if (collapsed != this.collapsed) {
         this.collapsed = collapsed

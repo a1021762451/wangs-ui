@@ -208,6 +208,12 @@ export const tableColumns = [
     component: 'el-checkbox',
     alwaysVisible: true,
   },
+  // {
+  //   component: 'el-checkbox-group',
+  //   prop: 'testCheckbox',
+  //   label: '复选框',
+  //   required: true,
+  // },
   // 测试下拉框
   {
     prop: 'testSelect',
