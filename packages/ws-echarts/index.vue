@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-18 10:28:04
+ * @LastEditTime: 2023-12-25 11:24:43
 -->
 <template>
   <div style="width: 100%; height: 100%">
@@ -57,6 +57,11 @@ export default {
     actionsList: {
       type: Array,
       default: () => [],
+    },
+    // setOption的第二个参数,为真配置不合并
+    notMerge: {
+      type: Boolean,
+      default: false,
     },
   },
   watch: {
@@ -113,7 +118,7 @@ export default {
     updateEcharts() {
       // 判断是否图表为空
       this.showEmpty = this.judgeEmpty()
-      this.myChart.setOption(this.options)
+      this.myChart.setOption(this.options, this.notMerge)
       this.$nextTick(this.resizeEcharts)
     },
     // 判断图表是否为空
