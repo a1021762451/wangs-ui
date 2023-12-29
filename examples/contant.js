@@ -20,23 +20,6 @@ export const formButtons = [
   {
     slotName: 'download',
   },
-  {
-    label: '更多',
-    children: [
-      {
-        method: 'testMore',
-        label: '测试更多',
-        icon: 'el-icon-setting',
-        loading: false, // 按钮loading转圈状态
-      },
-      {
-        method: 'testMore1',
-        label: '测试更多1',
-        icon: 'el-icon-setting',
-        loading: false, // 按钮loading转圈状态
-      },
-    ],
-  },
 ]
 
 // 表单配置
@@ -296,6 +279,23 @@ export const tableColumns = [
       {
         method: 'notEdit',
         label: '不编辑',
+      },
+      {
+        label: '更多',
+        children: [
+          {
+            method: 'testMore',
+            label: '测试更多',
+            icon: 'el-icon-setting',
+            loading: false, // 按钮loading转圈状态
+          },
+          {
+            method: 'testMore1',
+            label: '测试更多1',
+            icon: 'el-icon-setting',
+            loading: false, // 按钮loading转圈状态
+          },
+        ],
       },
     ],
   },
