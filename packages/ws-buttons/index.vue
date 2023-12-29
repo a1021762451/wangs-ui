@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-17 09:35:40
+ * @LastEditTime: 2023-12-29 17:48:15
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -14,6 +14,37 @@
         :name="buttonItem.slotName"
         :buttonItem="buttonItem"
       ></slot>
+      <el-dropdown
+        @click.stop
+        v-else-if="buttonItem.children"
+        :key="buttonItem.method + buttonItem.label"
+        :size="buttonSize"
+        trigger="click"
+        @command="happenCommand($event, buttonItem.children)"
+      >
+        <component
+          :is="buttonItem.component || (isLinkButton ? 'el-link' : 'el-button')"
+          class="button-item"
+          v-bind="{
+            size: buttonSize,
+            type: 'primary',
+            underline: false,
+            ...buttonItem,
+          }"
+        >
+          {{ buttonItem.label }}
+        </component>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item
+            v-for="child in buttonItem.children"
+            :key="child.label"
+            :icon="child.icon"
+            :command="child.method"
+            @click.native.stop
+            >{{ child.label }}</el-dropdown-item
+          >
+        </el-dropdown-menu>
+      </el-dropdown>
       <component
         v-else
         :is="buttonItem.component || (isLinkButton ? 'el-link' : 'el-button')"
@@ -54,6 +85,12 @@ export default {
     buttonSize: {
       default: 'small',
       type: String,
+    },
+  },
+  methods: {
+    happenCommand(command, children) {
+      const buttonItem = children.find((item) => item.method === command)
+      this.$emit('happenEvent', buttonItem)
     },
   },
 }
