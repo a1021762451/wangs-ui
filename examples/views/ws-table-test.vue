@@ -20,7 +20,7 @@
       allOptions,
     }"
     :switchConfig="{
-      switchMode: 'rowControl',
+      switchMode: 'rowControl, dblclick',
     }"
     @happenEvent="happenEvent"
     @selection-change="selectionChange"

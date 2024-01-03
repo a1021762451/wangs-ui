@@ -285,13 +285,13 @@ export const tableColumns = [
         children: [
           {
             method: 'testMore',
-            label: '测试更多',
+            label: '更多',
             icon: 'el-icon-setting',
             loading: false, // 按钮loading转圈状态
           },
           {
             method: 'testMore1',
-            label: '测试更多1',
+            label: '更多1',
             icon: 'el-icon-setting',
             loading: false, // 按钮loading转圈状态
           },

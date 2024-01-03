@@ -434,7 +434,7 @@ export default {
           // 增加主键
           // item[this.rowKey] = item[this.rowKey] || getRandomId()
           // 编辑模式下，增加切换键
-          this.switchMode === 'rowControl' &&
+          this.switchMode.includes('rowControl') &&
             item[this.switchKey] === undefined &&
             this.$set(item, this.switchKey, false)
           if (item.children) {

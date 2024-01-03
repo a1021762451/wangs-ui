@@ -105,10 +105,10 @@
         <el-form-item
           v-if="
             !switchMode ||
-            (switchMode === 'dblclick' &&
+            (switchMode.includes('dblclick') &&
               property === fieldItem.prop &&
               index === $index) ||
-            (switchMode === 'rowControl' && row[switchKey])
+            (switchMode.includes('rowControl') && row[switchKey])
           "
           :prop="`${row.prop__table}.${fieldItem.prop}`"
           :rules="getRules(fieldItem, row)"
@@ -132,7 +132,7 @@
                 disabled: row[fieldItem.disabledKey],
                 ...getAttrs(fieldItem, row),
               }"
-              v-focus="switchMode === 'dblclick'"
+              v-focus="switchMode.includes('dblclick') && !row[switchKey]"
               v-model="row[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, row)"
               @blur="handleBlur(row, fieldItem)"
@@ -282,8 +282,8 @@ export default {
     switchConfig: {
       default() {
         return {
-          // switchMode: '', // dblclick/rowControl
-          // switchKey: 'isEdit__table', // 切换键
+          // switchMode: '', // dblclick/rowControl Array|String
+          // switchKey: 'isEdit__table', // 切换键  String
         }
       },
       type: Object,
@@ -362,12 +362,15 @@ export default {
     // input框失焦处理
     handleBlur(row, fieldItem) {
       const { prop, blurHandler: handler } = fieldItem
+      const temRow = this.temRow
+      this.temRow = {}
+      // 延迟清空，防止change事件还没触发，表单元素就切换了
       setTimeout(() => {
         this.property = ''
         this.index = ''
-      }, 100)
+      }, 200)
       // 如果前后值相同则不处理
-      if (row[prop] == this.temRow[prop]) {
+      if (row[prop] == temRow[prop]) {
         return
       }
       // 自定义数据过滤

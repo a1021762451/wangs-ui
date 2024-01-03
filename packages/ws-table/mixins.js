@@ -1,7 +1,7 @@
 export default {
   methods: {
     switchStatus(row, status) {
-      if (this.switchMode !== 'rowControl') return
+      if (!this.switchMode.includes('rowControl')) return
       row[this.switchKey] = status
     },
     clearSelection() {

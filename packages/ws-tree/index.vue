@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-19 12:20:43
+ * @LastEditTime: 2024-01-03 15:47:02
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -92,9 +92,12 @@
                 }"
               >
                 <template
-                  v-for="item in filterButtonsFn
-                    ? filterButtonsFn(operationsList, data, node, 'hover')
-                    : operationsList"
+                  v-for="item in filterButtonsFn(
+                    operationsList,
+                    data,
+                    node,
+                    'hover'
+                  )"
                 >
                   <span @click.stop v-if="item.children" :key="item.icon">
                     <el-dropdown
@@ -154,9 +157,12 @@
       id="option-button-group"
     >
       <el-button
-        v-for="item in filterButtonsFn
-          ? filterButtonsFn(operationsList, optionData, node, 'contextMenu')
-          : operationsList"
+        v-for="item in filterButtonsFn(
+          operationsList,
+          optionData,
+          node,
+          'contextMenu'
+        )"
         :key="item.label"
         @click="happenEvent(optionData, node, item)"
         class="option-card-button"
@@ -271,6 +277,9 @@ export default {
     // 过滤操作按钮
     filterButtonsFn: {
       type: Function,
+      default(operationsList) {
+        return operationsList
+      },
     },
     // 数据
     data: {
