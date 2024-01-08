@@ -324,7 +324,11 @@ export default {
     },
     data: {
       handler(newData) {
+        // 清空勾选
+        this.selection = []
+        // 初始化数据
         this.tableForm.tableData = newData
+        // 重新处理数据
         this.dataOrColumnsChange()
       },
       immediate: true,

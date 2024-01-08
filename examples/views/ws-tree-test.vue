@@ -12,7 +12,7 @@
     excludeFirstSearch
     changeMode="contextMenu, hover"
     style="height: 300px; width: 240px"
-    textEllipsis
+    showOverflowTooltip
     default-expand-all
     showHeader
     :dataIsFlat="false"

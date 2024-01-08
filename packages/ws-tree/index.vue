@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-03 15:47:02
+ * @LastEditTime: 2024-01-04 16:57:06
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -11,8 +11,9 @@
     <slot name="header">
       <div class="model-title" v-if="showHeader">
         <span class="model-title-left">
-          <span>{{ headerConfig.title }}</span>
+          <span>{{ headerConfig.title || '类型' }}</span>
           <el-tooltip
+            v-if="headerConfig.titleTip || titleTip"
             effect="dark"
             placement="top"
             :content="headerConfig.titleTip || titleTip"
@@ -24,7 +25,7 @@
           <el-tooltip
             effect="dark"
             placement="top"
-            :content="headerConfig.addTip"
+            :content="headerConfig.addTip || '添加根节点'"
           >
             <i
               class="el-icon-plus"
@@ -38,14 +39,17 @@
     <!-- 搜索框 -->
     <el-input
       v-if="showSearch"
-      placeholder="按关键字筛选"
       v-model="filterText"
-      clearable
-      size="small"
+      v-bind="{
+        clearable: true,
+        placeholder: '按关键字筛选',
+        size: 'small',
+        ...(headerConfig.searchAttrs || {}),
+      }"
     ></el-input>
     <!-- 树主体 -->
     <div
-      :class="textEllipsis ? 'container-textEllipsis' : 'tree-container'"
+      :class="showOverflowTooltip ? 'container-showOverflowTooltip' : 'tree-container'"
       ref="container"
     >
       <el-tree
@@ -68,10 +72,7 @@
         <template v-slot="{ data, node }">
           <slot name="treeNode" v-bind="{ data, node }">
             <div
-              :class="
-                nodeSpaceBetween ? 'custom-tree-node-flex' : 'custom-tree-node'
-              "
-              class="textEllipsis-tree-node"
+              class="showOverflowTooltip-tree-node custom-tree-node-flex"
               @mouseenter="mouseenter(data)"
               @mouseleave="mouseleave"
             >
@@ -223,21 +224,11 @@ export default {
       default: '#fff',
       type: String,
     },
-    // 树点击选中颜色
-    activeColor: {
-      default: '',
-      type: String,
-    },
-    // 节点内容和按钮之间的布局是否采取flex SpaceBetween布局
-    nodeSpaceBetween: {
-      default: true,
-      type: Boolean,
-    },
-    // 头部内容配置
+    // 头部内容配置  title/titleTip/addTip/searchAttrs
     headerConfig: {
       default: () => ({
-        title: '类型',
-        addTip: '添加根节点',
+        title: '',
+        addTip: '',
       }),
       type: Object,
     },
@@ -257,7 +248,7 @@ export default {
       type: Boolean,
     },
     // 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字
-    textEllipsis: {
+    showOverflowTooltip: {
       default: false,
       type: Boolean,
     },
@@ -350,14 +341,6 @@ export default {
       container.addEventListener('scroll', this.scroll)
       document.addEventListener('click', this.OptionCardClose)
     }
-    // todo：动态设置选中颜色
-    // if (this.activeColor) {
-    //   const treeEl = this.$refs.tree.$el
-    //   console.log(treeEl, 'treeEl');
-    //   const activeColorEl = treeEl.querySelector('.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content')
-    //   console.log(activeColorEl, 'background-color');
-    //   activeColorEl.style.backgroundColor = this.activeColor
-    // }
   },
   beforeDestroy() {
     document.removeEventListener('click', this.OptionCardClose)
@@ -607,12 +590,12 @@ export default {
       transform: translateY(-50%);
     }
   }
-  .container-textEllipsis {
+  .container-showOverflowTooltip {
     overflow: auto;
     border: none;
     flex: 1;
     margin-top: 4px;
-    .textEllipsis-tree-node {
+    .showOverflowTooltip-tree-node {
       width: 100%;
       overflow: hidden;
       display: flex;

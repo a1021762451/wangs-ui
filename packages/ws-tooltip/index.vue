@@ -6,7 +6,10 @@ export default {
   extends: Tooltip, // 组件继承
   props: {
     ...Tooltip.props,
-    overflow: Boolean // 新增props属性
+    overflow: {
+      type: Boolean,
+      default: true
+    } // 新增props属性
   },
   methods: {
     // 重写show方法

@@ -17,7 +17,7 @@
           ref="wsTree"
           v-bind="{
             showSearch: false,
-            textEllipsis: true,
+            showOverflowTooltip: true,
             'default-expand-all': true,
             ...treeConfig,
             showCheckbox: multiple,

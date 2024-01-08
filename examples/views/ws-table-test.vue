@@ -2,7 +2,6 @@
   <ws-table
     ref="wsTable"
     showSearch
-    style="height: 100%"
     placeholder="-"
     :loading="loading"
     utilsList="download,showSingle"

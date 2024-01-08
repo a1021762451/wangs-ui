@@ -396,11 +396,11 @@ export default {
       }
     },
     // 表格内复选框变更
-    fieldItemChange(fieldItem, row, method = 'formFieldChange') {
+    fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
       this.$emit('happenEvent', {
         buttonItem: { method },
         fieldItem,
-        row,
+        formData,
       })
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
