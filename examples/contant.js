@@ -29,6 +29,7 @@ export const formConfigList = [
     prop: 'testSelect',
     label: '下拉框',
     required: true,
+    suffixLabel: '元',
   },
   {
     component: 'el-input',

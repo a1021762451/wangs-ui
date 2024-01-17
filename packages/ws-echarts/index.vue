@@ -3,10 +3,14 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-25 11:24:43
+ * @LastEditTime: 2024-01-17 09:18:47
 -->
 <template>
-  <div style="width: 100%; height: 100%">
+  <div
+    style="width: 100%; height: 100%"
+    ref="container"
+    v-resize="resizeEcharts"
+  >
     <div
       v-show="!emptyCondition"
       style="width: 100%; height: 100%"
@@ -21,13 +25,14 @@
 </template>
 
 <script>
-import { getRandomId } from '../utils/util'
+import { getRandomId, debounce, vResize } from '../utils/util'
 export default {
   name: 'ws-echarts',
   data() {
     return {
       myChart: {},
       showEmpty: false,
+      resizeEcharts: debounce(this.resizeEchartsCB, 100),
     }
   },
   props: {
@@ -83,13 +88,12 @@ export default {
     this.init()
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.resizeEcharts)
+    // window.removeEventListener('resize', this.resizeEcharts)
+  },
+  directives: {
+    resize: vResize,
   },
   methods: {
-    // echarts示例自适应
-    resizeEcharts() {
-      this.myChart.resize()
-    },
     // 初始化
     init() {
       // myChart.hideLoading()
@@ -99,7 +103,7 @@ export default {
       this.$emit('init', this.myChart)
       this.updateEcharts()
       // 监听窗口变化，自适应图表
-      window.addEventListener('resize', this.resizeEcharts)
+      // window.addEventListener('resize', this.resizeEcharts)
       // 监听点击事件
       this.myChart.on('click', (params) => {
         this.$emit('click', params)
@@ -113,6 +117,11 @@ export default {
       this.actionsList.forEach((action) => {
         this.myChart.dispatchAction(action)
       })
+    },
+    // echarts示例自适应
+    resizeEchartsCB(size = {}) {
+      if (!this.myChart || this.judgeHidden()) return
+      this.myChart.resize()
     },
     // 更新echarts视图
     updateEcharts() {
@@ -137,6 +146,22 @@ export default {
         return false
       }
       return true
+    },
+    // 判断是否隐藏
+    judgeHidden() {
+      let el = this.$refs.container
+      while (el) {
+        const { display, visibility, opacity } = window.getComputedStyle(el)
+        if (
+          display === 'none' ||
+          visibility === 'hidden' ||
+          parseFloat(opacity) === 0
+        ) {
+          return true
+        }
+        el = el.parentElement
+      }
+      return false
     },
     // chartLoading() {
     //   this.myChart.showLoading({

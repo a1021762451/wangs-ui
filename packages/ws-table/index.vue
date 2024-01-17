@@ -344,18 +344,19 @@ export default {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
       this.columns.forEach((fieldItem) => {
-        if (fieldItem.required && !fieldItem.disabled) {
-          obj[fieldItem.prop] = fieldItem.rule || [
-            {
-              required: true,
-              message: `请输入${fieldItem.label}`,
-              trigger: 'change',
-              // trigger: blurEletypes.includes(fieldItem.component)
-              //   ? 'blur'
-              //   : 'change',
-            },
-          ]
-        }
+        const { component = '', required, disabled } = fieldItem
+        if (!required || disabled) return
+        const messageSuffix = component.includes('input') ? '输入' : '选择'
+        obj[fieldItem.prop] = fieldItem.rule || [
+          {
+            required: true,
+            message: `请${messageSuffix}${fieldItem.label}`,
+            trigger: 'change',
+            // trigger: blurEletypes.includes(fieldItem.component)
+            //   ? 'blur'
+            //   : 'change',
+          },
+        ]
       })
       return obj
     },

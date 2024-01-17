@@ -470,7 +470,6 @@ export const formConfigList = [
 | buttonConfigList  | 按钮组配置                          | Array   | -      | -      |
 | buttonSize        | 按钮组尺寸                          | String  | -      | small  |
 | formData          | 表单数据                            | Object  | -      | -      |
-| colon             | 标签后面是否有冒号                  | Boolean | -      | true   |
 | isSearchList      | 是否是搜索控件                      | Boolean | -      | false  |
 | useDefaultButtons | 是否使用默认的查询重置按钮          | Boolean | -      | true   |
 | gutter            | el-row 属性                         | Number  | -      | 12     |

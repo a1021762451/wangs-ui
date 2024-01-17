@@ -3,21 +3,22 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-19 23:12:52
+ * @LastEditTime: 2024-01-09 14:45:06
 -->
 <template>
   <div>
     <ws-form
+      label-suffix=":"
       :formConfigList="formConfigList"
       :buttonConfigList="formButtons"
       :allOptions="allOptions"
-      isSearchList
+      :isSearchList="false"
       @happenEvent="happenEvent"
       :formData.sync="formData"
       :extraComponents="extraComponents"
       ref="wsForm"
     >
-     <!-- 指向ws-form组件的插槽 -->
+      <!-- 指向ws-form组件的插槽 -->
       <template #testSlot="{ fieldItem, formData }">
         <el-input
           clearable
@@ -26,12 +27,9 @@
           :disabled="fieldItem.disabled"
         ></el-input>
       </template>
-     <!-- 指向ws-buttons组件的插槽 -->
+      <!-- 指向ws-buttons组件的插槽 -->
       <template #download="scope">
-        <el-button
-          type="primary"
-          size="small"
-          @click="happenEvent(scope)"
+        <el-button type="primary" size="small" @click="happenEvent(scope)"
           >下载</el-button
         >
       </template>
@@ -44,7 +42,7 @@ import {
   formButtons,
   formConfigList,
   allOptions,
-  happenEvent
+  happenEvent,
 } from '../contant'
 export default {
   name: 'renderSearch-test',
@@ -55,13 +53,13 @@ export default {
       allOptions,
       formData: {},
       extraComponents: {
-        'ws-select': () => import('@/ws-select')
-      }
+        'ws-select': () => import('@/ws-select'),
+      },
     }
   },
   methods: {
-    happenEvent
-  }
+    happenEvent,
+  },
 }
 </script>
 

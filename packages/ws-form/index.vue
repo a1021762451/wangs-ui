@@ -32,7 +32,10 @@
                   ? '18px'
                   : '18px' -->
           <el-form-item
-            :class="{ notLeftMargin: fieldItem.isSide && isSearchList }"
+            :class="{
+              notLeftMargin: fieldItem.isSide && isSearchList,
+              'form-item-with-suffixLabel': fieldItem.suffixLabel,
+            }"
             :style="{
               marginBottom: isSearchList
                 ? Object.keys(rules).length
@@ -43,18 +46,8 @@
             v-bind="fieldItem"
             :required="undefined"
           >
-            <template
-              v-slot:label
-              v-if="fieldItem.label || fieldItem.headerSlotName"
-            >
-              <slot
-                v-if="fieldItem.headerSlotName"
-                :name="fieldItem.headerSlotName"
-              ></slot>
-              <template v-else>
-                {{ fieldItem.label }}
-                <span v-if="colon">:</span>
-              </template>
+            <template v-slot:label v-if="fieldItem.labelSlotName">
+              <slot :name="fieldItem.labelSlotName"></slot>
             </template>
             <slot
               v-if="fieldItem.slotName"
@@ -103,6 +96,9 @@
                 >
               </template>
             </component>
+            <span class="suffix-label" v-if="fieldItem.suffixLabel">{{
+              fieldItem.suffixLabel
+            }}</span>
           </el-form-item>
         </el-col>
         <!-- 按钮 -->
@@ -209,11 +205,6 @@ export default {
         return {}
       },
       type: Object,
-    },
-    // 标签后面是否有冒号
-    colon: {
-      default: false,
-      type: Boolean,
     },
     // 是否是搜索控件
     isSearchList: {
@@ -341,11 +332,14 @@ export default {
         'el-time-picker',
       ]
       this.formConfigList.forEach((fieldItem) => {
-        if (!fieldItem.required || fieldItem.disabled) return
+        const { component = '', required, disabled } = fieldItem
+        if (!required || disabled) return
+        const messageSuffix =
+          !component || component.includes('input') ? '输入' : '选择'
         obj[fieldItem.prop] = fieldItem.rule || [
           {
             required: true,
-            message: `请输入${fieldItem.label}`,
+            message: `请${messageSuffix}${fieldItem.label}`,
             trigger: 'change',
             // trigger: blurEletypes.includes(fieldItem.component)
             //   ? 'blur'
@@ -423,9 +417,13 @@ export default {
       const { method } = buttonItem
       // method为reset则进行默认处理
       if (method === 'reset') {
-        const obj = deepClone(this.cloneForm)
-        this.$emit('update:formData', obj)
-        await this.$refs.form.validate()
+        // const obj = deepClone(this.cloneForm)
+        // this.$emit('update:formData', obj)
+        // await this.$refs.form.validate()
+        // this.$nextTick(() => {
+        //   this.$refs.form.clearValidate()
+        // })
+        this.resetFields()
         // 同时触发重置事件，用于区分
         this.handleSearch()
       }
@@ -544,6 +542,16 @@ export default {
 .searchMode .searchMode-list {
   margin-bottom: 0;
 }
+
+.form-item-with-suffixLabel {
+  /deep/ .el-form-item__content {
+    display: flex;
+    align-items: center;
+  }
+  .suffix-label {
+    margin-left: 4px;
+  }
+}
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;
 }
@@ -572,10 +580,10 @@ export default {
   }
 }
 /deep/ .el-radio-group {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  // height: 100%;
+  // display: flex;
+  // align-items: center;
+  // flex-wrap: wrap;
   .el-radio {
     margin-right: 10px;
   }
