@@ -3,30 +3,26 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-04 16:57:06
+ * @LastEditTime: 2024-01-17 10:07:53
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
     <!-- 添加根节点按钮 -->
     <slot name="header">
       <div class="model-title" v-if="showHeader">
-        <span class="model-title-left">
-          <span>{{ headerConfig.title || '类型' }}</span>
+        <span class="model-title-left" v-if="title">
+          <span>{{ title }}</span>
           <el-tooltip
-            v-if="headerConfig.titleTip || titleTip"
+            v-if="titleTip"
             effect="dark"
             placement="top"
-            :content="headerConfig.titleTip || titleTip"
+            :content="titleTip"
           >
             <i class="el-icon-info"></i>
           </el-tooltip>
         </span>
-        <span class="model-title-right">
-          <el-tooltip
-            effect="dark"
-            placement="top"
-            :content="headerConfig.addTip || '添加根节点'"
-          >
+        <span class="model-title-right" v-if="addTip">
+          <el-tooltip effect="dark" placement="top" :content="addTip">
             <i
               class="el-icon-plus"
               style="cursor: pointer"
@@ -49,7 +45,9 @@
     ></el-input>
     <!-- 树主体 -->
     <div
-      :class="showOverflowTooltip ? 'container-showOverflowTooltip' : 'tree-container'"
+      :class="
+        showOverflowTooltip ? 'container-showOverflowTooltip' : 'tree-container'
+      "
       ref="container"
     >
       <el-tree
@@ -196,7 +194,7 @@ const defaultButtons = [
 ]
 import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
-import { flatToTree, debounce } from '../utils/util.js'
+import { flatToTree, debounce, getObjAttr } from '../utils/util.js'
 export default {
   name: 'ws-tree',
   mixins: [mixins],
@@ -227,8 +225,8 @@ export default {
     // 头部内容配置  title/titleTip/addTip/searchAttrs
     headerConfig: {
       default: () => ({
-        title: '',
-        addTip: '',
+        // title: '',
+        // addTip: '',
       }),
       type: Object,
     },
@@ -319,14 +317,26 @@ export default {
       return this.$attrs.props || {}
     },
     titleTip() {
+      if (this.headerConfig.hasOwnProperty('titleTip'))
+        return this.headerConfig.titleTip
       if (this.changeByHover && this.changeByContextMenu)
         return '鼠标右键或悬浮可进行编辑'
       if (this.changeByHover) return '鼠标悬浮可进行编辑'
       if (this.changeByContextMenu) return '鼠标右键可进行编辑'
       return ''
     },
+    addTip() {
+      return this.headerConfig.hasOwnProperty('addTip')
+        ? this.headerConfig.addTip
+        : '添加根节点'
+    },
+    title() {
+      return this.headerConfig.hasOwnProperty('title')
+        ? this.headerConfig.title
+        : '类型'
+    },
     nodeKey() {
-      return this.$attrs['node-key'] || this.$attrs['nodeKey'] || 'id'
+      return getObjAttr(this.$attrs, 'nodeKey') || 'id'
     },
     changeByHover() {
       return this.changeMode.includes('hover')

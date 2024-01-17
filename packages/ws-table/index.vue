@@ -162,7 +162,13 @@ const allUtils = [
     icon: 'el-icon-c-scale-to-original',
   },
 ]
-import { debounce, deepClone, getShowValue, treeToFlat } from '../utils/util'
+import {
+  debounce,
+  deepClone,
+  getShowValue,
+  treeToFlat,
+  getObjAttr,
+} from '../utils/util'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
@@ -366,13 +372,13 @@ export default {
       })
     },
     treeProps() {
-      return this.$attrs['tree-props'] || this.$attrs['treeProps'] || {}
+      return getObjAttr(this.$attrs, 'treeProps') || {}
     },
     childrenKey() {
       return this.treeProps.children || 'children'
     },
     rowKey() {
-      return this.$attrs['row-key'] || this.$attrs['rowKey'] || 'id'
+      return getObjAttr(this.$attrs, 'rowKey') || 'id'
     },
     switchMode() {
       return this.switchConfig.switchMode
