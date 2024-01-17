@@ -635,13 +635,29 @@ export function flatToTree(data = [], props = {}, nodeKey = 'id') {
   })
   return result
 }
-
+// 判断是否隐藏
+function judgeHidden(el) {
+  while (el) {
+    const { display, visibility, opacity } = window.getComputedStyle(el)
+    if (
+      display === 'none' ||
+      visibility === 'hidden' ||
+      parseFloat(opacity) === 0
+    ) {
+      return true
+    }
+    el = el.parentElement
+  }
+  return false
+}
 // vue指令，监听元素大小变化(重点是宽度变化)
 export const vResize = {
   bind(el, binding) {
     // 如果是设置window修饰符，添加resize事件监听
     if (binding.modifiers.window) {
-      window.addEventListener('resize', binding.value)
+      window.addEventListener('resize', (event) => {
+        !judgeHidden(el) && binding.value(event)
+      })
       el.__bindingValue__ = binding.value
       return
     }
@@ -652,7 +668,7 @@ export const vResize = {
         for (let entry of entries) {
           // 在这个例子中，我们只关注宽度变化
           const { width, height } = entry.contentRect || {}
-          binding.value({ width, height })
+          !judgeHidden(el) && binding.value({ width, height })
           // 可以在这里执行你想要的操作，比如调整子元素的尺寸等
         }
       })
@@ -667,7 +683,7 @@ export const vResize = {
     function get() {
       const style = document.defaultView.getComputedStyle(el)
       if (width !== style.width || height !== style.height) {
-        binding.value({ width, height })
+        !judgeHidden(el) && binding.value({ width, height })
       }
       width = style.width
       height = style.height

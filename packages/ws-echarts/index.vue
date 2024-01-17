@@ -3,14 +3,10 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-17 09:18:47
+ * @LastEditTime: 2024-01-17 09:38:25
 -->
 <template>
-  <div
-    style="width: 100%; height: 100%"
-    ref="container"
-    v-resize="resizeEcharts"
-  >
+  <div style="width: 100%; height: 100%" v-resize="resizeEcharts">
     <div
       v-show="!emptyCondition"
       style="width: 100%; height: 100%"
@@ -120,7 +116,7 @@ export default {
     },
     // echarts示例自适应
     resizeEchartsCB(size = {}) {
-      if (!this.myChart || this.judgeHidden()) return
+      if (!this.myChart) return
       this.myChart.resize()
     },
     // 更新echarts视图
@@ -146,22 +142,6 @@ export default {
         return false
       }
       return true
-    },
-    // 判断是否隐藏
-    judgeHidden() {
-      let el = this.$refs.container
-      while (el) {
-        const { display, visibility, opacity } = window.getComputedStyle(el)
-        if (
-          display === 'none' ||
-          visibility === 'hidden' ||
-          parseFloat(opacity) === 0
-        ) {
-          return true
-        }
-        el = el.parentElement
-      }
-      return false
     },
     // chartLoading() {
     //   this.myChart.showLoading({
