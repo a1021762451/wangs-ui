@@ -343,7 +343,6 @@ export const debounce = (fn, delay = 500, immediate) => {
   return function () {
     let args = arguments
     if (timer) {
-      console.log('防抖中')
       clearTimeout(timer)
     }
     if (immediate) {
