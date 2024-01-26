@@ -1,5 +1,6 @@
 <template>
   <div
+    v-resize.immediate="judgeOneRow"
     class="render"
     :class="{ fold: isFold, searchMode: isSearchList }"
     :style="{ height: isFold ? colHeight + 'px' : undefined }"
@@ -119,18 +120,20 @@
             >
               <slot :name="name" v-bind="scope"></slot>
             </template>
-            <el-link
-              v-if="isSearchList && exceedOneRow"
-              :underline="false"
-              :size="buttonSize"
-              type="primary"
-              @click="isFold = !isFold"
-              class="fold-button"
-              ><span class="fold-text">{{ !isFold ? '收起' : '展开' }}</span
-              ><i
-                :class="!isFold ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
-              ></i
-            ></el-link>
+            <template slot="suffix">
+              <el-link
+                v-if="isSearchList && (exceedOneRow || isFold)"
+                :underline="false"
+                :size="buttonSize"
+                type="primary"
+                @click="isFold = !isFold"
+                class="fold-button"
+                ><span class="fold-text">{{ !isFold ? '收起' : '展开' }}</span
+                ><i
+                  :class="!isFold ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
+                ></i
+              ></el-link>
+            </template>
           </ws-buttons>
         </el-form-item>
       </el-row>
@@ -167,6 +170,7 @@ import {
   getMaxValidator,
   getMinValidator,
   getDefaultTime,
+  vResize,
 } from '../utils/util'
 import wsButtons from '../ws-buttons/index.vue'
 import mixins from './mixins'
@@ -244,28 +248,6 @@ export default {
         return {}
       },
       type: Object,
-    },
-  },
-  //自定义指令
-  directives: {
-    // 监听元素宽度变化，用于地图自适应小
-    resize: {
-      bind(el, binding) {
-        let width = '',
-          height = ''
-        function get() {
-          const style = document.defaultView.getComputedStyle(el)
-          if (width !== style.width || height !== style.height) {
-            binding.value({ width, height })
-          }
-          width = style.width
-          height = style.height
-        }
-        el.__vueReize__ = setInterval(get, 200)
-      },
-      unbind(el) {
-        clearInterval(el.__vueReize__)
-      },
     },
   },
   watch: {
@@ -373,13 +355,16 @@ export default {
   created() {
     this.addComponents()
   },
+  directives: {
+    resize: vResize,
+  },
   mounted() {
-    this.judgeOneRow()
-    window.addEventListener('resize', this.judgeOneRow)
+    // this.judgeOneRow()
+    // window.addEventListener('resize', this.judgeOneRow)
     this.cloneForm = deepClone(this.formData)
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.judgeOneRow)
+    // window.removeEventListener('resize', this.judgeOneRow)
   },
   methods: {
     getAttrs,

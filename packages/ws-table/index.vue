@@ -1,5 +1,5 @@
 <template>
-  <div class="table-container">
+  <div class="table-container" v-resize="doLayout">
     <ws-form
       v-if="showSearch"
       @update:formData="
@@ -168,6 +168,7 @@ import {
   getShowValue,
   treeToFlat,
   getObjAttr,
+  vResize
 } from '../utils/util'
 import mixins from './mixins'
 import wsButtons from '../ws-buttons/index.vue'
@@ -387,12 +388,15 @@ export default {
       return this.switchConfig.switchKey || 'isEdit__table'
     },
   },
+  directives: {
+    resize: vResize,
+  },
   mounted() {
     this.getSingleColunms()
-    window.addEventListener('resize', this.doLayout)
+    // window.addEventListener('resize', this.doLayout)
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.doLayout)
+    // window.removeEventListener('resize', this.doLayout)
   },
   methods: {
     // 数据或者表格列变更都要执行

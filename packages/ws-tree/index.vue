@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-17 10:07:53
+ * @LastEditTime: 2024-01-26 15:44:19
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -353,6 +353,10 @@ export default {
     }
   },
   beforeDestroy() {
+    if (this.changeByContextMenu) {
+      const container = this.$refs.container
+      container.removeEventListener('scroll', this.scroll)
+    }
     document.removeEventListener('click', this.OptionCardClose)
   },
   watch: {

@@ -343,7 +343,7 @@ export const debounce = (fn, delay = 500, immediate) => {
   return function () {
     let args = arguments
     if (timer) {
-      // console.log('防抖中')
+      console.log('防抖中')
       clearTimeout(timer)
     }
     if (immediate) {
@@ -653,11 +653,26 @@ function judgeHidden(el) {
 // vue指令，监听元素大小变化(重点是宽度变化)
 export const vResize = {
   bind(el, binding) {
+    const { window: isWindow, immediate = false } = binding.modifiers
+    const valueFn = function () {
+      binding.value(...arguments)
+    }
+    let callback = function () {
+      const __resizeTime__ = el.__resizeTime__ || 0
+      // 记录resize的次数
+      el.__resizeTime__ = __resizeTime__ + 1
+      // 次数为0，判断立即执行还是直接退出
+      if (!__resizeTime__) {
+        immediate && valueFn(...arguments)
+        return
+      }
+      !judgeHidden(el) && valueFn(...arguments)
+    }
+    callback = debounce(callback, 500)
     // 如果是设置window修饰符，添加resize事件监听
-    if (binding.modifiers.window) {
-      window.addEventListener('resize', (event) => {
-        !judgeHidden(el) && binding.value(event)
-      })
+    if (isWindow) {
+      callback()
+      window.addEventListener('resize', callback)
       el.__bindingValue__ = binding.value
       return
     }
@@ -668,8 +683,7 @@ export const vResize = {
         for (let entry of entries) {
           // 在这个例子中，我们只关注宽度变化
           const { width, height } = entry.contentRect || {}
-          !judgeHidden(el) && binding.value({ width, height })
-          // 可以在这里执行你想要的操作，比如调整子元素的尺寸等
+          callback({ width, height })
         }
       })
       // 开始观察
@@ -683,7 +697,7 @@ export const vResize = {
     function get() {
       const style = document.defaultView.getComputedStyle(el)
       if (width !== style.width || height !== style.height) {
-        !judgeHidden(el) && binding.value({ width, height })
+        callback({ width, height })
       }
       width = style.width
       height = style.height

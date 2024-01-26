@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-17 09:38:25
+ * @LastEditTime: 2024-01-26 17:15:39
 -->
 <template>
   <div style="width: 100%; height: 100%" v-resize="resizeEcharts">
@@ -21,14 +21,13 @@
 </template>
 
 <script>
-import { getRandomId, debounce, vResize } from '../utils/util'
+import { getRandomId, vResize } from '../utils/util'
 export default {
   name: 'ws-echarts',
   data() {
     return {
       myChart: {},
       showEmpty: false,
-      resizeEcharts: debounce(this.resizeEchartsCB, 100),
     }
   },
   props: {
@@ -80,14 +79,14 @@ export default {
       return this.isShowEmpty && this.showEmpty
     },
   },
+  directives: {
+    resize: vResize,
+  },
   mounted() {
     this.init()
   },
   beforeDestroy() {
     // window.removeEventListener('resize', this.resizeEcharts)
-  },
-  directives: {
-    resize: vResize,
   },
   methods: {
     // 初始化
@@ -115,7 +114,7 @@ export default {
       })
     },
     // echarts示例自适应
-    resizeEchartsCB(size = {}) {
+    resizeEcharts(size = {}) {
       if (!this.myChart) return
       this.myChart.resize()
     },
