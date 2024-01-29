@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-19 12:13:04
+ * @LastEditTime: 2024-01-29 15:24:21
 -->
 <template>
   <ws-tree
@@ -19,7 +19,7 @@
     :data="treeData"
     current-node-key="9"
     :default-checked-keys="['9', '10']"
-    :disabledFn="disabledFn" 
+    :disabledFn="disabledFn"
     :disabledContextmenuFn="disabledContextmenuFn"
     :filterButtonsFn="filterButtonsFn"
     :useDefaultButtons="false"
@@ -115,7 +115,11 @@ export default {
       ],
       extraOperations: [
         {
-          label: '右键操作',
+          label: '右键操作1',
+          method: 'contextMenuAction',
+        },
+        {
+          label: '右键2',
           method: 'contextMenuAction',
         },
         {
@@ -124,7 +128,6 @@ export default {
         },
         {
           icon: 'el-icon-more',
-          label: '更多',
           children: [
             {
               method: 'edit',
@@ -145,12 +148,15 @@ export default {
     filterButtonsFn(operationsList, data, node, from) {
       if (from === 'contextMenu')
         return operationsList.filter(
-          (item) => item.method == 'contextMenuAction'
+          (item) => item.method && item.method.includes('contextMenuAction')
         )
-      else return operationsList.filter((item) => item.method !== 'edit')
+      else
+        return operationsList.filter(
+          (item) => !['contextMenuAction', 'edit'].includes(item.method)
+        )
     },
     disabledFn(data, node) {
-       if(data.label === '三级 3-2-2三级 3-2-2') return true
+      if (data.label === '三级 3-2-2三级 3-2-2') return true
     },
     // 判断右键禁用
     disabledContextmenuFn(data, node) {

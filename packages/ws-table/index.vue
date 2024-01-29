@@ -171,14 +171,12 @@ import {
   vResize
 } from '../utils/util'
 import mixins from './mixins'
-import wsButtons from '../ws-buttons/index.vue'
 import tableColumn from './components/tableColumn'
 import wsForm from '../ws-form/index.vue'
 export default {
   name: 'ws-table',
   mixins: [mixins],
   components: {
-    wsButtons,
     tableColumn,
     filterColumns: () => import('./components/filterColumns'),
     wsForm,

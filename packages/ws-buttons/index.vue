@@ -2,12 +2,12 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-26 16:10:57
+ * @LastEditTime: 2024-01-29 15:00:57
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
-  <div class="button-col">
+  <div class="button-col" @click.stop>
     <slot name="prefix"></slot>
     <template v-for="buttonItem in buttonConfigList">
       <slot
@@ -16,9 +16,8 @@
         :buttonItem="buttonItem"
       ></slot>
       <el-dropdown
-        @click.stop
         v-else-if="buttonItem.children"
-        :key="buttonItem.method + buttonItem.label"
+        :key="buttonItem.method + buttonItem.label + buttonItem.icon"
         :size="buttonSize"
         trigger="click"
         @command="happenCommand($event, buttonItem.children)"
@@ -50,14 +49,14 @@
         v-else
         :is="buttonItem.component || (isLinkButton ? 'el-link' : 'el-button')"
         class="button-item"
-        :key="buttonItem.method + buttonItem.label"
+        :key="buttonItem.method + buttonItem.label + buttonItem.icon"
         v-bind="{
           size: buttonSize,
           type: 'primary',
           underline: false,
           ...buttonItem,
         }"
-        @click.stop="$emit('happenEvent', buttonItem)"
+        @click="$emit('happenEvent', buttonItem)"
       >
         {{ buttonItem.label }}
       </component>

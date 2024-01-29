@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-26 15:44:19
+ * @LastEditTime: 2024-01-29 16:49:54
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -90,49 +90,29 @@
                   visibility: iAct == data ? 'visible' : 'hidden',
                 }"
               >
-                <template
-                  v-for="item in filterButtonsFn(
-                    operationsList,
-                    data,
-                    node,
-                    'hover'
-                  )"
+                <ws-buttons
+                  class="ws-buttons"
+                  isLinkButton
+                  :buttonConfigList="
+                    (
+                      filterButtonsFn(operationsList, data, node, 'hover') || []
+                    ).map((item) => ({ ...item, label: '' }))
+                  "
+                  @happenEvent="happenEvent(data, node, $event)"
                 >
-                  <span @click.stop v-if="item.children" :key="item.icon">
-                    <el-dropdown
-                      trigger="click"
-                      size="small"
-                      @command="
-                        happenCommand($event, data, node, item.children)
-                      "
-                    >
-                      <i :class="`${item.icon}`" :title="item.label"></i>
-                      <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item
-                          v-for="child in item.children"
-                          :key="child.label"
-                          :icon="child.icon"
-                          :command="child.method"
-                          @click.native.stop
-                          >{{ child.label }}</el-dropdown-item
-                        >
-                      </el-dropdown-menu>
-                    </el-dropdown>
-                  </span>
-                  <i
-                    v-else
-                    :key="item.icon"
-                    @click.stop="happenEvent(data, node, item)"
-                    :class="`${item.icon}`"
-                    :title="item.label"
-                  ></i>
-                </template>
+                  <template
+                    v-for="(index, name) in $scopedSlots"
+                    v-slot:[name]="scope"
+                  >
+                    <slot :name="name" v-bind="scope"></slot>
+                  </template>
+                </ws-buttons>
               </span>
               <!-- 禁用蒙层 -->
               <wsTooltip
                 :content="node.label"
                 :overflow="false"
-                :placement="'top'"
+                :placement="'right'"
               >
                 <div
                   v-if="judgeDisabled(data, node)"
@@ -155,20 +135,20 @@
       v-show="optionCardShow"
       id="option-button-group"
     >
-      <el-button
-        v-for="item in filterButtonsFn(
-          operationsList,
-          optionData,
-          node,
-          'contextMenu'
-        )"
-        :key="item.label"
-        @click="happenEvent(optionData, node, item)"
-        class="option-card-button"
-        :icon="item.icon"
+      <ws-buttons
+        class="ws-buttons-option"
+        :buttonConfigList="
+          (
+            filterButtonsFn(operationsList, optionData, node, 'contextMenu') ||
+            []
+          ).map((item) => ({ ...item, type: 'default' }))
+        "
+        @happenEvent="happenEvent(optionData, node, $event)"
       >
-        {{ item.label }}</el-button
-      >
+        <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+          <slot :name="name" v-bind="scope"></slot>
+        </template>
+      </ws-buttons>
     </div>
   </div>
 </template>
@@ -182,24 +162,26 @@ const defaultButtons = [
     icon: 'el-icon-plus',
   },
   {
-    label: '删除',
-    method: 'nodeDelete',
-    icon: 'el-icon-delete',
-  },
-  {
     label: '编辑',
     method: 'nodeEdit',
     icon: 'el-icon-edit',
   },
+  {
+    label: '删除',
+    method: 'nodeDelete',
+    icon: 'el-icon-delete',
+  },
 ]
 import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
+import wsButtons from '../ws-buttons/index.vue'
 import { flatToTree, debounce, getObjAttr } from '../utils/util.js'
 export default {
   name: 'ws-tree',
   mixins: [mixins],
   components: {
     wsTooltip,
+    wsButtons,
   },
   props: {
     // 增删改查模式
@@ -344,6 +326,13 @@ export default {
     changeByContextMenu() {
       return this.changeMode.includes('contextMenu')
     },
+    optionCardButtons() {
+      if (!this.changeByContextMenu) return []
+      const optionCardButtons = optionCardButtons.forEach((item) => {
+        this.$set(item, 'type', 'default')
+      })
+      return optionCardButtons
+    },
   },
   mounted() {
     if (this.changeByContextMenu) {
@@ -385,14 +374,6 @@ export default {
     },
   },
   methods: {
-    happenCommand(command, data, node, children) {
-      const buttonItem = children.find((item) => item.method === command)
-      this.$emit('happenEvent', {
-        buttonItem,
-        node,
-        data,
-      })
-    },
     // 自动设置当前选中节点
     setCurrentKeyByProp() {
       this.currentNodeKey &&
@@ -682,6 +663,26 @@ export default {
   flex: 1;
   /deep/ .el-tree-node > .el-tree-node__children {
     overflow: visible;
+  }
+}
+/deep/ span.el-link--inner {
+  margin-left: 0;
+}
+/deep/ .ws-buttons {
+  .el-link:not(:last-child) {
+    margin-right: 2px;
+  }
+  margin-right: 0;
+}
+/deep/ .ws-buttons-option {
+  display: flex;
+  flex-direction: column;
+  .el-button {
+    width: 100%;
+    margin-left: 0 !important;
+    font-size: 10px;
+    border-radius: 0;
+    padding: 8px 10px;
   }
 }
 </style>
