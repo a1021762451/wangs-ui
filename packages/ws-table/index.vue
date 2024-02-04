@@ -1,5 +1,5 @@
 <template>
-  <div class="table-container" v-resize="doLayout">
+  <div class="table-container">
     <ws-form
       v-if="showSearch"
       @update:formData="
