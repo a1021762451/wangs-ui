@@ -3,10 +3,16 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:56:21
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-20 10:33:10
+ * @LastEditTime: 2024-02-04 12:23:07
 -->
 <template>
-  <ws-fold @collapse="collapse">
+  <ws-fold
+    @collapse="collapse"
+    isPercent
+    :minwidth="10"
+    :maxwidth="60"
+    :defaultWidth="30"
+  >
     <div>test</div>
     <!-- <template v-slot:collapse="{ collapsed }">
        <div>test{{ collapsed }}</div>

@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-12-20 10:30:52
+ * @LastEditTime: 2024-02-04 12:21:06
 -->
 <template>
   <div
@@ -73,13 +73,15 @@ export default {
       type: Number,
       default: 0,
     },
+    // 宽度是否是百分比
+    isPercent: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      width:
-        sessionStorage.getItem(this.storageKey) ||
-        this.defaultWidth ||
-        this.maxwidth, // 组件宽度
+      width: 0, // 组件宽度
       collapsed: false, // 折叠状态
     }
   },
@@ -88,10 +90,28 @@ export default {
       this.changeWidth()
     },
   },
-  created() {
+  computed: {
+    minwidthComputed() {
+      return this.getWidth(this.minwidth)
+    },
+    maxwidthComputed() {
+      return this.getWidth(this.maxwidth)
+    },
+    defaultWidthComputed() {
+      return this.getWidth(this.defaultWidth)
+    },
+  },
+  mounted() {
+    this.initWidth()
     this.changeWidth()
   },
   methods: {
+    initWidth() {
+      this.width =
+        sessionStorage.getItem(this.storageKey) ||
+        this.defaultWidthComputed ||
+        this.maxwidthComputed
+    },
     // 开始拖拽
     startResize(event) {
       event.preventDefault()
@@ -107,24 +127,46 @@ export default {
     resize(event) {
       const container = this.$refs.container
       const width = event.clientX - container.offsetLeft
-      this.width = Math.max(this.minwidth, Math.min(this.maxwidth, width))
+      this.width = Math.max(
+        this.minwidthComputed,
+        Math.min(this.maxwidthComputed, width)
+      )
     },
     // 切换折叠状态
     toggleCollapse(collapsed) {
-      this.width = collapsed
-        ? this.minwidth
-        : this.defaultWidth || this.maxwidth
+      this.width = collapsed ? this.minwidthComputed : this.maxwidthComputed
     },
     // 变更宽度
     changeWidth() {
       // 保存宽度
       sessionStorage.setItem(this.storageKey, this.width)
       // 判断是否折叠
-      const collapsed = this.width == this.minwidth
+      const collapsed = this.width == this.minwidthComputed
       if (collapsed != this.collapsed) {
         this.collapsed = collapsed
         this.$emit('collapse', this.collapsed)
       }
+    },
+    // 根据百分比获取宽度数值
+    getWidthByPercent(percent) {
+      console.log(percent, 'percent')
+      const container = this.$refs.container
+      // 获取父元素宽度
+      const parentNode = container.parentNode
+      let computedStyle = getComputedStyle(parentNode)
+      let elementWidth = parentNode.clientWidth
+      let padding =
+        parseFloat(computedStyle.paddingLeft) +
+        parseFloat(computedStyle.paddingRight)
+      let contentWidth = elementWidth - padding
+      // 返回宽度
+      percent = Math.max(0, Math.min(100, percent))
+      let width = (contentWidth * percent) / 100
+      return width
+    },
+    getWidth(width) {
+      if (!width || width < 0) return 0
+      return this.isPercent ? this.getWidthByPercent(width) : width
     },
   },
 }
