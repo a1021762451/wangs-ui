@@ -667,7 +667,7 @@ export const vResize = {
       }
       !judgeHidden(el) && valueFn(...arguments)
     }
-    callback = debounce(callback, 500)
+    callback = debounce(callback, 100)
     // 如果是设置window修饰符，添加resize事件监听
     if (isWindow) {
       callback()

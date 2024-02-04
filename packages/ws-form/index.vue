@@ -1,6 +1,6 @@
 <template>
   <div
-    v-resize.immediate="judgeOneRow"
+    v-resize.window.immediate="judgeOneRow"
     class="render"
     :class="{ fold: isFold, searchMode: isSearchList }"
     :style="{ height: isFold ? colHeight + 'px' : undefined }"
@@ -122,7 +122,7 @@
             </template>
             <template slot="suffix">
               <el-link
-                v-if="isSearchList && (exceedOneRow || isFold)"
+                v-show="isSearchList && (exceedOneRow || isFold)"
                 :underline="false"
                 :size="buttonSize"
                 type="primary"

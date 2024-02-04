@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-29 16:49:54
+ * @LastEditTime: 2024-02-04 09:27:02
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -94,9 +94,7 @@
                   class="ws-buttons"
                   isLinkButton
                   :buttonConfigList="
-                    (
-                      filterButtonsFn(operationsList, data, node, 'hover') || []
-                    ).map((item) => ({ ...item, label: '' }))
+                    getButtonConfigList(operationsList, data, node, 'hover')
                   "
                   @happenEvent="happenEvent(data, node, $event)"
                 >
@@ -138,10 +136,12 @@
       <ws-buttons
         class="ws-buttons-option"
         :buttonConfigList="
-          (
-            filterButtonsFn(operationsList, optionData, node, 'contextMenu') ||
-            []
-          ).map((item) => ({ ...item, type: 'default' }))
+          getButtonConfigList(
+            operationsList,
+            optionData,
+            optionData,
+            'contextMenu'
+          )
         "
         @happenEvent="happenEvent(optionData, node, $event)"
       >
@@ -274,8 +274,8 @@ export default {
       optionCardY: '',
       optionCardShow: false,
       optionData: [],
-      node: {},
-      nodeRef: {},
+      optionNode: {},
+      optionNodeRef: {},
       iAct: '',
       filterText: '',
       searchText: '',
@@ -374,6 +374,20 @@ export default {
     },
   },
   methods: {
+    // 获取过滤后的按钮
+    getButtonConfigList(operationsList, data, node, type) {
+      let buttonConfigList =
+        this.filterButtonsFn(operationsList, data, node, type) || []
+      if (type === 'hover') {
+        return buttonConfigList.map((item) => ({
+          ...item,
+          label: '',
+        }))
+      }
+      if (type === 'contextMenu') {
+        return buttonConfigList.map((item) => ({ ...item, type: 'default' }))
+      }
+    },
     // 自动设置当前选中节点
     setCurrentKeyByProp() {
       this.currentNodeKey &&
@@ -411,8 +425,8 @@ export default {
       // this.optionCardY = e.y + 10
       this.optionCardY = clientHeight - e.y
       this.optionData = data
-      this.node = node
-      this.nodeRef = nodeRef
+      this.optionNode = node
+      this.optionNodeRef = nodeRef
       this.optionCardShow = true
     },
     // 判断节点是否禁用右键
@@ -545,7 +559,7 @@ export default {
 
 <style lang="less" scoped>
 .contextmenu {
-  // width: 70px;
+  transition: all 0.3s;
   display: flex;
   flex-direction: column;
   background: white;
@@ -665,12 +679,12 @@ export default {
     overflow: visible;
   }
 }
-/deep/ span.el-link--inner {
-  margin-left: 0;
-}
 /deep/ .ws-buttons {
   .el-link:not(:last-child) {
     margin-right: 2px;
+  }
+  span.el-link--inner {
+    margin-left: 0;
   }
   margin-right: 0;
 }
