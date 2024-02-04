@@ -55,13 +55,9 @@ const commonAttrs = {
     },
   },
 }
-let getAttrsCount = 0
-let getPickerCount = 0
 
 // 获取所有的配置属性
 export function getAttrs(fieldItem, formData = {}, isDetail) {
-  getAttrsCount += 1
-  // console.log(getAttrsCount, 'getAttrsCount');
   let obj = {}
   if (
     fieldItem.component === 'el-date-picker' ||
@@ -89,17 +85,12 @@ export function getAttrs(fieldItem, formData = {}, isDetail) {
 
 // 时间框时间选择进行限制
 export function getPicker(fieldItem, formData) {
-  // getPickerCount += 1
-  // console.log(getPickerCount, 'getPickerCount');
-
   // 初始化参数
   let {
     component,
     minAllowEqual = true,
     maxAllowEqual = true,
     timeDisabled,
-    minTime = 0,
-    maxTime = 0,
     minDate = 0,
     maxDate = 0,
     minTimeProp,
@@ -107,35 +98,30 @@ export function getPicker(fieldItem, formData) {
   } = fieldItem
   const componentAttrs = fieldItem.componentAttrs || {}
   const { type, isRange, valueFormat, pickerOptions = {} } = componentAttrs
-
   // 如果是范围选择则 不进行限制
   if (/range/i.test(type) || isRange) return {}
-  const minValue = formData[minTimeProp] || 0
-  const maxValue = formData[maxTimeProp] || 0
-
+  // 获取最小最大时间值
+  let minTime = '00:00:00'
+  let maxTime = '23:59:59'
+  // minDate, maxDate可能是函数, 从而实现动态限制
+  minDate = typeof minDate === 'function' ? minDate() : minDate
+  maxDate = typeof maxDate === 'function' ? maxDate() : maxDate
+  const minValue = formData[minTimeProp] || minDate || 0
+  const maxValue = formData[maxTimeProp] || maxDate || 0
   // el-date-picker组件
   if (component === 'el-date-picker') {
     // 单独处理日月年限制
-    const minTimeValue = () =>
-      +new Date(format(new Date(minValue), 'yyyy-MM-dd'))
-    const maxTimeValue = () =>
-      +new Date(format(new Date(maxValue), 'yyyy-MM-dd'))
-    minDate = minValue ? minTimeValue() : +new Date(minDate)
-    maxDate = maxValue ? maxTimeValue() : +new Date(maxDate)
+    let minDateYMD = +new Date(format(new Date(minValue), 'yyyy-MM-dd'))
+    let maxDateYMD = +new Date(format(new Date(maxValue), 'yyyy-MM-dd'))
     let selectableRange = ''
     // timeDisabled控制是否禁用精度到时分秒，副作用时此刻按钮隐藏
     if (timeDisabled) {
-      minTime = minTime || '00:00:00'
-      maxTime = maxTime || '23:59:59'
       if (minValue && formData[fieldItem.prop]) {
         const isSameDay =
           new Date(minValue).toDateString() ===
           new Date(formData[fieldItem.prop]).toDateString()
         if (isSameDay) {
-          const HH = new Date(minValue).getHours()
-          const mm = new Date(minValue).getMinutes()
-          const ss = new Date(minValue).getSeconds()
-          minTime = HH + ':' + mm + ':' + ss
+          minTime = format(new Date(minValue), 'HH:mm:ss')
         }
       }
       if (maxValue && formData[fieldItem.prop]) {
@@ -143,10 +129,8 @@ export function getPicker(fieldItem, formData) {
           new Date(maxValue).toDateString() ===
           new Date(formData[fieldItem.prop]).toDateString()
         if (isSameDay) {
-          const HH = new Date(maxValue).getHours()
-          const mm = new Date(maxValue).getMinutes()
-          const ss = new Date(maxValue).getSeconds()
-          maxTime = HH + ':' + mm + ':' + ss
+          maxTime = format(new Date(maxValue), 'HH:mm:ss')
+          maxTime = maxTime === '00:00:00' ? '23:59:59' : maxTime
         }
       }
       selectableRange = minTime + '-' + maxTime
@@ -156,9 +140,9 @@ export function getPicker(fieldItem, formData) {
         time = +new Date(format(new Date(time), 'yyyy-MM-dd'))
         let minCondition = false
         let maxCondition = false
-        minCondition = minAllowEqual ? minDate <= time : minDate < time
-        maxCondition = maxAllowEqual ? time <= maxDate : time < maxDate
-        if (maxDate) {
+        minCondition = minAllowEqual ? minDateYMD <= time : minDateYMD < time
+        maxCondition = maxAllowEqual ? time <= maxDateYMD : time < maxDateYMD
+        if (maxDateYMD) {
           return !(minCondition && maxCondition)
         } else {
           return !minCondition
@@ -170,11 +154,12 @@ export function getPicker(fieldItem, formData) {
     // el-time-select组件
   } else if (component === 'el-time-select') {
     // minTime/start maxTime/end 限制重复，只用一种即可
-    minTime = minValue || minTime || '00:00'
-    maxTime = maxValue || maxTime || '23:59'
+    minTime = minValue || '00:00'
+    // 如果运行相等，需要加一分钟
+    maxTime = maxValue || '23:59'
     return {
-      start: minTime || '00:00',
-      end: maxTime || '23:59',
+      start: minTime,
+      end: maxTime,
       ...pickerOptions,
       // minTime: minValue,
       // maxTime: maxValue
@@ -185,13 +170,13 @@ export function getPicker(fieldItem, formData) {
     // 秒级别控制不了
     let selectableRange = ''
     // 处理minTime
-    minTime = minValue || minTime || '00:00:00'
+    minTime = minValue || '00:00:00'
     minTime =
       typeof minTime === 'string' ? minTime : format(minTime, 'HH:mm:ss')
     const minO = decodeFormatTime(minTime, valueFormat || 'HH:mm:ss')
     minTime = encodeFormatTime(minO, 'HH:mm:ss')
     // 处理maxTime
-    maxTime = maxValue || maxTime || '23:59:59'
+    maxTime = maxValue || '23:59:59'
     maxTime =
       typeof maxTime === 'string' ? maxTime : format(maxTime, 'HH:mm:ss')
     const maxO = decodeFormatTime(maxTime, valueFormat || 'HH:mm:ss')
@@ -551,7 +536,58 @@ function handleDate(num, type = 'day', date = new Date(), hasCalculate = true) {
   time[setFn](value)
   return time
 }
-
+// 24小时制时分秒加减
+export function handleTime(num, type, time) {
+  if (!time) return
+  const timeArr = time.split(':')
+  let [hour, minute, second] = timeArr.map(Number)
+  function judgeHour(hour) {
+    return hour < 0 || hour > 23
+  }
+  function changeMinute() {
+    if (minute >= 60) {
+      hour += Math.floor(minute / 60)
+      minute %= 60
+    }
+    if (minute < 0) {
+      hour += Math.ceil(minute / 60)
+      minute = 60 + (minute % 60)
+    }
+  }
+  function changeSecond() {
+    if (second >= 60) {
+      minute += Math.floor(second / 60)
+      second %= 60
+      changeMinute()
+    }
+    if (second < 0) {
+      minute += Math.ceil(second / 60)
+      second = 60 + (second % 60)
+      changeMinute()
+    }
+  }
+  function addZero(value) {
+    value = '' + value
+    return '00'.replace(new RegExp(`0{${value.length}}$`), value)
+  }
+  if (type === 'hour') {
+    hour = +hour + num
+  }
+  if (type === 'minute') {
+    minute = +minute + num
+    changeMinute()
+  }
+  if (type === 'second') {
+    second = +second + num
+    changeSecond()
+  }
+  console.log(hour, minute, second, 'hour, minute, second');
+  hour = addZero(hour)
+  minute = addZero(minute)
+  second = addZero(second)
+  const arr = [hour, minute, second]
+  return judgeHour(hour) ? time : arr.slice(0, timeArr.length).join(':')
+}
 // 获取默认时间- 今年的当前时间，明天当前时间，昨天当前时间， 同理去年和明年
 export function getDefaultTime(defaultTimeType, formatStr) {
   let time

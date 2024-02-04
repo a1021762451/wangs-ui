@@ -75,7 +75,7 @@ export const formConfigList = [
     prop: 'testMaxDatetime',
     label: '大时间',
     required: true,
-    minTimeProp: 'testMinDatetme', // 用于比较的最小时间对应字段
+    minTimeProp: 'testMinDatetime', // 用于比较的最小时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
     // isShowCurrent: true,
     minAllowEqual: false, // 允许和用于比较的最小时间相等 精度到天
@@ -233,11 +233,11 @@ export const tableColumns = [
     component: 'el-date-picker',
     required: true,
     maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
-    minDate: '2022-01-01', // 用于比较的最小时间固定值
-    maxDate: '2024-01-01', // 用于比较的最大时间固定值
+    minDate: '2024-02-04 02:10:31', // 用于比较的最小时间固定值
+    maxDate: '2024-03-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
-    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
+    // minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
@@ -251,11 +251,11 @@ export const tableColumns = [
     component: 'el-date-picker',
     required: true,
     minTimeProp: 'testMinDatetime', // 用于比较的最小时间对应字段
-    minDate: '2022-01-01', // 用于比较的最小时间固定值
-    maxDate: '2024-01-01', // 用于比较的最大时间固定值
+    minDate: '2024-02-04 02:10:31', // 用于比较的最小时间固定值
+    maxDate: '2024-03-01', // 用于比较的最大时间固定值
     timeDisabled: true, // 时间限制精度是否到时分秒
-    minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
-    maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
+    // minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
+    // maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',

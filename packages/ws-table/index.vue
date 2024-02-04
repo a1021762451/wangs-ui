@@ -8,7 +8,7 @@
         }
       "
       @happenEvent="happenEvent"
-      style="margin-bottom: 10px"
+      style="margin-bottom: 6px"
       v-bind="{
         formData: formData,
         isSearchList: true,
@@ -812,7 +812,7 @@ export default {
 .talbe-utils {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding-right: 12px;
 
   .icon-setting {
