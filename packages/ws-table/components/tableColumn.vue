@@ -135,8 +135,8 @@
               v-focus="switchMode.includes('dblclick') && !row[switchKey]"
               v-model="row[fieldItem.prop]"
               @change="fieldItemChange(fieldItem, row)"
-              @blur="handleBlur(row, fieldItem)"
-              @input="handleInput($event, row, fieldItem)"
+              @blur="handleBlur(fieldItem, row)"
+              @input="handleInput($event, fieldItem, row)"
             >
               <template v-if="fieldItem.component === 'el-select'">
                 <el-option
@@ -360,7 +360,7 @@ export default {
       this.temRow = deepClone(row)
     },
     // input框失焦处理
-    handleBlur(row, fieldItem) {
+    handleBlur(fieldItem, row) {
       const { prop, blurHandler: handler } = fieldItem
       const temRow = this.temRow
       this.temRow = {}
@@ -381,7 +381,7 @@ export default {
       // this.fieldItemChange(fieldItem, row, 'tableFieldBlur')
     },
     // input框输入处理
-    handleInput(value, row, fieldItem) {
+    handleInput(value, fieldItem, row) {
       const { prop, inputHandler: handler } = fieldItem
       if (typeof handler === 'function') {
         const newValue = handler(value)

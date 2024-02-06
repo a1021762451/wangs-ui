@@ -155,7 +155,6 @@ export function getPicker(fieldItem, formData) {
   } else if (component === 'el-time-select') {
     // minTime/start maxTime/end 限制重复，只用一种即可
     minTime = minValue || '00:00'
-    // 如果运行相等，需要加一分钟
     maxTime = maxValue || '23:59'
     return {
       start: minTime,

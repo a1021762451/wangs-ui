@@ -55,6 +55,7 @@
               :name="fieldItem.slotName"
               :formData="formData"
               :fieldItem="fieldItem"
+              :fieldItemChange="fieldItemChange"
             ></slot>
             <component
               v-else-if="fieldItem.component"
@@ -375,11 +376,24 @@ export default {
       }
     },
     // 表格内复选框变更
-    fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
+    async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
       this.$emit('happenEvent', {
         buttonItem: { method },
         fieldItem,
         formData,
+      })
+      // 没有按钮组时，触发刷新事件
+      if (!this.showButtons) {
+        // 校验单个字段
+        await this.validateField(fieldItem.prop)
+        this.handleSearch()
+      }
+    },
+    validateField(prop) {
+      return new Promise((resolve, reject) => {
+        this.$refs.form.validateField(prop, (valid) => {
+          valid ? reject(`${prop} is required`) : resolve()
+        })
       })
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
@@ -412,12 +426,8 @@ export default {
         // 同时触发重置事件，用于区分
         this.handleSearch()
       }
-      // method为search则进行默认处理
-      if (method === 'search') {
-        await this.$refs.form.validate()
-      }
-      // method为comfirm则进行默认处理
-      if (method === 'comfirm') {
+      // method为search,comfirm则进行校验
+      if (['search', 'comfirm'].includes(method)) {
         await this.$refs.form.validate()
       }
       this.$emit('happenEvent', {
