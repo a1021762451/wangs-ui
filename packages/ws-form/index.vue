@@ -350,7 +350,7 @@ export default {
     },
     showButtons() {
       // this.configList.length > 0 &&
-      return this.buttonsList.length > 0
+      return this.buttonsList.length > 0 && !this.isDetail
     },
   },
   created() {
