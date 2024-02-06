@@ -383,7 +383,7 @@ export default {
         formData,
       })
       // 没有按钮组时，触发刷新事件
-      if (!this.showButtons) {
+      if (!this.showButtons && this.isSearchList) {
         // 校验单个字段
         await this.validateField(fieldItem.prop)
         this.handleSearch()
