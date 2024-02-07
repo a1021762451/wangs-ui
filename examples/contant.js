@@ -19,6 +19,7 @@ export const formButtons = [
   },
   {
     slotName: 'download',
+    method: 'download',
   },
 ]
 
@@ -162,7 +163,6 @@ export const tableColumns = [
     slotName: 'testTableSlot',
     prop: 'testTableSlot',
     label: '插槽',
-    showOverflowTooltip: true,
   },
   // 过滤举例
   {
@@ -171,7 +171,6 @@ export const tableColumns = [
     formatter: function (row, column, cellValue, index) {
       return cellValue + '-过滤'
     },
-    showOverflowTooltip: true,
   },
   // 富文本举例
   {

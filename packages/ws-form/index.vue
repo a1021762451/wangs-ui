@@ -136,7 +136,7 @@
         >
           <ws-buttons
             :buttonConfigList="buttonsList"
-            :buttonSize="buttonSize"
+            :buttonSize="buttonSize || size"
             class="searchMode-ws-buttons"
             @happenEvent="happenEvent"
           >
@@ -150,7 +150,7 @@
               <el-link
                 v-show="isSearchList && (exceedOneRow || isFold)"
                 :underline="false"
-                :size="buttonSize"
+                :size="buttonSize || size"
                 type="primary"
                 @click="isFold = !isFold"
                 class="fold-button"
@@ -250,7 +250,7 @@ export default {
     },
     // 按钮组尺寸
     buttonSize: {
-      default: 'small',
+      default: '',
       type: String,
     },
     // 是否是详情模式
@@ -377,6 +377,9 @@ export default {
     showButtons() {
       // this.configList.length > 0 &&
       return this.buttonsList.length > 0 && !this.isDetail
+    },
+    size() {
+      return this.$attrs.size
     },
   },
   created() {

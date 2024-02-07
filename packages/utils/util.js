@@ -580,7 +580,7 @@ export function handleTime(num, type, time) {
     second = +second + num
     changeSecond()
   }
-  console.log(hour, minute, second, 'hour, minute, second');
+  console.log(hour, minute, second, 'hour, minute, second')
   hour = addZero(hour)
   minute = addZero(minute)
   second = addZero(second)
@@ -628,14 +628,19 @@ export function getDefaultTime(defaultTimeType, formatStr) {
 }
 
 // 树数据扁平化
-export function treeToFlat(data = [], props = {}, nodeKey = 'id') {
+export function treeToFlat(data = [], props = {}, nodeKey = 'id', useDef) {
   let { children = 'children', parent = 'pid' } = props
   const result = []
   if (!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
-      if (!item[nodeKey]) item[nodeKey] = getRandomId()
-      item[parent] = parentId
+      if (useDef) {
+        if (!item[nodeKey]) def(item, nodeKey, getRandomId())
+        def(item, parent, parentId)
+      } else {
+        if (!item[nodeKey]) item[nodeKey] = getRandomId()
+        item[parent] = parentId
+      }
       result.push(item)
       if (item[children] && item[children].length) {
         loop(item[children], item[nodeKey])

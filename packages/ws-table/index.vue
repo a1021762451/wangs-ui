@@ -13,6 +13,7 @@
         formData: formData,
         isSearchList: true,
         ...seachConfig,
+        formConfigList,
       }"
     >
       <!-- 将父组件插槽内容转发给子组件 -->
@@ -58,7 +59,7 @@
       label-width="80px"
       :validate-on-rule-change="false"
       inline
-      size="small"
+      size="mini"
       class="common-table"
     >
       <!-- 表格 -->
@@ -74,7 +75,7 @@
           'current-row-key': currentRow[rowKey],
           ...$attrs,
           rowKey,
-          'row-class-name': setRowClassName,
+          'cell-class-name': setCellClassName,
         }"
         @select="select"
         @select-all="selectAll"
@@ -289,6 +290,11 @@ export default {
       default: false,
       type: Boolean,
     },
+    // 是否生成默认表单配置
+    getDefault: {
+      default: false,
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -313,15 +319,18 @@ export default {
   watch: {
     tableColumns: {
       handler(newData) {
-        this.columns = deepClone(newData)
+        const columns = deepClone(newData)
+        this.columns = columns
         // 搜索行处理勾选和索引
         if (this.showSearchRow) {
-          this.setSelectable(this.columns)
-          this.setIndex(this.columns)
-          this.setFilterButtons(this.columns)
+          this.setSelectable(columns)
+          this.setIndex(columns)
+          this.setFilterButtons(columns)
         }
-        this.addLabelForColumns(this.columns)
-        this.originColunms = deepClone(this.columns)
+        // 初始化表单配置
+        this.getDefaultFormConfigList()
+        this.addLabelForColumns(columns)
+        this.originColunms = deepClone(columns)
       },
       immediate: true,
     },
@@ -386,11 +395,18 @@ export default {
     rowKey() {
       return getObjAttr(this.$attrs, 'rowKey') || 'id'
     },
-    rowClassName() {
-      return getObjAttr(this.$attrs, 'rowClassName')
+    cellClassName() {
+      return getObjAttr(this.$attrs, 'cellClassName')
     },
     flatColums() {
-      return treeToFlat(deepClone(this.columns))
+      return treeToFlat(this.columns, {}, 'id', true)
+    },
+    // 获取第一个有prop的列
+    firstColumnWidthProp() {
+      return this.columns.find((item) => !item.type && item.prop)
+    },
+    formConfigList() {
+      return this.getDefaultFormConfigList(true)
     },
   },
   directives: {
@@ -429,6 +445,33 @@ export default {
           label: '字段值',
         },
       ]
+    },
+    // 根据表格配置生成默认表单配置
+    getDefaultFormConfigList(getForm = false) {
+      const { formConfigList = [] } = this.seachConfig
+      if (!this.getDefault) return formConfigList
+      const arr = []
+      this.flatColums.forEach((item) => {
+        const { component, prop, label, noDefaultNeed } = item
+        // 不需要默认配置
+        if (!prop || noDefaultNeed) return
+        // 搜索表单默认配置
+        if (this.showSearch && getForm) {
+          const finditem = formConfigList.find((x) => x.prop === prop)
+          arr.push(
+            finditem || {
+              prop,
+              label,
+              component: 'el-input',
+            }
+          )
+        }
+        // 表格搜索行默认配置
+        else if (this.showSearchRow && !component && !getForm) {
+          this.$set(item, 'component', 'el-input')
+        }
+      })
+      return arr
     },
     // 根据配置初始化一个row
     initSearchRow() {
@@ -495,10 +538,20 @@ export default {
       }
       this.$set(operationColumn, 'filterButtons', fn)
     },
-    // 设置rowClassName
-    setRowClassName({ row, rowIndex }) {
-      if (row.rowType__table === 'searchRow') return 'first-row'
-      if (this.rowClassName) return this.rowClassName(row, rowIndex)
+    // 设置cellClassName
+    setCellClassName({ row, column, rowIndex, columnIndex }) {
+      let classStr = ''
+      if (
+        row.children &&
+        row.children.length &&
+        column.property === this.firstColumnWidthProp.prop
+      ) {
+        classStr += 'tree-cell '
+      }
+      if (row.rowType__table === 'searchRow') classStr += 'search-row '
+      if (this.cellClassName)
+        classStr += this.cellClassName({ row, column, rowIndex, columnIndex })
+      return classStr
     },
     // 迭代增加label__table，用于多级表头下label作区分
     addLabelForColumns(dataList, fatherLabel = '') {
@@ -988,12 +1041,17 @@ export default {
   flex: 1;
   min-height: 0;
 }
-/deep/ .first-row {
-  .el-checkbox {
+/deep/ .search-row {
+  .cell > .el-checkbox {
     display: none;
   }
   .el-table__expand-icon {
     display: none;
+  }
+}
+/deep/ .tree-cell {
+  .overflow_tip {
+    display: inline;
   }
 }
 </style>

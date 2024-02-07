@@ -65,10 +65,10 @@
   <el-table-column
     v-else
     v-bind="{
-      showOverflowTooltip: !fieldItem.component,
       align: 'center',
       resizable: true,
       ...fieldItem,
+      showOverflowTooltip: !fieldItem.component,
     }"
   >
     <!-- 表头插槽 -->
@@ -90,17 +90,8 @@
       v-slot="{ row, column, $index }"
       v-if="!fieldItem.type || (fieldItem.type && fieldItem.slotName)"
     >
-      <!-- 命名插槽 -->
-      <template v-if="fieldItem.slotName">
-        <slot
-          :name="fieldItem.slotName"
-          v-bind="{ row, column, $index, fieldItem }"
-        >
-          <!-- 用了插槽就不会显示默认的内容 -->
-        </slot>
-      </template>
       <!-- 表单元素 -->
-      <template v-else-if="fieldItem.component">
+      <template v-if="fieldItem.component">
         <!-- 表单元素编辑模式 -->
         <el-form-item
           v-if="
@@ -114,86 +105,80 @@
           :rules="getRules(fieldItem, row)"
         >
           <!-- 命名插槽 -->
-          <template v-if="fieldItem.slotName">
-            <slot
-              :name="fieldItem.slotName"
-              v-bind="{ row, column, $index, fieldItem }"
-            >
-              <!-- 用了插槽就不会显示默认的内容 -->
-            </slot>
-          </template>
-          <template v-else>
-            <!-- 表单元素显示 -->
-            <component
-              :is="fieldItem.component"
-              v-bind="{
-                size: 'mini',
-                'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-                disabled: row[fieldItem.disabledKey],
-                ...getAttrs(fieldItem, row),
-              }"
-              v-focus="switchMode.includes('dblclick') && !row[switchKey]"
-              v-model="row[fieldItem.prop]"
-              @change="fieldItemChange(fieldItem, row)"
-              @blur="handleBlur(fieldItem, row)"
-              @input="handleInput($event, fieldItem, row)"
-            >
-              <template v-if="fieldItem.component === 'el-select'">
-                <template v-for="item in allOptions[fieldItem.prop]">
-                  <el-option-group
-                    v-if="item.children"
-                    :key="item.label"
-                    v-bind="item"
-                  >
-                    <el-option
-                      v-for="nextItem in item.children"
-                      :key="nextItem.label + nextItem.value"
-                      v-bind="nextItem"
-                    >
-                      <slot
-                        v-if="fieldItem.selectSlotName"
-                        :name="fieldItem.selectSlotName"
-                        v-bind="nextItem"
-                      ></slot>
-                    </el-option>
-                  </el-option-group>
+          <slot
+            v-if="fieldItem.formSlotName"
+            :name="fieldItem.formSlotName"
+            v-bind="{ row, column, $index, fieldItem }"
+          >
+            <!-- 用了插槽就不会显示默认的内容 -->
+          </slot>
+          <!-- 表单元素显示 -->
+          <component
+            v-else
+            :is="fieldItem.component"
+            v-bind="{
+              size: 'mini',
+              'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+              disabled: row[fieldItem.disabledKey],
+              ...getAttrs(fieldItem, row),
+            }"
+            v-focus="switchMode.includes('dblclick') && !row[switchKey]"
+            v-model="row[fieldItem.prop]"
+            @change="fieldItemChange(fieldItem, row)"
+            @blur="handleBlur(fieldItem, row)"
+            @input="handleInput($event, fieldItem, row)"
+          >
+            <template v-if="fieldItem.component === 'el-select'">
+              <template v-for="item in allOptions[fieldItem.prop]">
+                <el-option-group
+                  v-if="item.children"
+                  :key="item.label"
+                  v-bind="item"
+                >
                   <el-option
-                    v-else
-                    :key="item.label + item.value"
-                    v-bind="item"
+                    v-for="nextItem in item.children"
+                    :key="nextItem.label + nextItem.value"
+                    v-bind="nextItem"
                   >
                     <slot
                       v-if="fieldItem.selectSlotName"
                       :name="fieldItem.selectSlotName"
-                      v-bind="item"
-                    ></slot
-                  ></el-option>
-                </template>
+                      v-bind="nextItem"
+                    ></slot>
+                  </el-option>
+                </el-option-group>
+                <el-option v-else :key="item.label + item.value" v-bind="item">
+                  <slot
+                    v-if="fieldItem.selectSlotName"
+                    :name="fieldItem.selectSlotName"
+                    v-bind="item"
+                  ></slot
+                ></el-option>
               </template>
-              <template v-if="fieldItem.component === 'el-radio-group'">
-                <el-radio
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="{
-                    ...item,
-                    label: item.value,
-                  }"
-                  >{{ item.label }}</el-radio
-                >
-              </template>
-              <template v-if="fieldItem.component === 'el-checkbox-group'">
-                <el-checkbox
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="{
-                    ...item,
-                    label: item.value,
-                  }"
-                  >{{ item.label }}</el-checkbox
-                >
-              </template>
-            </component>
-          </template>
+            </template>
+            <template v-if="fieldItem.component === 'el-radio-group'">
+              <el-radio
+                v-for="item in allOptions[fieldItem.prop]"
+                :key="item.value"
+                v-bind="{
+                  ...item,
+                  label: item.value,
+                }"
+                >{{ item.label }}</el-radio
+              >
+            </template>
+            <template v-if="fieldItem.component === 'el-checkbox-group'">
+              <el-checkbox
+                v-for="item in allOptions[fieldItem.prop]"
+                :key="item.value"
+                v-bind="{
+                  ...item,
+                  label: item.value,
+                }"
+                >{{ item.label }}</el-checkbox
+              >
+            </template>
+          </component>
         </el-form-item>
         <!-- 表单元素非编辑模式 -->
         <!--allowToggle控制是否能够双击切换-->
@@ -201,14 +186,16 @@
           v-else
           placement="top"
           :content="
-            getShowValue(
-              row,
-              column,
-              $index,
-              fieldItem,
-              allOptions,
-              placeholder
-            )
+            !fieldItem.slotName
+              ? getShowValue(
+                  row,
+                  column,
+                  $index,
+                  fieldItem,
+                  allOptions,
+                  placeholder
+                )
+              : ''
           "
           overflow
         >
@@ -217,18 +204,37 @@
             @dblclick="toggleInput(row, column, $index)"
             class="overflow_tip"
           >
-            {{
-              getShowValue(
-                row,
-                column,
-                $index,
-                fieldItem,
-                allOptions,
-                placeholder
-              )
-            }}
+            <!-- 命名插槽 -->
+            <slot
+              v-if="fieldItem.slotName"
+              :name="fieldItem.slotName"
+              v-bind="{ row, column, $index, fieldItem }"
+            >
+              <!-- 用了插槽就不会显示默认的内容 -->
+            </slot>
+            <template v-else>
+              {{
+                getShowValue(
+                  row,
+                  column,
+                  $index,
+                  fieldItem,
+                  allOptions,
+                  placeholder
+                )
+              }}
+            </template>
           </div>
         </ws-tooltip>
+      </template>
+      <!-- 命名插槽 -->
+      <template v-else-if="fieldItem.slotName">
+        <slot
+          :name="fieldItem.slotName"
+          v-bind="{ row, column, $index, fieldItem }"
+        >
+          <!-- 用了插槽就不会显示默认的内容 -->
+        </slot>
       </template>
       <!-- 富文本 -->
       <template v-else-if="fieldItem.rich">
