@@ -684,6 +684,14 @@ function judgeHidden(el) {
   }
   return false
 }
+// 创建不可枚举的属性
+export function def(obj, key, value, config) {
+  Object.defineProperty(obj, key, {
+    value,
+    enumerable: false,
+    ...config,
+  })
+}
 // vue指令，监听元素大小变化(重点是宽度变化)
 export const vResize = {
   bind(el, binding) {

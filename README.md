@@ -55,9 +55,7 @@ Vue.use(wangsUi)
       buttonConfigList: formButtons,
       allOptions,
     }"
-  :switchConfig="{
-      switchMode: 'rowControl',
-    }"
+  switchMode="rowControl, dblclick"
   @happenEvent="happenEvent"
   @selection-change="selectionChange"
 >
@@ -265,47 +263,53 @@ const allOptions = {
 
 #### 组件属性
 
-| 参数           | 说明                                                     | 类型    | 可选值                                               | 默认值 |
-| -------------- | -------------------------------------------------------- | ------- | ---------------------------------------------------- | ------ |
-| allOptions     | 所有表单下拉框选项集合                                   | Object  | -                                                    | -      |
-| tableColumns   | 所有列的对象集合数组                                     | Array   | -                                                    | -      |
-| switchConfig   | 表单与普通内容切换的控制配置                             | Object  |                                                      | -      |
-| utilsList      | 工具栏                                                   | Array   | 'switchMode' - 切换模式 'switchKey' - 行切换控制字段 | -      |
-| showPagination | 展示分页组件                                             | Boolean | -                                                    | true   |
-| showSearch     | 是否显示搜索框                                           | Boolean | -                                                    | false  |
-| checkStrictly  | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                                                    | false  |
-| pageInfo       | 分页数据, 不传则没有分页栏                               | Object  | -                                                    | -      |
-| loading        | 加载样式                                                 | Boolean | -                                                    | false  |
-| placeholder    | 表格空单元占位                                           | String  | -                                                    | -      |
-| seachConfig    | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                                                    | -      |
-| formData       | 搜索栏数据                                               | Object  | -                                                    | -      |
+| 参数             | 说明                                                     | 类型    | 可选值              | 默认值 |
+| ---------------- | -------------------------------------------------------- | ------- | ------------------- | ------ |
+| allOptions       | 所有表单下拉框选项集合                                   | Object  | -                   | -      |
+| tableColumns     | 所有列的对象集合数组                                     | Array   | -                   | -      |
+| utilsList        | 工具栏                                                   | Array   | -                   | -      |
+| operationConfig  | 表格头部操作按钮配置,对应 ws-buttons 配置                | Object  | -                   | -      |
+| showPagination   | 展示分页组件                                             | Boolean | -                   | true   |
+| paginationConfig | 分页配置                                                 | Object  | -                   | -      |
+| showSearch       | 是否显示搜索框                                           | Boolean | -                   | false  |
+| showSearchRow    | 首行是搜索栏                                             | Boolean | -                   | false  |
+| checkStrictly    | 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法 | Boolean | -                   | false  |
+| pageInfo         | 分页数据, 不传则没有分页栏                               | Object  | -                   | -      |
+| loading          | 加载样式                                                 | Boolean | -                   | false  |
+| placeholder      | 表格空单元占位                                           | String  | -                   | -      |
+| switchMode       | 列切换模式                                               | String  | dblclick/rowControl | -      |
+| switchKey        | 列切换字段                                               | String  | isEdit\_\_table     | -      |
+| seachConfig      | 搜索栏配置， 同 ws-form, 不传则没有搜索栏                | Object  | -                   | -      |
+| formData         | 搜索栏数据                                               | Object  | -                   | -      |
 
 - tableColumns 内部对象属性(兼容 el-table-column 自带的属性， 不另作说明)
 
-| 参数             | 说明                                   | 类型     | 可选值 | 默认值 |
-| ---------------- | -------------------------------------- | -------- | ------ | ------ |
-| slotName         | 对应列插槽名                           | String   | -      | -      |
-| headerSlotName   | 对应列表头插槽名                       | String   | -      | -      |
-| children         | 多级表头配置                           | Array    | -      | -      |
-| formatter        | 同 el-table formatter                  | Function | -      | -      |
-| selfAdjust       | 列宽根据内容自调节                     | Boolean  | -      | false  |
-| rich             | 列内容是富文本                         | Boolean  | -      | false  |
-| component        | 组件名，用于表单组件                   | String   | -      | -      |
-| blurHandler      | el-input 组件失焦时值过滤              | Function | -      | -      |
-| inputHandler     | el-input 组件输入时值过滤              | Function | -      | -      |
-| required         | 是否必填                               | Boolean  | -      | false  |
-| alwaysVisible    | 列是否一直展示                         | Boolean  | -      | false  |
-| maxTimeProp      | 时间组件最大值对应的字段               | String   | -      | -      |
-| minTimeProp      | 时间组件最小值对应的字段               | String   | -      | -      |
-| minDate          | 固定的最小时间                         | String   | -      | -      |
-| maxDate          | 固定的最大时间                         | String   | -      | -      |
-| timeDisabled     | 时间限制精度是否到时分秒               | Boolean  | -      | -      |
-| minAllowEqual    | 允许和用于比较的最小时间相等, 精度到天 | Boolean  | -      | true   |
-| maxAllowEqual    | 允许和用于比较的最大时间相等, 精度到天 | Boolean  | -      | true   |
-| allowToggle      | 是否允许双击切换， 仅支持输入框        | Boolean  | -      | -      |
-| placeholder      | 表格空单元占位                         | String   | -      | -      |
-| componentAttrs   | 组件对应的属性                         | Object   | -      | -      |
-| buttonConfigList | 每行按钮组，type 为 operation 时生效   | Array    | -      | -      |
+| 参数             | 说明                                       | 类型                            | 可选值 | 默认值 |
+| ---------------- | ------------------------------------------ | ------------------------------- | ------ | ------ |
+| slotName         | 对应列插槽名                               | String                          | -      | -      |
+| headerSlotName   | 对应列表头插槽名                           | String                          | -      | -      |
+| selectSlotName   | 对应搜索框 el-option 插槽                  | String                          | -      | -      |
+| children         | 多级表头配置                               | Array                           | -      | -      |
+| formatter        | 同 el-table formatter                      | Function                        | -      | -      |
+| selfAdjust       | 列宽根据内容自调节                         | Boolean                         | -      | false  |
+| rich             | 列内容是富文本                             | Boolean                         | -      | false  |
+| component        | 组件名，用于表单组件                       | String                          | -      | -      |
+| blurHandler      | el-input 组件失焦时值过滤                  | Function(value)                 | -      | -      |
+| inputHandler     | el-input 组件输入时值过滤                  | Function(value)                 | -      | -      |
+| required         | 是否必填                                   | Boolean                         | -      | false  |
+| alwaysVisible    | 列是否一直展示                             | Boolean                         | -      | false  |
+| maxTimeProp      | 时间组件最大值对应的字段                   | String                          | -      | -      |
+| minTimeProp      | 时间组件最小值对应的字段                   | String                          | -      | -      |
+| minDate          | 固定的最小时间                             | String                          | -      | -      |
+| maxDate          | 固定的最大时间                             | String                          | -      | -      |
+| timeDisabled     | 时间限制精度是否到时分秒                   | Boolean                         | -      | -      |
+| minAllowEqual    | 允许和用于比较的最小时间相等, 精度到天     | Boolean                         | -      | true   |
+| maxAllowEqual    | 允许和用于比较的最大时间相等, 精度到天     | Boolean                         | -      | true   |
+| allowToggle      | 是否允许双击切换， 仅支持输入框            | Boolean                         | -      | -      |
+| placeholder      | 表格空单元占位                             | String                          | -      | -      |
+| componentAttrs   | 组件对应的属性                             | Object                          | -      | -      |
+| buttonConfigList | 每行按钮组，type 为 operation 时生效       | Array                           | -      | -      |
+| filterButtons    | 行按钮组过滤函数，type 为 operation 时生效 | Function(buttonConfigList, row) | -      | -      |
 
 #### 组件事件
 
@@ -325,7 +329,7 @@ const allOptions = {
 
 #### slot 插槽
 
-tableColumns 配置 slotName 和 headerSlotName
+tableColumns 配置 slotName 和 headerSlotName 和 selectSlotName
 ，也支持按钮组 ws-buttons 配置的插槽
 
 #### 组件图片
@@ -476,22 +480,23 @@ export const formConfigList = [
 
 - formConfigList 内部对象属性(兼容 el-form-item 自带的属性， 不另作说明)
 
-| 参数            | 说明                                             | 类型     | 可选值 | 默认值 |
-| --------------- | ------------------------------------------------ | -------- | ------ | ------ |
-| slotName        | 表单元素内容插槽                                 | String   | -      | -      |
-| component       | 组件名，用于表单组件                             | String   | -      | -      |
-| blurHandler     | el-input 组件失焦时值过滤                        | Function | -      | -      |
-| inputHandler    | el-input 组件输入时值过滤                        | Function | -      | -      |
-| required        | 是否必填                                         | Boolean  | -      | false  |
-| maxTimeProp     | 时间组件最大值对应的字段                         | String   | -      | -      |
-| minTimeProp     | 时间组件最小值对应的字段                         | String   | -      | -      |
-| minDate         | 固定的最小时间                                   | String   | -      | -      |
-| maxDate         | 固定的最大时间                                   | String   | -      | -      |
-| timeDisabled    | 时间限制精度是否到时分秒                         | Boolean  | -      | -      |
-| minAllowEqual   | 允许和用于比较的最小时间相等,精度到天            | Boolean  | -      | true   |
-| maxAllowEqual   | 允许和用于比较的最大时间相等,精度到天            | Boolean  | -      | true   |
-| defaultTimeType | 默认时间类型，支持去年/今年/明年的昨天/明天/今天 | String   | -      | ''     |
-| componentAttrs  | 组件对应的属性                                   | Object   | -      | -      |
+| 参数            | 说明                                             | 类型            | 可选值 | 默认值 |
+| --------------- | ------------------------------------------------ | --------------- | ------ | ------ |
+| slotName        | 表单元素内容插槽                                 | String          | -      | -      |
+| selectSlotName  | 对应搜索框 el-option 插槽                        | String          | -      | -      |
+| component       | 组件名，用于表单组件                             | String          | -      | -      |
+| blurHandler     | el-input 组件失焦时值过滤                        | Function(value) | -      | -      |
+| inputHandler    | el-input 组件输入时值过滤                        | Function(value) | -      | -      |
+| required        | 是否必填                                         | Boolean         | -      | false  |
+| maxTimeProp     | 时间组件最大值对应的字段                         | String          | -      | -      |
+| minTimeProp     | 时间组件最小值对应的字段                         | String          | -      | -      |
+| minDate         | 固定的最小时间                                   | String          | -      | -      |
+| maxDate         | 固定的最大时间                                   | String          | -      | -      |
+| timeDisabled    | 时间限制精度是否到时分秒                         | Boolean         | -      | -      |
+| minAllowEqual   | 允许和用于比较的最小时间相等,精度到天            | Boolean         | -      | true   |
+| maxAllowEqual   | 允许和用于比较的最大时间相等,精度到天            | Boolean         | -      | true   |
+| defaultTimeType | 默认时间类型，支持去年/今年/明年的昨天/明天/今天 | String          | -      | ''     |
+| componentAttrs  | 组件对应的属性                                   | Object          | -      | -      |
 
 #### 组件事件
 
@@ -501,7 +506,7 @@ export const formConfigList = [
 
 #### slot 插槽
 
-formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
+formConfigList 配置 slotName 和 selectSlotName, 也支持按钮组 ws-buttons 配置的插槽
 
 #### 组件图片
 
@@ -555,22 +560,22 @@ formConfigList 配置 slotName, 也支持按钮组 ws-buttons 配置的插槽
 
 #### 组件属性
 
-| 参数               | 说明                                                   | 类型     | 可选值                                      | 默认值 |
-| ------------------ | ------------------------------------------------------ | -------- | ------------------------------------------- | ------ |
-| changeMode         | 增删改查模式                                           | String   | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |        |
-| excludeFirstSearch | 后续搜索 不被第一次的搜索操作影响                      | Boolean  | -                                           | false  |
-| extraOperations    | 额外的按钮                                             | Array    | -                                           | -      |
-| backgroundColor    | 组件背景色，包括树                                     | String   | -                                           | -      |
-| nodeSpaceBetween   | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean  | -                                           | false  |
-| headerConfig       | 头部内容配置                                           | Object   | -                                           | -      |
-| showHeader         | 是否显示头部                                           | Boolean  | -                                           | false  |
-| showSearch         | 是否显示搜索框                                         | Boolean  | -                                           | true   |
-| noFilter           | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean  | -                                           | false  |
-| showOverflowTooltip       | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean  | -                                           | false  |
-| dataIsFlat         | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean  | -                                           | true   |
-| useDefaultButtons  | 是否使用默认的增删改按钮                               | Boolean  | -                                           | true   |
-| disabledFn         | 结点是否禁用的回调函数,会自动添加 disabled 属性        | Function | -                                           | -      |
-| filterButtonsFn    | 过滤操作按钮回调函数                                   | Function | -                                           | -      |
+| 参数                | 说明                                                   | 类型                                       | 可选值                                      | 默认值 |
+| ------------------- | ------------------------------------------------------ | ------------------------------------------ | ------------------------------------------- | ------ |
+| changeMode          | 增删改查模式                                           | String                                     | 'contextMenu' - 右键编辑 'hover' - 悬浮编辑 |        |
+| excludeFirstSearch  | 后续搜索 不被第一次的搜索操作影响                      | Boolean                                    | -                                           | false  |
+| extraOperations     | 额外的按钮                                             | Array                                      | -                                           | -      |
+| backgroundColor     | 组件背景色，包括树                                     | String                                     | -                                           | -      |
+| nodeSpaceBetween    | 节点内容和按钮之间的布局是否采取 SpaceBetween 布局     | Boolean                                    | -                                           | false  |
+| headerConfig        | 头部内容配置                                           | Object                                     | -                                           | -      |
+| showHeader          | 是否显示头部                                           | Boolean                                    | -                                           | false  |
+| showSearch          | 是否显示搜索框                                         | Boolean                                    | -                                           | true   |
+| noFilter            | 是否需要进行过滤， 通常结合远程搜索使用                | Boolean                                    | -                                           | false  |
+| showOverflowTooltip | 是否取消横向滚动，文字超出部分显示省略号，悬浮显示文字 | Boolean                                    | -                                           | false  |
+| dataIsFlat          | 传入的数据是否是扁平的， 扁平就自动转为树结构          | Boolean                                    | -                                           | true   |
+| useDefaultButtons   | 是否使用默认的增删改按钮                               | Boolean                                    | -                                           | true   |
+| disabledFn          | 结点是否禁用的回调函数,会自动添加 disabled 属性        | Function(data, node)                       | -                                           | -      |
+| filterButtonsFn     | 过滤操作按钮回调函数                                   | Function(operationsList, data, node, type) | -                                           | -      |
 
 #### 组件事件
 

@@ -74,6 +74,7 @@
           'current-row-key': currentRow[rowKey],
           ...$attrs,
           rowKey,
+          'row-class-name': setRowClassName,
         }"
         @select="select"
         @select-all="selectAll"
@@ -99,9 +100,9 @@
           :fieldItem="fieldItem"
           :rules="rules"
           :allOptions="allOptions"
-          :filterButtons="filterButtons"
           :placeholder="placeholder"
-          :switchConfig="switchConfig"
+          :switchMode="switchMode"
+          :switchKey="switchKey"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -168,7 +169,9 @@ import {
   getShowValue,
   treeToFlat,
   getObjAttr,
-  vResize
+  vResize,
+  getDefaultTime,
+  def,
 } from '../utils/util'
 import mixins from './mixins'
 import tableColumn from './components/tableColumn'
@@ -223,13 +226,6 @@ export default {
       },
       type: Object,
     },
-    // 过滤表格操作按钮
-    filterButtons: {
-      default(row, buttonConfigList) {
-        return buttonConfigList
-      },
-      type: Function,
-    },
     // 搜索框配置
     seachConfig: {
       default() {
@@ -271,15 +267,15 @@ export default {
       },
       type: Object,
     },
-    // 编辑配置
-    switchConfig: {
-      default() {
-        return {
-          // switchMode: '', // dblclick/rowControl
-          // switchKey: 'isEdit__table', // 切换键
-        }
-      },
-      type: Object,
+    // 列切换模式
+    switchMode: {
+      default: '', // dblclick/rowControl
+      type: String,
+    },
+    // 列切换字段
+    switchKey: {
+      default: 'isEdit__table',
+      type: String,
     },
     // 分页配置
     paginationConfig: {
@@ -287,6 +283,11 @@ export default {
         return {}
       },
       type: Object,
+    },
+    // 首行是搜索栏
+    showSearchRow: {
+      default: false,
+      type: Boolean,
     },
   },
   data() {
@@ -313,6 +314,12 @@ export default {
     tableColumns: {
       handler(newData) {
         this.columns = deepClone(newData)
+        // 搜索行处理勾选和索引
+        if (this.showSearchRow) {
+          this.setSelectable(this.columns)
+          this.setIndex(this.columns)
+          this.setFilterButtons(this.columns)
+        }
         this.addLabelForColumns(this.columns)
         this.originColunms = deepClone(this.columns)
       },
@@ -329,10 +336,10 @@ export default {
     },
     data: {
       handler(newData) {
+        // 初始化数据
+        this.tableForm.tableData = deepClone(newData)
         // 清空勾选
         this.selection = []
-        // 初始化数据
-        this.tableForm.tableData = newData
         // 重新处理数据
         this.dataOrColumnsChange()
       },
@@ -379,11 +386,11 @@ export default {
     rowKey() {
       return getObjAttr(this.$attrs, 'rowKey') || 'id'
     },
-    switchMode() {
-      return this.switchConfig.switchMode
+    rowClassName() {
+      return getObjAttr(this.$attrs, 'rowClassName')
     },
-    switchKey() {
-      return this.switchConfig.switchKey || 'isEdit__table'
+    flatColums() {
+      return treeToFlat(deepClone(this.columns))
     },
   },
   directives: {
@@ -399,6 +406,8 @@ export default {
   methods: {
     // 数据或者表格列变更都要执行
     dataOrColumnsChangeCallback() {
+      // 初始化首行
+      this.initSearchRow()
       // 表格数据增加prop, 便于校验表单
       this.containerIsForm && this.addFormPropForTable()
       // 配置selfAdjust为true,则宽度自调节
@@ -421,6 +430,76 @@ export default {
         },
       ]
     },
+    // 根据配置初始化一个row
+    initSearchRow() {
+      if (!this.showSearchRow) return
+      const { tableData } = this.tableForm
+      this.flatColums.forEach((item) => {
+        const { component } = item
+        // 设置默认时间
+        if (item.defaultTimeType) {
+          const { componentAttrs = {} } = item
+          this.$set(
+            this.formData,
+            item.prop,
+            getDefaultTime(item.defaultTimeType, componentAttrs.valueFormat)
+          )
+          return
+        }
+        // 判断是否需要初始化表单值
+        if (item.prop && !this.formData.hasOwnProperty(item.prop)) {
+          this.$set(this.formData, item.prop, '')
+          // 特殊情况
+          component === 'el-checkbox-group' &&
+            this.$set(this.formData, item.prop, [])
+        }
+      })
+      const obj = this.formData
+      def(obj, 'rowType__table', 'searchRow')
+      if (tableData[0] && tableData[0].rowType__table === 'searchRow') {
+        tableData[0] = obj
+      } else {
+        tableData.unshift(obj)
+      }
+      this.switchStatus(obj, true)
+    },
+    // type为slection时 重写selectable属性
+    setSelectable(columns) {
+      const checkboxColumn = columns.find((item) => item.type === 'selection')
+      const selectable = checkboxColumn.selectable
+      const fn = (row, index) => {
+        if (row.rowType__table === 'searchRow') return false
+        if (selectable) return selectable(row, index)
+        return true
+      }
+      this.$set(checkboxColumn, 'selectable', fn)
+    },
+    // type为index时 重写index属性
+    setIndex(columns) {
+      const indexColumn = columns.find((item) => item.type === 'index')
+      const indexFn = indexColumn.index
+      const fn = (index) => {
+        if (indexFn) return indexFn(index)
+        return index == 0 ? '' : index - 1
+      }
+      this.$set(indexColumn, 'index', fn)
+    },
+    // type为operation时 重写filterButtons属性
+    setFilterButtons(columns) {
+      const operationColumn = columns.find((item) => item.type === 'operation')
+      const filterButtons = operationColumn.filterButtons
+      const fn = (buttonConfigList, row) => {
+        if (row.rowType__table === 'searchRow') return []
+        if (filterButtons) return filterButtons(buttonConfigList, row)
+        return buttonConfigList
+      }
+      this.$set(operationColumn, 'filterButtons', fn)
+    },
+    // 设置rowClassName
+    setRowClassName({ row, rowIndex }) {
+      if (row.rowType__table === 'searchRow') return 'first-row'
+      if (this.rowClassName) return this.rowClassName(row, rowIndex)
+    },
     // 迭代增加label__table，用于多级表头下label作区分
     addLabelForColumns(dataList, fatherLabel = '') {
       fatherLabel = fatherLabel ? `${fatherLabel}-` : ''
@@ -433,7 +512,8 @@ export default {
         }
         // 确保最后一级有label__table
         if (prop) {
-          item.label__table = `${fatherLabel}` + label
+          def(item, 'label__table', `${fatherLabel}` + label)
+          // item.label__table = `${fatherLabel}` + label
         }
       })
     },
@@ -443,13 +523,16 @@ export default {
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {
-          this.$set(item, 'prop__table', `${prop__table}.${index}`)
+          def(item, 'prop__table', `${prop__table}.${index}`)
+          // this.$set(item, 'prop__table', `${prop__table}.${index}`)
           // 增加主键
           // item[this.rowKey] = item[this.rowKey] || getRandomId()
           // 编辑模式下，增加切换键
           this.switchMode.includes('rowControl') &&
             item[this.switchKey] === undefined &&
             this.$set(item, this.switchKey, false)
+          // 需要响应式，所以使用this.$set
+          // def(item, this.switchKey, false)
           if (item.children) {
             iterateAddProp(
               item.children,
@@ -505,9 +588,23 @@ export default {
       })
     },
     happenEvent(params) {
-      if (params.buttonItem.method === 'search')
+      const {
+        buttonItem: { method },
+        row,
+      } = params
+      if (method === 'search') {
         this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+      }
       this.$emit('happenEvent', params)
+      // 首行搜索逻辑
+      if (
+        method === 'tableFieldChange' &&
+        this.showSearchRow &&
+        row.rowType__table === 'searchRow'
+      ) {
+        this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+        this.handleSearch()
+      }
     },
     // 遍历列的所有内容，获取最宽一列的宽度
     getMaxLength(arr) {
@@ -715,11 +812,7 @@ export default {
     // 获取单条展示数据
     getSingleTableData(row) {
       const arr = []
-      const flatColums = treeToFlat(deepClone(this.columns))
-      // 先不做$index处理
-      // const { tableData } = this.tableForm
-      // const flatData = treeToFlat(deepClone(tableData))
-      flatColums.forEach((column) => {
+      this.flatColums.forEach((column) => {
         const { prop, label__table } = column
         // const $index = flatData.indexOf(row)
         const $index = 0
@@ -778,8 +871,7 @@ export default {
         }
         data = deepClone(this.selection)
       } else data = treeToFlat(deepClone(tableData))
-      const flatColums = treeToFlat(deepClone(this.columns))
-      flatColums.forEach((column) => {
+      this.flatColums.forEach((column) => {
         const { prop } = column
         data.forEach((row, $index) => {
           prop &&
@@ -895,5 +987,13 @@ export default {
 .common-table {
   flex: 1;
   min-height: 0;
+}
+/deep/ .first-row {
+  .el-checkbox {
+    display: none;
+  }
+  .el-table__expand-icon {
+    display: none;
+  }
 }
 </style>

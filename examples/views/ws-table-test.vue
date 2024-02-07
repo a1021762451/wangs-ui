@@ -18,9 +18,7 @@
       buttonConfigList: formButtons,
       allOptions,
     }"
-    :switchConfig="{
-      switchMode: 'rowControl, dblclick',
-    }"
+    switchMode="rowControl, dblclick"
     @happenEvent="happenEvent"
     @selection-change="selectionChange"
   >
@@ -238,6 +236,9 @@ export default {
     },
     notEdit({ row }) {
       this.$refs.wsTable.switchStatus(row, false)
+    },
+    search(eventData) {
+      console.log('search', eventData, this.formData)
     },
   },
 }

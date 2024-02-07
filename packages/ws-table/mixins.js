@@ -1,7 +1,11 @@
 export default {
   methods: {
     switchStatus(row, status) {
-      if (!this.switchMode.includes('rowControl')) return
+      if (
+        !this.switchMode.includes('rowControl') ||
+        row[this.switchKey] === status
+      )
+        return
       row[this.switchKey] = status
     },
     clearSelection() {

@@ -16,7 +16,8 @@
       :rules="rules"
       :allOptions="allOptions"
       :placeholder="placeholder"
-      :switchConfig="switchConfig"
+      :switchMode="switchMode"
+      :switchKey="switchKey"
       @happenEvent="(params) => $emit('happenEvent', params)"
     >
       <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -49,10 +50,9 @@
         v-bind="{
           isLinkButton: true,
           ...fieldItem,
-          buttonConfigList: filterButtons(
-            row,
-            fieldItem.buttonConfigList || []
-          ),
+          buttonConfigList: fieldItem.filterButtons
+            ? fieldItem.filterButtons(fieldItem.buttonConfigList, row)
+            : fieldItem.buttonConfigList,
         }"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -139,11 +139,36 @@
               @input="handleInput($event, fieldItem, row)"
             >
               <template v-if="fieldItem.component === 'el-select'">
-                <el-option
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="item"
-                ></el-option>
+                <template v-for="item in allOptions[fieldItem.prop]">
+                  <el-option-group
+                    v-if="item.children"
+                    :key="item.label"
+                    v-bind="item"
+                  >
+                    <el-option
+                      v-for="nextItem in item.children"
+                      :key="nextItem.label + nextItem.value"
+                      v-bind="nextItem"
+                    >
+                      <slot
+                        v-if="fieldItem.selectSlotName"
+                        :name="fieldItem.selectSlotName"
+                        v-bind="nextItem"
+                      ></slot>
+                    </el-option>
+                  </el-option-group>
+                  <el-option
+                    v-else
+                    :key="item.label + item.value"
+                    v-bind="item"
+                  >
+                    <slot
+                      v-if="fieldItem.selectSlotName"
+                      :name="fieldItem.selectSlotName"
+                      v-bind="item"
+                    ></slot
+                  ></el-option>
+                </template>
               </template>
               <template v-if="fieldItem.component === 'el-radio-group'">
                 <el-radio
@@ -266,35 +291,20 @@ export default {
       },
       type: Object,
     },
-    // 过滤表格操作按钮
-    filterButtons: {
-      default(row, buttonConfigList) {
-        return buttonConfigList
-      },
-      type: Function,
-    },
     // 表格单元格占位
     placeholder: {
       default: '',
       type: String,
     },
-    // 编辑配置
-    switchConfig: {
-      default() {
-        return {
-          // switchMode: '', // dblclick/rowControl Array|String
-          // switchKey: 'isEdit__table', // 切换键  String
-        }
-      },
-      type: Object,
+    // 列切换模式
+    switchMode: {
+      default: '', // dblclick/rowControl
+      type: String,
     },
-  },
-  computed: {
-    switchMode() {
-      return this.switchConfig.switchMode
-    },
-    switchKey() {
-      return this.switchConfig.switchKey || 'isEdit__table'
+    // 列切换字段
+    switchKey: {
+      default: 'isEdit__table',
+      type: String,
     },
   },
   data() {

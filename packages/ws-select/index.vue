@@ -42,22 +42,28 @@
     </template>
     <template v-else>
       <el-checkbox
+        v-if="isNeedSelectAll && multiple && options.length > 0"
         :value="isCheckAll"
         :indeterminate="indeterminate"
         @change="selectAll"
-        v-if="isNeedSelectAll && multiple && options.length > 0"
         class="ws-select__checkbox"
       >
         全选
       </el-checkbox>
-      <el-option
-        v-for="item in options"
-        :key="item[valueKey]"
-        :label="item[labelKey]"
-        :value="item[valueKey]"
-      >
-        <slot v-bind="item"></slot>
-      </el-option>
+      <template v-for="item in options">
+        <el-option-group v-if="item.children" :key="item.label" v-bind="item">
+          <el-option
+            v-for="nextItem in item.children"
+            :key="nextItem.label + nextItem.value"
+            v-bind="nextItem"
+          >
+            <slot v-bind="item"></slot
+          ></el-option>
+        </el-option-group>
+        <el-option v-else :key="item.label + item.value" v-bind="item"
+          ><slot v-bind="item"></slot
+        ></el-option>
+      </template>
     </template>
     <template v-slot:empty>
       <slot name="empty"></slot>
@@ -129,20 +135,27 @@ export default {
     return {}
   },
   computed: {
+    allOptions() {
+      const arr = []
+      this.options.forEach((item) => {
+        if (item.children) {
+          item.children.forEach((nextItem) => {
+            arr.push(nextItem)
+          })
+        } else {
+          arr.push(item)
+        }
+      })
+      return arr
+    },
     isCheckAll() {
-      return this.value.length === this.options.length
+      return this.value.length === this.allOptions.length
     },
     indeterminate() {
-      return this.value.length > 0 && this.value.length < this.options.length
+      return this.value.length > 0 && this.value.length < this.allOptions.length
     },
     isTreeSelect() {
       return this.selectMode.includes('treeSelect')
-    },
-    labelKey() {
-      return this.props['label'] || 'label'
-    },
-    valueKey() {
-      return this.props['value'] || 'value'
     },
     treeNodeKey() {
       const treeConfig = this.treeConfig
@@ -175,9 +188,7 @@ export default {
   methods: {
     // 全选操作
     selectAll(checked) {
-      const selectValue = checked
-        ? this.options.map((d) => d[this.valueKey])
-        : []
+      const selectValue = checked ? this.allOptions.map((d) => d.value) : []
       this.$emit('change', selectValue)
     },
     // 值变化，树回显

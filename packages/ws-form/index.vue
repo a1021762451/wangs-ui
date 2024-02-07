@@ -69,11 +69,36 @@
               }"
             >
               <template v-if="fieldItem.component === 'el-select'">
-                <el-option
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="item"
-                ></el-option>
+                <template v-for="item in allOptions[fieldItem.prop]">
+                  <el-option-group
+                    v-if="item.children"
+                    :key="item.label"
+                    v-bind="item"
+                  >
+                    <el-option
+                      v-for="nextItem in item.children"
+                      :key="nextItem.label + nextItem.value"
+                      v-bind="nextItem"
+                    >
+                      <slot
+                        v-if="fieldItem.selectSlotName"
+                        :name="fieldItem.selectSlotName"
+                        v-bind="nextItem"
+                      ></slot
+                    ></el-option>
+                  </el-option-group>
+                  <el-option
+                    v-else
+                    :key="item.label + item.value"
+                    v-bind="item"
+                  >
+                    <slot
+                      v-if="fieldItem.selectSlotName"
+                      :name="fieldItem.selectSlotName"
+                      v-bind="item"
+                    ></slot>
+                  </el-option>
+                </template>
               </template>
               <template v-if="fieldItem.component === 'el-radio-group'">
                 <el-radio
@@ -156,7 +181,7 @@ const defaultButtons = [
 ]
 const defaultButtonsForForm = [
   {
-    method: 'comfirm',
+    method: 'confirm',
     label: '确认',
   },
   {
@@ -283,11 +308,12 @@ export default {
             return
           }
           // 判断是否需要初始化表单值
-          !this.formData.hasOwnProperty(item.prop) &&
+          if (!this.formData.hasOwnProperty(item.prop)) {
             this.$set(this.formData, item.prop, '')
-          // 特殊情况
-          component === 'el-checkbox-group' &&
-            this.$set(this.formData, item.prop, [])
+            // 特殊情况
+            component === 'el-checkbox-group' &&
+              this.$set(this.formData, item.prop, [])
+          }
         })
         this.configList = configList
       },
@@ -401,15 +427,20 @@ export default {
       if (!this.isSearchList || !this.showButtons) return
       // 判断是否单行, 第一个col高度或者第一个row高度 与 整个form高度比较
       const el = this.$refs.wsForm
+      if (!el) return
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
-      const compareHeight = compareEle.offsetHeight
-      this.exceedOneRow = el.offsetHeight - 10 > compareHeight
       // exceedOneRow变动后，按钮组高度可能会变化，nextTick中获取按钮组高度
       this.$nextTick(() => {
         let searchModeListEl = this.$refs.searchModeList.$el
         this.colHeight = searchModeListEl.offsetHeight
       })
+      if (!compareEle) {
+        this.exceedOneRow = false
+        return
+      }
+      const compareHeight = compareEle.offsetHeight
+      this.exceedOneRow = el.offsetHeight - 10 > compareHeight
     },
     // 集中处理事件
     async happenEvent(buttonItem) {
@@ -427,7 +458,7 @@ export default {
         this.handleSearch()
       }
       // method为search,comfirm则进行校验
-      if (['search', 'comfirm'].includes(method)) {
+      if (['search', 'confirm'].includes(method)) {
         await this.$refs.form.validate()
       }
       this.$emit('happenEvent', {
