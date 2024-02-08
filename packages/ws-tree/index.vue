@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-02-04 09:27:02
+ * @LastEditTime: 2024-02-08 12:25:28
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -356,7 +356,10 @@ export default {
       handler() {
         const data = this.data || []
         this.treeData = this.dataIsFlat
-          ? flatToTree(data, this.props, this.nodeKey)
+          ? flatToTree(data, {
+              ...this.props,
+              id: this.nodeKey,
+            })
           : data
         this.setCurrentKeyByProp()
       },

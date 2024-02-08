@@ -172,7 +172,10 @@ export default {
       const { data, dataIsFlat } = this.treeConfig
       return dataIsFlat
         ? data
-        : treeToFlat(data, this.treeProps, this.treeNodeKey)
+        : treeToFlat(data, {
+            ...this.treeProps,
+            id: this.treeNodeKey,
+          })
     },
   },
   watch: {

@@ -399,7 +399,7 @@ export default {
       return getObjAttr(this.$attrs, 'cellClassName')
     },
     flatColums() {
-      return treeToFlat(this.columns, {}, 'id', true)
+      return treeToFlat(this.columns)
     },
     // 获取第一个有prop的列
     firstColumnWidthProp() {

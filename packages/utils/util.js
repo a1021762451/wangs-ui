@@ -628,22 +628,22 @@ export function getDefaultTime(defaultTimeType, formatStr) {
 }
 
 // 树数据扁平化
-export function treeToFlat(data = [], props = {}, nodeKey = 'id', useDef) {
-  let { children = 'children', parent = 'pid' } = props
+export function treeToFlat(data = [], props = {}, useDef = true) {
+  let { children = 'children', parent = 'pid', id = 'id' } = props
   const result = []
   if (!Array.isArray(data)) return result
   const loop = (data, parentId = null) => {
     data.forEach((item) => {
       if (useDef) {
-        if (!item[nodeKey]) def(item, nodeKey, getRandomId())
+        if (!item[id]) def(item, id, getRandomId())
         def(item, parent, parentId)
       } else {
-        if (!item[nodeKey]) item[nodeKey] = getRandomId()
+        if (!item[id]) item[id] = getRandomId()
         item[parent] = parentId
       }
       result.push(item)
       if (item[children] && item[children].length) {
-        loop(item[children], item[nodeKey])
+        loop(item[children], item[id])
       }
     })
   }
@@ -651,14 +651,14 @@ export function treeToFlat(data = [], props = {}, nodeKey = 'id', useDef) {
   return result
 }
 // 扁平数据转树
-export function flatToTree(data = [], props = {}, nodeKey = 'id') {
+export function flatToTree(data = [], props = {}) {
   data = deepClone(data)
-  let { children = 'children', parent = 'pid' } = props
+  let { children = 'children', parent = 'pid', id = 'id' } = props
   const result = []
   const map = {}
   if (!Array.isArray(data)) return result
   data.forEach((item) => {
-    map[item[nodeKey]] = item
+    map[item[id]] = item
   })
   data.forEach((item) => {
     const parentNode = map[item[parent]]
