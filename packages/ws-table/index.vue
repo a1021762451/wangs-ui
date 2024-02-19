@@ -486,7 +486,7 @@ export default {
     },
     // 根据配置初始化一个row
     initSearchRow() {
-      if (!this.showSearchRow) return
+      if (!this.showSearchRow || this.showSingleStatus) return
       const { tableData } = this.tableForm
       this.flatColums.forEach((item) => {
         const { component } = item
@@ -780,7 +780,6 @@ export default {
         const index = this.flatData.indexOf(row)
         this.property = column.property
         this.index = index
-        console.log('this.property', this.property, this.index)
       }
       this.$emit('cell-dblclick', row, column, cell, event)
     },
@@ -868,8 +867,10 @@ export default {
       }
       if (!this.showSingleStatus) {
         const { tableData } = this.tableForm
-        temColumns = deepClone(this.columns)
-        temTableData = deepClone(tableData)
+        // temColumns = deepClone(this.columns)
+        // temTableData = deepClone(tableData)
+        temColumns = this.columns
+        temTableData = tableData
         this.tableForm.tableData = this.getSingleTableData(this.currentRow)
         this.columns = []
         this.$nextTick(() => {
@@ -879,8 +880,8 @@ export default {
         this.showSingleStatus = true
       } else {
         // this.currentRow = {}
-        this.columns = temColumns
         this.tableForm.tableData = temTableData
+        this.columns = temColumns
         this.showSingleStatus = false
       }
     },

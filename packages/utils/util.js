@@ -283,20 +283,17 @@ export const deepClone = (data) => {
   var obj
   if (type === 'array') {
     obj = []
-  } else if (type === 'object') {
-    obj = {}
-  } else {
-    // 不再具有下一层次
-    return data
-  }
-  if (type === 'array') {
     for (var i = 0, len = data.length; i < len; i++) {
       obj.push(deepClone(data[i]))
     }
   } else if (type === 'object') {
+    obj = {}
     for (var key in data) {
       obj[key] = deepClone(data[key])
     }
+  } else {
+    // 不再具有下一层次
+    return data
   }
   return obj
 }
@@ -690,6 +687,7 @@ function judgeHidden(el) {
   return false
 }
 // 创建不可枚举的属性
+// 注意深度克隆后，不可枚举的属性会丢失
 export function def(obj, key, value, config) {
   Object.defineProperty(obj, key, {
     value,
