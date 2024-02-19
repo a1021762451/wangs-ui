@@ -81,6 +81,7 @@
         @select-all="selectAll"
         @selection-change="selectionChange"
         @current-change="currentChange"
+        @cell-dblclick="cellDblclick"
         v-on="{
           ...$listeners,
           ...(!checkStrictly
@@ -89,6 +90,7 @@
                 'select-all': () => {},
                 'selection-change': () => {},
                 'current-change': () => {},
+                'cell-dblclick': () => {},
               }
             : {}),
         }"
@@ -104,6 +106,8 @@
           :placeholder="placeholder"
           :switchMode="switchMode"
           :switchKey="switchKey"
+          :property.sync="property"
+          :index.sync="index"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -314,6 +318,8 @@ export default {
         100,
         true
       ),
+      property: '',
+      index: '',
     }
   },
   watch: {
@@ -398,8 +404,13 @@ export default {
     cellClassName() {
       return getObjAttr(this.$attrs, 'cellClassName')
     },
+    // 扁平化列
     flatColums() {
       return treeToFlat(this.columns)
+    },
+    // 扁平化数据
+    flatData() {
+      return treeToFlat(this.tableForm.tableData)
     },
     // 获取第一个有prop的列
     firstColumnWidthProp() {
@@ -684,7 +695,9 @@ export default {
       return width
     },
     // 校验单行
-    validateRow(row) {
+    async validateRow(row) {
+      this.switchStatus(row, true)
+      await this.$nextTick()
       const props = []
       let allpromise = []
       for (let key in this.rules) {
@@ -761,6 +774,15 @@ export default {
           flag ? this.selection.push(row) : this.selection.splice(index, 1)
         }
       })
+    },
+    cellDblclick(row, column, cell, event) {
+      if (this.switchMode.includes('dblclick')) {
+        const index = this.flatData.indexOf(row)
+        this.property = column.property
+        this.index = index
+        console.log('this.property', this.property, this.index)
+      }
+      this.$emit('cell-dblclick', row, column, cell, event)
     },
     // 勾选操作
     selectionChangeCallback(selection) {
@@ -867,8 +889,9 @@ export default {
       const arr = []
       this.flatColums.forEach((column) => {
         const { prop, label__table } = column
+        const $index = this.flatData.indexOf(row)
         // const $index = flatData.indexOf(row)
-        const $index = 0
+        // const $index = 0
         if (prop) {
           arr.push({
             prop,
@@ -1053,5 +1076,8 @@ export default {
   .overflow_tip {
     display: inline;
   }
+}
+/deep/ .el-form--inline .el-form-item {
+  margin-right: 0;
 }
 </style>
