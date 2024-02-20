@@ -100,6 +100,7 @@
         <tableColumn
           v-for="fieldItem in columns"
           :key="fieldItem.label + fieldItem.prop + fieldItem.type"
+          :filterButtons="filterButtons"
           :fieldItem="fieldItem"
           :rules="rules"
           :allOptions="allOptions"
@@ -299,6 +300,13 @@ export default {
       default: false,
       type: Boolean,
     },
+    // 过滤表格操作按钮
+    filterButtons: {
+      default(buttonConfigList, row) {
+        return buttonConfigList
+      },
+      type: Function,
+    },
   },
   data() {
     return {
@@ -331,7 +339,7 @@ export default {
         if (this.showSearchRow) {
           this.setSelectable(columns)
           this.setIndex(columns)
-          this.setFilterButtons(columns)
+          // this.setFilterButtons(columns)
         }
         // 初始化表单配置
         this.getDefaultFormConfigList()
@@ -352,7 +360,9 @@ export default {
     data: {
       handler(newData) {
         // 初始化数据
-        this.tableForm.tableData = deepClone(newData)
+        // this.tableForm.tableData = deepClone(newData)
+        // 引用不能丢失 否则表格方法会失效（使用row）
+        this.tableForm.tableData = newData
         // 清空勾选
         this.selection = []
         // 重新处理数据
@@ -559,10 +569,27 @@ export default {
       ) {
         classStr += 'tree-cell '
       }
-      if (row.rowType__table === 'searchRow') classStr += 'search-row '
+      if (row.rowType__table === 'searchRow') classStr += 'search-cell '
+      const fieldItem = this.flatColums.find(
+        (item) => item.prop === column.property
+      )
+      if (this.judgeShowFormItem(fieldItem, row, rowIndex))
+        classStr += 'form-cell '
       if (this.cellClassName)
         classStr += this.cellClassName({ row, column, rowIndex, columnIndex })
       return classStr
+    },
+    // 判断是否显示表单元素
+    judgeShowFormItem(fieldItem, row, $index) {
+      const { switchMode, switchKey, property, index } = this
+      return (
+        fieldItem.component &&
+        (!switchMode ||
+          (switchMode.includes('dblclick') &&
+            property === fieldItem.prop &&
+            index === $index) ||
+          (switchMode.includes('rowControl') && row[switchKey]))
+      )
     },
     // 迭代增加label__table，用于多级表头下label作区分
     addLabelForColumns(dataList, fatherLabel = '') {
@@ -1065,7 +1092,10 @@ export default {
   flex: 1;
   min-height: 0;
 }
-/deep/ .search-row {
+/deep/ .el-form--inline .el-form-item {
+  margin-right: 0;
+}
+/deep/ .search-cell {
   .cell > .el-checkbox {
     display: none;
   }
@@ -1078,7 +1108,16 @@ export default {
     display: inline;
   }
 }
-/deep/ .el-form--inline .el-form-item {
-  margin-right: 0;
+/deep/ .form-cell {
+  .cell {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  // .el-input:not(.el-date-editor) input {
+  //   padding-left: 4px;
+  // }
+  // .el-select .el-input input {
+  //   padding-left: 15px;
+  // }
 }
 </style>

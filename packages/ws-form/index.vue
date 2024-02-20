@@ -25,7 +25,7 @@
       <el-row :gutter="gutter" type="flex">
         <!-- 表单元素 -->
         <el-col
-          :span="fieldItem.col || 6"
+          :span="fieldItem.col || col"
           v-for="fieldItem in configList"
           :key="fieldItem.prop"
         >
@@ -274,6 +274,11 @@ export default {
         return {}
       },
       type: Object,
+    },
+    // 通用col
+    col: {
+      default: 6,
+      type: Number,
     },
   },
   watch: {

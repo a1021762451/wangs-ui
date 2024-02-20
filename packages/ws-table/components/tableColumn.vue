@@ -47,9 +47,10 @@
         v-bind="{
           isLinkButton: true,
           ...fieldItem,
-          buttonConfigList: fieldItem.filterButtons
-            ? fieldItem.filterButtons(fieldItem.buttonConfigList, row)
-            : fieldItem.buttonConfigList,
+          buttonConfigList:
+            row.rowType__table === 'searchRow'
+              ? []
+              : filterButtons(fieldItem.buttonConfigList, row),
         }"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -90,14 +91,7 @@
       <!-- 表单元素 -->
       <!-- 表单元素编辑模式 -->
       <el-form-item
-        v-if="
-          fieldItem.component &&
-          (!switchMode ||
-            (switchMode.includes('dblclick') &&
-              property === fieldItem.prop &&
-              index === $index) ||
-            (switchMode.includes('rowControl') && row[switchKey]))
-        "
+        v-if="judgeShowFormItem(fieldItem, row, $index)"
         :prop="`${row.prop__table}.${fieldItem.prop}`"
         :rules="getRules(fieldItem, row)"
       >
@@ -253,6 +247,13 @@ export default {
       default: '',
       type: String,
     },
+    // 过滤表格操作按钮
+    filterButtons: {
+      default(buttonConfigList, row) {
+        return buttonConfigList
+      },
+      type: Function,
+    },
     // 列切换模式
     switchMode: {
       default: '', // dblclick/rowControl
@@ -365,6 +366,18 @@ export default {
         fieldItem,
         row,
       })
+    },
+    // 判断是否显示表单元素
+    judgeShowFormItem(fieldItem, row, $index) {
+      const { switchMode, switchKey, property, index } = this
+      return (
+        fieldItem.component &&
+        (!switchMode ||
+          (switchMode.includes('dblclick') &&
+            property === fieldItem.prop &&
+            index === $index) ||
+          (switchMode.includes('rowControl') && row[switchKey]))
+      )
     },
   },
 }

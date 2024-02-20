@@ -237,6 +237,7 @@ export const tableColumns = [
     timeDisabled: true, // 时间限制精度是否到时分秒
     // minAllowEqual: false, // 不允许和用于比较的最小时间相等  精度到天
     // maxAllowEqual: false, // 不允许和用于比较的最大时间相等  精度到天
+    defaultTimeType: 'today', // 默认当前时间
     componentAttrs: {
       type: 'datetime',
       valueFormat: 'yyyy-MM-dd HH:mm',
