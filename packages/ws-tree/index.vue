@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-02-08 12:25:28
+ * @LastEditTime: 2024-02-20 14:55:53
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -325,13 +325,6 @@ export default {
     },
     changeByContextMenu() {
       return this.changeMode.includes('contextMenu')
-    },
-    optionCardButtons() {
-      if (!this.changeByContextMenu) return []
-      const optionCardButtons = optionCardButtons.forEach((item) => {
-        this.$set(item, 'type', 'default')
-      })
-      return optionCardButtons
     },
   },
   mounted() {

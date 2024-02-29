@@ -888,7 +888,10 @@ export default {
     },
     // 单条展示
     showSingle() {
-      if (!Object.keys(this.currentRow).length) {
+      if (
+        !Object.keys(this.currentRow).length ||
+        this.currentRow.rowType__table === 'searchRow'
+      ) {
         this.$message.warning('请先选中一条数据')
         return
       }
