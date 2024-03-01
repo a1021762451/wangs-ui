@@ -3,18 +3,14 @@
  * @Author: wang shuai
  * @Date: 2023-04-23 16:45:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-26 17:15:39
+ * @LastEditTime: 2024-02-29 14:23:42
 -->
 <template>
-  <div style="width: 100%; height: 100%" v-resize="resizeEcharts">
-    <div
-      v-show="!emptyCondition"
-      style="width: 100%; height: 100%"
-      :id="chartId"
-    ></div>
+  <div class="ws-echarts" v-resize="resizeEcharts">
+    <div class="echarts-container" v-show="!emptyCondition" :id="chartId"></div>
     <el-empty
+      class="echarts-empty"
       v-if="emptyCondition"
-      style="width: 100%; height: 100%"
       v-bind="$attrs"
     ></el-empty>
   </div>
@@ -156,9 +152,14 @@ export default {
 </script>
 
 <style lang="less" scoped>
-/deep/ .el-empty {
+.el-empty {
   padding: 0;
   justify-content: center;
+}
+.ws-echarts,
+.echarts-container,
+.echarts-empty {
+  width: 100%;
   height: 100%;
 }
 </style>

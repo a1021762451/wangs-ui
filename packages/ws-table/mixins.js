@@ -2,7 +2,7 @@ export default {
   methods: {
     switchStatus(row, status) {
       if (
-        !this.switchMode.includes('rowControl') ||
+        !this.switchModeData.includes('rowControl') ||
         row[this.switchKey] === status
       )
         return

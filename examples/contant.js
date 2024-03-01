@@ -185,7 +185,6 @@ export const tableColumns = [
     prop: 'testInput',
     label: '输入框',
     component: 'el-input',
-    allowToggle: true, // 是否允许切换显示
     // '如果输入格式为数字加小数点， 去掉小数点'
     blurHandler: function (value) {
       if (/^\d*\.$/.test(value)) {
@@ -221,11 +220,9 @@ export const tableColumns = [
     component: 'el-select',
     width: 200,
     required: true,
-    allowToggle: true,
   },
   // 测试时间框模式
   {
-    allowToggle: true,
     prop: 'testMinDatetime',
     label: '小时间',
     width: 200,

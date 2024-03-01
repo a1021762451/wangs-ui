@@ -1,3 +1,10 @@
+<!--
+ * @Description: 
+ * @Author: wang shuai
+ * @Date: 2023-12-25 09:24:53
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2024-03-01 14:59:58
+-->
 <template>
   <div class="table-container">
     <ws-form
@@ -43,6 +50,9 @@
       "
       class="table-buttons"
       @happenEvent="(buttonItem) => $emit('happenEvent', { buttonItem })"
+      :style="{
+        justifyContent: operationConfig.justifyContent || 'flex-end',
+      }"
       v-bind="{
         ...operationConfig,
       }"
@@ -61,6 +71,7 @@
       inline
       size="mini"
       class="common-table"
+      :class="{ formNoMarginBottom: containerIsForm && !hasRequired }"
     >
       <!-- 表格 -->
       <el-table
@@ -105,7 +116,7 @@
           :rules="rules"
           :allOptions="allOptions"
           :placeholder="placeholder"
-          :switchMode="switchMode"
+          :switchModeData="switchModeData"
           :switchKey="switchKey"
           :property.sync="property"
           :index.sync="index"
@@ -182,6 +193,7 @@ import {
 import mixins from './mixins'
 import tableColumn from './components/tableColumn'
 import wsForm from '../ws-form/index.vue'
+import wsButtons from '../ws-buttons/index.vue'
 export default {
   name: 'ws-table',
   mixins: [mixins],
@@ -189,6 +201,7 @@ export default {
     tableColumn,
     filterColumns: () => import('./components/filterColumns'),
     wsForm,
+    wsButtons,
   },
   props: {
     // 必传,
@@ -276,7 +289,7 @@ export default {
     // 列切换模式
     switchMode: {
       default: '', // dblclick/rowControl
-      type: String,
+      type: String | Array,
     },
     // 列切换字段
     switchKey: {
@@ -328,6 +341,7 @@ export default {
       ),
       property: '',
       index: '',
+      switchModeData: this.switchMode,
     }
   },
   watch: {
@@ -336,9 +350,19 @@ export default {
         const columns = deepClone(newData)
         this.columns = columns
         // 搜索行处理勾选和索引
-        if (this.showSearchRow) {
+        if (this.showSearchRow && !this.showSingleStatus) {
           this.setSelectable(columns)
           this.setIndex(columns)
+          // switchModeData 默认有rowControl
+          if (!this.switchModeData.includes('rowControl')) {
+            if (Array.isArray(this.switchModeData)) {
+              this.switchModeData.push('rowControl')
+            } else {
+              this.switchModeData += this.switchModeData
+                ? ',rowControl'
+                : 'rowControl'
+            }
+          }
           // this.setFilterButtons(columns)
         }
         // 初始化表单配置
@@ -373,8 +397,13 @@ export default {
   },
   computed: {
     containerIsForm() {
-      return this.columns.some((item) => {
+      return this.flatColums.some((item) => {
         return item.component
+      })
+    },
+    hasRequired() {
+      return this.flatColums.some((item) => {
+        return item.required
       })
     },
     rules() {
@@ -530,6 +559,7 @@ export default {
     // type为slection时 重写selectable属性
     setSelectable(columns) {
       const checkboxColumn = columns.find((item) => item.type === 'selection')
+      if (!checkboxColumn) return
       const selectable = checkboxColumn.selectable
       const fn = (row, index) => {
         if (row.rowType__table === 'searchRow') return false
@@ -541,6 +571,7 @@ export default {
     // type为index时 重写index属性
     setIndex(columns) {
       const indexColumn = columns.find((item) => item.type === 'index')
+      if (!indexColumn) return
       const indexFn = indexColumn.index
       const fn = (index) => {
         if (indexFn) return indexFn(index)
@@ -551,6 +582,7 @@ export default {
     // type为operation时 重写filterButtons属性
     setFilterButtons(columns) {
       const operationColumn = columns.find((item) => item.type === 'operation')
+      if (!operationColumn) return
       const filterButtons = operationColumn.filterButtons
       const fn = (buttonConfigList, row) => {
         if (row.rowType__table === 'searchRow') return []
@@ -581,14 +613,14 @@ export default {
     },
     // 判断是否显示表单元素
     judgeShowFormItem(fieldItem, row, $index) {
-      const { switchMode, switchKey, property, index } = this
+      const { switchModeData, switchKey, property, index } = this
       return (
         fieldItem.component &&
-        (!switchMode ||
-          (switchMode.includes('dblclick') &&
+        (!switchModeData ||
+          (switchModeData.includes('dblclick') &&
             property === fieldItem.prop &&
             index === $index) ||
-          (switchMode.includes('rowControl') && row[switchKey]))
+          (switchModeData.includes('rowControl') && row[switchKey]))
       )
     },
     // 迭代增加label__table，用于多级表头下label作区分
@@ -619,7 +651,7 @@ export default {
           // 增加主键
           // item[this.rowKey] = item[this.rowKey] || getRandomId()
           // 编辑模式下，增加切换键
-          this.switchMode.includes('rowControl') &&
+          this.switchModeData.includes('rowControl') &&
             item[this.switchKey] === undefined &&
             this.$set(item, this.switchKey, false)
           // 需要响应式，所以使用this.$set
@@ -803,7 +835,7 @@ export default {
       })
     },
     cellDblclick(row, column, cell, event) {
-      if (this.switchMode.includes('dblclick')) {
+      if (this.switchModeData.includes('dblclick')) {
         const index = this.flatData.indexOf(row)
         this.property = column.property
         this.index = index
@@ -1122,5 +1154,10 @@ export default {
   // .el-select .el-input input {
   //   padding-left: 15px;
   // }
+}
+/deep/ .formNoMarginBottom {
+  .el-form-item {
+    margin-bottom: 0;
+  }
 }
 </style>

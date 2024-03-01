@@ -2,14 +2,14 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-29 15:00:57
+ * @LastEditTime: 2024-03-01 17:12:09
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
   <div class="button-col" @click.stop>
     <slot name="prefix"></slot>
-    <template v-for="buttonItem in buttonConfigList">
+    <template v-for="buttonItem in filterButtons(buttonConfigList)">
       <slot
         v-if="buttonItem.slotName"
         :name="buttonItem.slotName"
@@ -85,6 +85,13 @@ export default {
     buttonSize: {
       default: 'small',
       type: String,
+    },
+    // 过滤操作按钮
+    filterButtons: {
+      default(buttonConfigList) {
+        return buttonConfigList
+      },
+      type: Function,
     },
   },
   methods: {

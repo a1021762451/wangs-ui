@@ -113,7 +113,7 @@
             disabled: row[fieldItem.disabledKey],
             ...getAttrs(fieldItem, row),
           }"
-          v-focus="switchMode.includes('dblclick') && !row[switchKey]"
+          v-focus="switchModeData.includes('dblclick') && !row[switchKey]"
           v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
           @blur="handleBlur(fieldItem, row)"
@@ -254,11 +254,6 @@ export default {
       },
       type: Function,
     },
-    // 列切换模式
-    switchMode: {
-      default: '', // dblclick/rowControl
-      type: String,
-    },
     // 列切换字段
     switchKey: {
       default: 'isEdit__table',
@@ -271,6 +266,11 @@ export default {
     index: {
       default: '',
       type: String | Number,
+    },
+    // 列切换模式
+    switchModeData: {
+      default: '', // dblclick/rowControl
+      type: String | Array,
     },
   },
   data() {
@@ -369,14 +369,14 @@ export default {
     },
     // 判断是否显示表单元素
     judgeShowFormItem(fieldItem, row, $index) {
-      const { switchMode, switchKey, property, index } = this
+      const { switchModeData, switchKey, property, index } = this
       return (
         fieldItem.component &&
-        (!switchMode ||
-          (switchMode.includes('dblclick') &&
+        (!switchModeData ||
+          (switchModeData.includes('dblclick') &&
             property === fieldItem.prop &&
             index === $index) ||
-          (switchMode.includes('rowControl') && row[switchKey]))
+          (switchModeData.includes('rowControl') && row[switchKey]))
       )
     },
   },

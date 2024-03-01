@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-02-20 14:55:53
+ * @LastEditTime: 2024-02-29 10:04:48
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -96,7 +96,7 @@
                   :buttonConfigList="
                     getButtonConfigList(operationsList, data, node, 'hover')
                   "
-                  @happenEvent="happenEvent(data, node, $event)"
+                  @happenEvent="happenEvent($event, data, node)"
                 >
                   <template
                     v-for="(index, name) in $scopedSlots"
@@ -139,11 +139,11 @@
           getButtonConfigList(
             operationsList,
             optionData,
-            optionData,
+            optionNode,
             'contextMenu'
           )
         "
-        @happenEvent="happenEvent(optionData, node, $event)"
+        @happenEvent="happenEvent($event, optionData, optionNode)"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
           <slot :name="name" v-bind="scope"></slot>
@@ -273,7 +273,7 @@ export default {
       optionCardX: '',
       optionCardY: '',
       optionCardShow: false,
-      optionData: [],
+      optionData: {},
       optionNode: {},
       optionNodeRef: {},
       iAct: '',
@@ -398,7 +398,7 @@ export default {
       !this.noFilter && this.filter(val)
     },
     // 操作点击事件
-    happenEvent(data, node, buttonItem) {
+    happenEvent(buttonItem, data, node) {
       this.optionCardShow = false
       this.$emit('happenEvent', {
         buttonItem,

@@ -156,7 +156,6 @@ export const tableColumns = [
     prop: 'testInput',
     label: '输入框',
     component: 'el-input',
-    allowToggle: true, // 是否允许切换显示
     // '如果输入格式为数字加小数点， 去掉小数点'
     blurHandler: function (value) {
       if (/^\d*\.$/.test(value)) {
@@ -186,11 +185,9 @@ export const tableColumns = [
     component: 'el-select',
     width: 200,
     required: true,
-    allowToggle: true,
   },
   // 测试时间框模式
   {
-    allowToggle: true,
     prop: 'testMinDatetime',
     label: '小时间',
     width: 200,
@@ -305,7 +302,6 @@ const allOptions = {
 | timeDisabled     | 时间限制精度是否到时分秒                   | Boolean                         | -      | -      |
 | minAllowEqual    | 允许和用于比较的最小时间相等, 精度到天     | Boolean                         | -      | true   |
 | maxAllowEqual    | 允许和用于比较的最大时间相等, 精度到天     | Boolean                         | -      | true   |
-| allowToggle      | 是否允许双击切换， 仅支持输入框            | Boolean                         | -      | -      |
 | placeholder      | 表格空单元占位                             | String                          | -      | -      |
 | componentAttrs   | 组件对应的属性                             | Object                          | -      | -      |
 | buttonConfigList | 每行按钮组，type 为 operation 时生效       | Array                           | -      | -      |
