@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-01 14:59:58
+ * @LastEditTime: 2024-03-04 17:00:19
 -->
 <template>
   <div class="table-container">
@@ -71,7 +71,10 @@
       inline
       size="mini"
       class="common-table"
-      :class="{ formNoMarginBottom: containerIsForm && !hasRequired }"
+      :class="{
+        formNoMarginBottom: !hasRequired,
+        headerWidthForm: showHeaderSearch && containerIsForm,
+      }"
     >
       <!-- 表格 -->
       <el-table
@@ -120,6 +123,8 @@
           :switchKey="switchKey"
           :property.sync="property"
           :index.sync="index"
+          :formData="formData"
+          :showHeaderSearch="showHeaderSearch"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -308,6 +313,11 @@ export default {
       default: false,
       type: Boolean,
     },
+    // 标题栏有搜索功能
+    showHeaderSearch: {
+      default: false,
+      type: Boolean,
+    },
     // 是否生成默认表单配置
     getDefault: {
       default: false,
@@ -474,6 +484,8 @@ export default {
     dataOrColumnsChangeCallback() {
       // 初始化首行
       this.initSearchRow()
+      // 初始化表头搜索
+      this.initHeaderSearch()
       // 表格数据增加prop, 便于校验表单
       this.containerIsForm && this.addFormPropForTable()
       // 配置selfAdjust为true,则宽度自调节
@@ -517,36 +529,29 @@ export default {
           )
         }
         // 表格搜索行默认配置
-        else if (this.showSearchRow && !component && !getForm) {
-          this.$set(item, 'component', 'el-input')
+        else if (!getForm) {
+          if ((this.showSearchRow || this.showHeaderSearch) && !component) {
+            this.$set(item, 'component', 'el-input')
+          }
+          // if (this.showHeaderSearch && !headerConfig) {
+          //   this.$set(item, 'headerConfig', {
+          //     component: 'el-input',
+          //     prop,
+          //   })
+          // }
         }
       })
       return arr
+    },
+    initHeaderSearch() {
+      if (!this.showHeaderSearch || this.showSingleStatus) return
+      this.initFormData()
     },
     // 根据配置初始化一个row
     initSearchRow() {
       if (!this.showSearchRow || this.showSingleStatus) return
       const { tableData } = this.tableForm
-      this.flatColums.forEach((item) => {
-        const { component } = item
-        // 设置默认时间
-        if (item.defaultTimeType) {
-          const { componentAttrs = {} } = item
-          this.$set(
-            this.formData,
-            item.prop,
-            getDefaultTime(item.defaultTimeType, componentAttrs.valueFormat)
-          )
-          return
-        }
-        // 判断是否需要初始化表单值
-        if (item.prop && !this.formData.hasOwnProperty(item.prop)) {
-          this.$set(this.formData, item.prop, '')
-          // 特殊情况
-          component === 'el-checkbox-group' &&
-            this.$set(this.formData, item.prop, [])
-        }
-      })
+      this.initFormData()
       const obj = this.formData
       def(obj, 'rowType__table', 'searchRow')
       if (tableData[0] && tableData[0].rowType__table === 'searchRow') {
@@ -555,6 +560,27 @@ export default {
         tableData.unshift(obj)
       }
       this.switchStatus(obj, true)
+    },
+    initFormData() {
+      this.flatColums.forEach((item) => {
+        const { component, defaultTimeType, componentAttrs = {}, prop } = item
+        // 设置默认时间
+        if (defaultTimeType) {
+          this.$set(
+            this.formData,
+            prop,
+            getDefaultTime(defaultTimeType, componentAttrs.valueFormat)
+          )
+          return
+        }
+        // 判断是否需要初始化表单值
+        if (prop && !this.formData.hasOwnProperty(prop)) {
+          this.$set(this.formData, prop, '')
+          // 特殊情况
+          component === 'el-checkbox-group' &&
+            this.$set(this.formData, prop, [])
+        }
+      })
     },
     // type为slection时 重写selectable属性
     setSelectable(columns) {
@@ -720,14 +746,14 @@ export default {
       }
       this.$emit('happenEvent', params)
       // 首行搜索逻辑
-      if (
-        method === 'tableFieldChange' &&
-        this.showSearchRow &&
-        row.rowType__table === 'searchRow'
-      ) {
-        this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
-        this.handleSearch()
-      }
+      // if (
+      //   method === 'tableFieldChange' &&
+      //   this.showSearchRow &&
+      //   row.rowType__table === 'searchRow'
+      // ) {
+      //   this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+      //   this.handleSearch()
+      // }
     },
     // 遍历列的所有内容，获取最宽一列的宽度
     getMaxLength(arr) {
@@ -851,6 +877,7 @@ export default {
       const { tableData } = this.tableForm
       tableData.forEach((item) => {
         const condition = selection.includes(item)
+        // selectAll没有同步更新selection，所以需要传自己own
         const childrenAndOwn = this.findChildrenAndOwnNode(item)
         this.toggleSelection(childrenAndOwn, condition)
       })
@@ -1137,6 +1164,9 @@ export default {
   .el-table__expand-icon {
     display: none;
   }
+  .el-form-item {
+    margin-bottom: 0;
+  }
 }
 /deep/ .tree-cell {
   .overflow_tip {
@@ -1158,6 +1188,23 @@ export default {
 /deep/ .formNoMarginBottom {
   .el-form-item {
     margin-bottom: 0;
+  }
+}
+/deep/ .headerWidthForm {
+  .el-table__header {
+    th.el-table__cell > .cell {
+      position: static;
+    }
+    .el-table__cell {
+      padding-bottom: 31px;
+    }
+    .el-form-item {
+      position: absolute;
+      bottom: 1px;
+      left: 0;
+      width: calc(100% - 4px);
+      margin: 0 2px 0;
+    }
   }
 }
 </style>

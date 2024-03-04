@@ -76,12 +76,77 @@
         v-bind="{ ...scope, fieldItem }"
         v-if="fieldItem.headerSlotName"
       >
-        {{ fieldItem.label }}
       </slot>
       <template v-else>
         {{ fieldItem.label }}
-        <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
       </template>
+      <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
+      <el-form-item v-if="fieldItem.component && showHeaderSearch">
+        <!-- 表单元素显示 -->
+        <component
+          :is="fieldItem.component"
+          v-bind="{
+            size: 'mini',
+            'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+            ...getAttrs(fieldItem, formData),
+          }"
+          v-model="formData[fieldItem.prop]"
+          @change="fieldItemChange(fieldItem, formData, 'search')"
+          @blur="handleBlur(fieldItem, formData)"
+          @input="handleInput($event, fieldItem, formData)"
+        >
+          <template v-if="fieldItem.component === 'el-select'">
+            <template v-for="item in allOptions[fieldItem.prop]">
+              <el-option-group
+                v-if="item.children"
+                :key="item.label"
+                v-bind="item"
+              >
+                <el-option
+                  v-for="nextItem in item.children"
+                  :key="nextItem.label + nextItem.value"
+                  v-bind="nextItem"
+                >
+                  <slot
+                    v-if="fieldItem.selectSlotName"
+                    :name="fieldItem.selectSlotName"
+                    v-bind="nextItem"
+                  ></slot>
+                </el-option>
+              </el-option-group>
+              <el-option v-else :key="item.label + item.value" v-bind="item">
+                <slot
+                  v-if="fieldItem.selectSlotName"
+                  :name="fieldItem.selectSlotName"
+                  v-bind="item"
+                ></slot
+              ></el-option>
+            </template>
+          </template>
+          <template v-if="fieldItem.component === 'el-radio-group'">
+            <el-radio
+              v-for="item in allOptions[fieldItem.prop]"
+              :key="item.value"
+              v-bind="{
+                ...item,
+                label: item.value,
+              }"
+              >{{ item.label }}</el-radio
+            >
+          </template>
+          <template v-if="fieldItem.component === 'el-checkbox-group'">
+            <el-checkbox
+              v-for="item in allOptions[fieldItem.prop]"
+              :key="item.value"
+              v-bind="{
+                ...item,
+                label: item.value,
+              }"
+              >{{ item.label }}</el-checkbox
+            >
+          </template>
+        </component>
+      </el-form-item>
     </template>
     <!-- 内容插槽 -->
     <template
@@ -272,6 +337,18 @@ export default {
       default: '', // dblclick/rowControl
       type: String | Array,
     },
+    // 表单数据
+    formData: {
+      default() {
+        return {}
+      },
+      type: Object,
+    },
+    // 标题栏有搜索功能
+    showHeaderSearch: {
+      default: false,
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -361,6 +438,7 @@ export default {
     },
     // 表格内复选框变更
     fieldItemChange(fieldItem, row, method = 'tableFieldChange') {
+      if (row.rowType__table === 'searchRow') method = 'search'
       this.$emit('happenEvent', {
         buttonItem: { method },
         fieldItem,
