@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-04 17:00:19
+ * @LastEditTime: 2024-03-04 17:06:11
 -->
 <template>
   <div class="table-container">
@@ -49,7 +49,10 @@
         operationConfig.buttonConfigList.length
       "
       class="table-buttons"
-      @happenEvent="(buttonItem) => $emit('happenEvent', { buttonItem })"
+      @happenEvent="
+        (buttonItem) =>
+          $emit('happenEvent', { buttonItem, method: buttonItem.method })
+      "
       :style="{
         justifyContent: operationConfig.justifyContent || 'flex-end',
       }"
@@ -733,6 +736,7 @@ export default {
     },
     handleSearch() {
       this.$emit('happenEvent', {
+        method: 'search',
         buttonItem: { method: 'search' },
       })
     },

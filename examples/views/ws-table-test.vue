@@ -60,6 +60,7 @@ import {
   formConfigList,
   allOptions,
   tableColumns,
+  happenEvent
 } from '../contant'
 export default {
   name: 'ws-table-test',
@@ -186,6 +187,7 @@ export default {
     }, '1000')
   },
   methods: {
+    happenEvent,
     // 更新表单数据
     // updateFormData({ formData }) {
     //   console.log('updateFormData')
@@ -199,14 +201,6 @@ export default {
       const pageInfo = wsTable.pageInfo
       this.formData = formData
       this.pageInfo = pageInfo
-    },
-    // 触发事件
-    happenEvent(eventData) {
-      const {
-        buttonItem: { method },
-      } = eventData
-      console.log('method', method)
-      this[method] && this[method](eventData)
     },
     // 单行校验
     validateRow(eventData) {

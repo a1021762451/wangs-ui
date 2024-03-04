@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-01 17:12:09
+ * @LastEditTime: 2024-03-04 17:22:26
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -13,6 +13,7 @@
       <slot
         v-if="buttonItem.slotName"
         :name="buttonItem.slotName"
+        :method="buttonItem.method"
         :buttonItem="buttonItem"
       ></slot>
       <el-dropdown

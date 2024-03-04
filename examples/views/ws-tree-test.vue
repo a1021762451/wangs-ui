@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-06-01 13:35:59
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-01-29 15:24:21
+ * @LastEditTime: 2024-03-04 17:10:29
 -->
 <template>
   <ws-tree
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { happenEvent } from '../contant'
 export default {
   name: 'ws-tree-test',
   data() {
@@ -145,6 +146,7 @@ export default {
     }
   },
   methods: {
+    happenEvent,
     filterButtonsFn(operationsList, data, node, from) {
       if (from === 'contextMenu')
         return operationsList.filter(
@@ -162,14 +164,6 @@ export default {
     disabledContextmenuFn(data, node) {
       if (!node.isLeaf) return true
       return false
-    },
-    // 触发事件
-    happenEvent(eventData) {
-      const {
-        buttonItem: { method },
-      } = eventData
-      console.log('eventData', eventData)
-      this[method] && this[method](eventData)
     },
     freeAdd() {
       console.log('freeAdd')

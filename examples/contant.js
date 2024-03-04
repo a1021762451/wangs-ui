@@ -301,7 +301,8 @@ export const tableColumns = [
 
 // 触发事件
 export function happenEvent(eventData) {
+  const { method } = eventData
+  console.log(method, 'method')
   console.log(eventData, 'eventData')
-  const { buttonItem = {}, formData, row } = eventData
-  this[buttonItem.method] && this[buttonItem.method](eventData)
+  this[method] && this[method](eventData)
 }

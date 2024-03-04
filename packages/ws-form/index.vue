@@ -412,6 +412,7 @@ export default {
     // 表格内复选框变更
     async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
       this.$emit('happenEvent', {
+        method,
         buttonItem: { method },
         fieldItem,
         formData,
@@ -470,12 +471,14 @@ export default {
         await this.$refs.form.validate()
       }
       this.$emit('happenEvent', {
+        method,
         buttonItem,
         formData: this.formData,
       })
     },
     handleSearch() {
       this.$emit('happenEvent', {
+        method: 'search',
         buttonItem: { method: 'search' },
         formData: this.formData,
       })

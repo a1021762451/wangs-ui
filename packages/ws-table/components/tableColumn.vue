@@ -371,6 +371,7 @@ export default {
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
       this.$emit('happenEvent', {
+        method: buttonItem.method,
         buttonItem,
         row,
         column,
@@ -440,6 +441,7 @@ export default {
     fieldItemChange(fieldItem, row, method = 'tableFieldChange') {
       if (row.rowType__table === 'searchRow') method = 'search'
       this.$emit('happenEvent', {
+        method,
         buttonItem: { method },
         fieldItem,
         row,

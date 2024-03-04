@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-02-29 10:04:48
+ * @LastEditTime: 2024-03-04 17:08:21
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -401,6 +401,7 @@ export default {
     happenEvent(buttonItem, data, node) {
       this.optionCardShow = false
       this.$emit('happenEvent', {
+        method: buttonItem.method,
         buttonItem,
         node,
         data,
@@ -486,6 +487,7 @@ export default {
     // 自由新增
     freeAdd() {
       this.$emit('happenEvent', {
+        method: 'freeAdd',
         buttonItem: { method: 'freeAdd' },
       })
     },
