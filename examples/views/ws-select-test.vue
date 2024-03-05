@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-23 21:28:58
+ * @LastEditTime: 2024-03-05 09:23:26
 -->
 <template>
   <el-form
@@ -15,7 +15,7 @@
   >
     <el-form-item label="测试ws-select" prop="testvalue">
       <ws-select
-        selectMode="treeSelect"
+        isTreeSelect
         v-model="form.testvalue"
         :options="defaultOptions"
         multiple

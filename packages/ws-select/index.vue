@@ -4,7 +4,6 @@
     :value="value"
     :filter-method="isTreeSelect ? filterMethodToTree : undefined"
     v-bind="{
-      multiple,
       filterable: true,
       'popper-class': isTreeSelect ? 'ws-treeSelect' : 'ws-select',
       ...$attrs,
@@ -20,6 +19,7 @@
             showOverflowTooltip: true,
             'default-expand-all': true,
             ...treeConfig,
+            'check-on-click-node': true,
             showCheckbox: multiple,
           }"
           @node-click="handleNodeClick"
@@ -74,7 +74,7 @@
   </el-select>
 </template>
 <script>
-import { treeToFlat } from '../utils/util'
+import { treeToFlat, getObjAttr } from '../utils/util'
 import wsTree from '../ws-tree/index.vue'
 export default {
   name: 'ws-select',
@@ -98,14 +98,13 @@ export default {
         return []
       },
     },
-    props: {
-      type: Object,
-      default() {
-        return {}
-      },
-    },
     // 多选模式是否需要全选
     isNeedSelectAll: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否是下拉树
+    isTreeSelect: {
       type: Boolean,
       default: false,
     },
@@ -126,44 +125,31 @@ export default {
       type: Boolean,
       default: true,
     },
-    multiple: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {}
   },
   computed: {
-    allOptions() {
-      const arr = []
-      this.options.forEach((item) => {
-        if (item.children) {
-          item.children.forEach((nextItem) => {
-            arr.push(nextItem)
-          })
-        } else {
-          arr.push(item)
-        }
-      })
-      return arr
+    multiple() {
+      // 布尔值简写获取到的是空字符串
+      return this.$attrs.multiple === '' || this.$attrs.multiple
+    },
+    flatOptions() {
+      return treeToFlat(this.options)
     },
     isCheckAll() {
-      return this.value.length === this.allOptions.length
+      return this.value.length === this.flatOptions.length
     },
     indeterminate() {
-      return this.value.length > 0 && this.value.length < this.allOptions.length
-    },
-    isTreeSelect() {
-      return this.selectMode.includes('treeSelect')
+      return (
+        this.value.length > 0 && this.value.length < this.flatOptions.length
+      )
     },
     treeNodeKey() {
-      const treeConfig = this.treeConfig
-      return treeConfig['node-key'] || treeConfig['nodeKey'] || 'id'
+      return getObjAttr(this.treeConfig, 'nodeKey') || 'id'
     },
     treeProps() {
-      const treeConfig = this.treeConfig
-      return treeConfig.props || {}
+      return this.treeConfig.props || {}
     },
     treeLabelKey() {
       return this.treeProps['label'] || 'label'
@@ -191,7 +177,7 @@ export default {
   methods: {
     // 全选操作
     selectAll(checked) {
-      const selectValue = checked ? this.allOptions.map((d) => d.value) : []
+      const selectValue = checked ? this.flatOptions.map((d) => d.value) : []
       this.$emit('change', selectValue)
     },
     // 值变化，树回显
@@ -232,7 +218,8 @@ export default {
 .ws-select__checkbox {
   padding-left: 20px;
 }
-.ws-treeSelect {
+.ws-treeSelect,
+.ws-treeSelect.is-multiple {
   // max-width: 260px;
   .el-select-dropdown__item,
   .el-select-dropdown__item.selected,
