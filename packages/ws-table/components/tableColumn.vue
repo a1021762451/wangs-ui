@@ -12,10 +12,11 @@
     <tableColumn
       v-for="column in fieldItem.children"
       :key="column.label + column.prop"
-      :fieldItem="column"
-      v-bind="$props"
+      v-bind="{
+        ...$props,
+        fieldItem: column,
+      }"
       v-on="$listeners"
-      @happenEvent="(params) => $emit('happenEvent', params)"
     >
       <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
         <slot :name="name" v-bind="scope"></slot>
@@ -85,15 +86,20 @@
         <!-- 表单元素显示 -->
         <component
           :is="fieldItem.component"
-          v-bind="{
-            size: 'mini',
-            'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-            ...getAttrs(fieldItem, formData),
-          }"
           v-model="formData[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, formData, 'search')"
           @blur="handleBlur(fieldItem, formData)"
           @input="handleInput($event, fieldItem, formData)"
+          v-bind="{
+            size: 'mini',
+            'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
+            options: allOptions[fieldItem.prop],
+            ...getAttrs(fieldItem, formData),
+          }"
+          v-on="{
+            // fieldItem.listeners和上面的事件一起触发，上面先触发
+            ...(fieldItem.listeners || {}),
+          }"
         >
           <template v-if="fieldItem.component === 'el-select'">
             <template v-for="item in allOptions[fieldItem.prop]">
@@ -183,6 +189,10 @@
           @change="fieldItemChange(fieldItem, row)"
           @blur="handleBlur(fieldItem, row)"
           @input="handleInput($event, fieldItem, row)"
+          v-on="{
+            // fieldItem.listeners和上面的事件一起触发，上面先触发
+            ...(fieldItem.listeners || {}),
+          }"
         >
           <template v-if="fieldItem.component === 'el-select'">
             <template v-for="item in allOptions[fieldItem.prop]">

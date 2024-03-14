@@ -169,7 +169,6 @@ export default {
     }
   },
   mounted() {
-    // this.getInitParams()
     setTimeout(() => {
       this.tableData.push({
         id: '4',
@@ -187,20 +186,6 @@ export default {
   },
   methods: {
     happenEvent,
-    // 更新表单数据
-    // updateFormData({ formData }) {
-    //   console.log('updateFormData')
-    //   this.formData = formData
-    // },
-    // 获取初始化的参数
-    getInitParams() {
-      const wsForm = this.$refs.wsForm
-      const wsTable = this.$refs.wsTable
-      const formData = wsForm.formData
-      const pageInfo = wsTable.pageInfo
-      this.formData = formData
-      this.pageInfo = pageInfo
-    },
     // 单行校验
     validateRow(eventData) {
       console.log(eventData, 'validateRow')

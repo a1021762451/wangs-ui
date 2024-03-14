@@ -2,8 +2,15 @@
   <div
     v-resize.window.immediate="judgeOneRow"
     class="render"
-    :class="{ fold: isFold, searchMode: isSearchList }"
-    :style="{ height: isFold ? colHeight + 'px' : undefined }"
+    :class="{
+      searchMode: isSearchList,
+      formMode: !isSearchList,
+      checkform: isCheckform,
+      isFold,
+    }"
+    :style="{
+      height: isFold ? colHeight + 'px' : undefined,
+    }"
     ref="wsForm"
   >
     <el-form
@@ -12,132 +19,160 @@
           ? `translateY(-100%) translateY(${colHeight}px)`
           : undefined,
       }"
+      :class="{
+        no_lable_wrap: labelWidth !== 'auto',
+        has_lable_wrap: labelWidth === 'auto',
+        has_rules: Object.keys(rules).length,
+        no_rules: !Object.keys(rules).length,
+      }"
       ref="form"
       v-bind="{
         rules,
         model: formData,
-        'label-width': 'auto',
+        labelWidth,
+        labelPosition,
         'validate-on-rule-change': false,
         ...$attrs,
       }"
       v-on="$listeners"
     >
+      <!-- 条件行 -->
+      <template v-if="isCheckform">
+        <el-form-item
+          class="form-item-condition"
+          label="已选条件"
+          :required="undefined"
+        >
+          <condition v-model="conditionOptions" @remove-tag="conditionRemove" />
+        </el-form-item>
+        <div class="border-line"></div>
+      </template>
       <el-row :gutter="gutter" type="flex">
         <!-- 表单元素 -->
-        <el-col
-          :span="fieldItem.col || col"
-          v-for="fieldItem in configList"
-          :key="fieldItem.prop"
-        >
-          <!-- ? Object.keys(rules).length
-                  ? '18px'
-                  : '18px' -->
-          <el-form-item
+        <template v-for="(fieldItem, index) in configList">
+          <el-col
+            :span="fieldItem.span"
+            :style="{ marginRight: `${(fieldItem.offestRight * 100) / 24}%` }"
             :class="{
-              notLeftMargin: fieldItem.isSide && isSearchList,
-              'form-item-with-suffixLabel': fieldItem.suffixLabel,
+              'border-bottom': isCheckform && !judgeIsRow(fieldItem),
             }"
-            :style="{
-              marginBottom: isSearchList
-                ? Object.keys(rules).length
-                  ? '18px'
-                  : '5px'
-                : undefined,
-            }"
-            v-bind="fieldItem"
-            :required="undefined"
+            :key="fieldItem.prop"
           >
-            <template v-slot:label v-if="fieldItem.labelSlotName">
-              <slot :name="fieldItem.labelSlotName"></slot>
-            </template>
-            <slot
-              v-if="fieldItem.slotName"
-              :name="fieldItem.slotName"
-              :formData="formData"
-              :fieldItem="fieldItem"
-              :fieldItemChange="fieldItemChange"
-            ></slot>
-            <component
-              v-else-if="fieldItem.component"
-              :is="fieldItem.component"
-              v-model="formData[fieldItem.prop]"
-              @change="fieldItemChange(fieldItem, formData)"
-              @blur="handleBlur(formData, fieldItem)"
-              @input="handleInput($event, formData, fieldItem)"
-              v-bind="{
-                ...getAttrs(fieldItem, formData, isDetail),
+            <!-- notLeftMargin: fieldItem.isSide && isSearchList, -->
+            <el-form-item
+              :class="{
+                'form-item-with-suffixLabel': fieldItem.suffixLabel,
               }"
+              v-bind="fieldItem"
+              :required="undefined"
             >
-              <template v-if="fieldItem.component === 'el-select'">
-                <template v-for="item in allOptions[fieldItem.prop]">
-                  <el-option-group
-                    v-if="item.children"
-                    :key="item.label"
-                    v-bind="item"
-                  >
+              <template v-slot:label v-if="fieldItem.labelSlotName">
+                <slot :name="fieldItem.labelSlotName"></slot>
+              </template>
+              <slot
+                v-if="fieldItem.slotName"
+                :name="fieldItem.slotName"
+                :formData="formData"
+                :fieldItem="fieldItem"
+                :fieldItemChange="fieldItemChange"
+              ></slot>
+              <component
+                v-else-if="fieldItem.component"
+                :is="fieldItem.component"
+                v-model="formData[fieldItem.prop]"
+                @change="fieldItemChange(fieldItem, formData)"
+                @blur="handleBlur(formData, fieldItem)"
+                @input="handleInput($event, formData, fieldItem)"
+                v-bind="{
+                  options: allOptions[fieldItem.prop],
+                  ...getAttrs(fieldItem, formData, isDetail),
+                }"
+                v-on="{
+                  // fieldItem.listeners和上面的事件一起触发，上面先触发
+                  ...(fieldItem.listeners || {}),
+                }"
+              >
+                <template v-if="fieldItem.component === 'el-select'">
+                  <template v-for="item in allOptions[fieldItem.prop]">
+                    <el-option-group
+                      v-if="item.children"
+                      :key="item.label"
+                      v-bind="item"
+                    >
+                      <el-option
+                        v-for="nextItem in item.children"
+                        :key="nextItem.label + nextItem.value"
+                        v-bind="nextItem"
+                      >
+                        <slot
+                          v-if="fieldItem.selectSlotName"
+                          :name="fieldItem.selectSlotName"
+                          v-bind="nextItem"
+                        ></slot
+                      ></el-option>
+                    </el-option-group>
                     <el-option
-                      v-for="nextItem in item.children"
-                      :key="nextItem.label + nextItem.value"
-                      v-bind="nextItem"
+                      v-else
+                      :key="item.label + item.value"
+                      v-bind="item"
                     >
                       <slot
                         v-if="fieldItem.selectSlotName"
                         :name="fieldItem.selectSlotName"
-                        v-bind="nextItem"
-                      ></slot
-                    ></el-option>
-                  </el-option-group>
-                  <el-option
-                    v-else
-                    :key="item.label + item.value"
-                    v-bind="item"
-                  >
-                    <slot
-                      v-if="fieldItem.selectSlotName"
-                      :name="fieldItem.selectSlotName"
-                      v-bind="item"
-                    ></slot>
-                  </el-option>
+                        v-bind="item"
+                      ></slot>
+                    </el-option>
+                  </template>
                 </template>
-              </template>
-              <template v-if="fieldItem.component === 'el-radio-group'">
-                <el-radio
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="{
-                    ...item,
-                    label: item.value,
-                  }"
-                  >{{ item.label }}</el-radio
-                >
-              </template>
-              <template v-if="fieldItem.component === 'el-checkbox-group'">
-                <el-checkbox
-                  v-for="item in allOptions[fieldItem.prop]"
-                  :key="item.value"
-                  v-bind="{
-                    ...item,
-                    label: item.value,
-                  }"
-                  >{{ item.label }}</el-checkbox
-                >
-              </template>
-            </component>
-            <span class="suffix-label" v-if="fieldItem.suffixLabel">{{
-              fieldItem.suffixLabel
-            }}</span>
-          </el-form-item>
-        </el-col>
+                <template v-if="fieldItem.component === 'el-radio-group'">
+                  <el-radio
+                    v-for="item in allOptions[fieldItem.prop]"
+                    :key="item.value"
+                    v-bind="{
+                      ...item,
+                      label: item.value,
+                    }"
+                    >{{ item.label }}</el-radio
+                  >
+                </template>
+                <template v-if="fieldItem.component === 'el-checkbox-group'">
+                  <el-checkbox
+                    v-for="item in allOptions[fieldItem.prop]"
+                    :key="item.value"
+                    v-bind="{
+                      ...item,
+                      label: item.value,
+                    }"
+                    >{{ item.label }}</el-checkbox
+                  >
+                </template>
+              </component>
+              <span class="suffix-label" v-if="fieldItem.suffixLabel">{{
+                fieldItem.suffixLabel
+              }}</span>
+            </el-form-item>
+          </el-col>
+          <div
+            v-if="
+              isCheckform &&
+              judgeIsRow(fieldItem) &&
+              (index !== configList.length - 1 ||
+                (index == configList.length - 1 && !isFold))
+            "
+            class="border-line"
+            :key="fieldItem.prop + 'line'"
+          ></div>
+        </template>
         <!-- 按钮 -->
         <el-form-item
           v-if="showButtons"
-          :class="isSearchList ? 'searchMode-list' : 'formMode-ws-buttons'"
+          class="form-item-buttons"
           ref="searchModeList"
         >
           <ws-buttons
             :buttonConfigList="buttonsList"
             :buttonSize="buttonSize || size"
-            class="searchMode-ws-buttons"
+            class="buttons"
             @happenEvent="happenEvent"
           >
             <template
@@ -197,13 +232,16 @@ import {
   getMinValidator,
   getDefaultTime,
   vResize,
+  getObjAttr,
 } from '../utils/util'
+import check from './components/check.vue'
+import condition from './components/condition.vue'
 import wsButtons from '../ws-buttons/index.vue'
 import mixins from './mixins'
 export default {
   name: 'ws-form',
   mixins: [mixins],
-  components: { wsButtons },
+  components: { check, condition, wsButtons },
   data() {
     return {
       cloneForm: {},
@@ -212,6 +250,7 @@ export default {
       buttonsList: [],
       configList: [],
       colHeight: '50',
+      conditionOptions: [],
     }
   },
   props: {
@@ -238,6 +277,11 @@ export default {
     },
     // 是否是搜索控件
     isSearchList: {
+      default: false,
+      type: Boolean,
+    },
+    // 是否是勾选表单--勾选组件多，且标签带边框
+    isCheckform: {
       default: false,
       type: Boolean,
     },
@@ -276,7 +320,7 @@ export default {
       type: Object,
     },
     // 通用col
-    col: {
+    span: {
       default: 6,
       type: Number,
     },
@@ -288,11 +332,12 @@ export default {
         let remain = 0
         let total = 0
         configList.forEach((item, index) => {
-          const { component } = item
+          const { component, listeners } = item
+          item.span = item.span || this.span
           // 搜索模式下判断表单元素是否在最左边
           if (this.isSearchList) {
-            const col = item.col || 6
-            total += col
+            const span = item.span || 6
+            total += span
             const newRemain = Math.floor((total - 1) / 24)
             if (newRemain !== remain || index === 0) {
               this.$set(item, 'isSide', true)
@@ -310,7 +355,6 @@ export default {
               //   ? format(new Date(), componentAttrs.valueFormat)
               //   : new Date()
             )
-            return
           }
           // 判断是否需要初始化表单值
           if (!this.formData.hasOwnProperty(item.prop)) {
@@ -318,6 +362,36 @@ export default {
             // 特殊情况
             component === 'el-checkbox-group' &&
               this.$set(this.formData, item.prop, [])
+          }
+          // listeners处理
+          if (listeners && typeof listeners === 'object') {
+            Object.keys(listeners).forEach((key) => {
+              listeners[key] = listeners[key].bind(this.$parent)
+            })
+          }
+          // 勾选表单处理
+          if (this.isCheckform) {
+            // 初始化conditionOptions
+            const value = this.formData[item.prop]
+            const valueIsArray = Array.isArray(value)
+            const valueExist =
+              (valueIsArray && value.length) || (!valueIsArray && value)
+            if (valueExist) {
+              this.conditionOptions.push({
+                label: item.label,
+                prop: item.prop,
+                value: this.formData[item.prop],
+              })
+            }
+            // 处理换行逻辑
+            if (item.childern || component === 'check') {
+              item.span = 24
+            } else {
+              item.isRow = true
+            }
+          }
+          if (item.isRow) {
+            item.offestRight = 24 - item.span
           }
         })
         this.configList = configList
@@ -386,6 +460,12 @@ export default {
     size() {
       return this.$attrs.size
     },
+    labelPosition() {
+      return getObjAttr(this.$attrs, 'labelPosition')
+    },
+    labelWidth() {
+      return getObjAttr(this.$attrs, 'labelWidth') || 'auto'
+    },
   },
   created() {
     this.addComponents()
@@ -397,12 +477,83 @@ export default {
     // this.judgeOneRow()
     // window.addEventListener('resize', this.judgeOneRow)
     this.cloneForm = deepClone(this.formData)
+    this.formMarginToPadding()
   },
   beforeDestroy() {
     // window.removeEventListener('resize', this.judgeOneRow)
   },
   methods: {
     getAttrs,
+    // 判断是否占据一行
+    judgeIsRow(fieldItem) {
+      return fieldItem.isRow || fieldItem.span === 24
+    },
+    // 将form label的margin转换为padding
+    async formMarginToPadding() {
+      if (!this.isCheckform) return
+      await this.$nextTick()
+      const el = this.$refs.wsForm
+      if (!el) return
+      const formItems = el.getElementsByClassName('el-form-item')
+      for (let i = 0; i < formItems.length; i++) {
+        const formItem = formItems[i]
+        const labelWrap = formItem.getElementsByClassName(
+          'el-form-item__label-wrap'
+        )[0]
+        if (labelWrap) {
+          const { marginLeft, marginRight, width } =
+            window.getComputedStyle(labelWrap)
+          if (this.labelWidth === 'auto' && marginRight) {
+            // 正则匹配数字（小数或整数）和单位
+            const reg = /(\d+)(\w+)/
+            // marginLeft转换为数字和单位
+            const marginLeftArr = marginLeft.match(reg)
+            const marginLeftNum = +marginLeftArr[1]
+            const marginLeftUnit = marginLeftArr[2]
+            const marginLeftHalf = marginLeftNum / 2 + marginLeftUnit
+            if (this.labelPosition === 'left') {
+              labelWrap.style.paddingRight = marginLeft
+            } else if (this.labelPosition === 'right') {
+              labelWrap.style.paddingLeft = marginLeft
+            } else {
+              labelWrap.style.paddingLeft = marginLeftHalf
+              labelWrap.style.paddingRight = marginLeftHalf
+            }
+            labelWrap.style.marginLeft = 0
+            continue
+          }
+          labelWrap.style.paddingLeft = marginLeft
+          labelWrap.style.marginLeft = 0
+          labelWrap.style.paddingRight = marginRight
+          labelWrap.style.marginRight = 0
+        }
+      }
+    },
+    // 变更条件
+    changeItem(value, { prop, label }) {
+      let checkedValue
+      if (this.allOptions[prop]) {
+        const options = this.allOptions[prop]
+        checkedValue = options.filter((item) => value.includes(item.value))
+      } else {
+        checkedValue = value
+      }
+      const findItem = this.conditionOptions.find((item) => item.prop === prop)
+      if (findItem) {
+        findItem.value = checkedValue
+      } else {
+        this.conditionOptions.push({
+          label,
+          prop: prop,
+          value: checkedValue,
+        })
+      }
+    },
+    // 删除条件
+    conditionRemove(item) {
+      const { prop } = item
+      this.formData[prop] = ''
+    },
     // 增加额外的组件
     addComponents() {
       for (const key in this.extraComponents) {
@@ -411,6 +562,7 @@ export default {
     },
     // 表格内复选框变更
     async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
+      this.changeItem(formData[fieldItem.prop], fieldItem)
       this.$emit('happenEvent', {
         method,
         buttonItem: { method },
@@ -483,7 +635,7 @@ export default {
         formData: this.formData,
       })
     },
-    // input框失焦处理
+    // input框失焦处理, liseners中的blur事件也会触发，handleBlur方法先触发
     handleBlur(row, fieldItem) {
       const { prop, blurHandler: handler } = fieldItem
       // 自定义数据过滤
@@ -514,38 +666,7 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-.searchMode {
-  /deep/ .el-form-item {
-    margin-bottom: 18px;
-    display: flex;
-  }
-  .notLeftMargin {
-    /deep/ .el-form-item__label-wrap {
-      margin-left: 0px !important;
-    }
-  }
-  /deep/ .el-form-item__label-wrap {
-    margin-left: 20px !important;
-  }
-  /deep/ .el-form-item__content {
-    margin-left: 0 !important;
-    flex: 1;
-    line-height: normal;
-  }
-  .searchMode-ws-buttons {
-    margin-left: 40px;
-    /deep/ .el-button + .el-button,
-    .el-checkbox.is-bordered + .el-checkbox.is-bordered {
-      margin-left: 0;
-    }
-    /deep/ .el-button {
-      margin-right: 10px;
-    }
-  }
-  /deep/ .el-form-item__error {
-    white-space: nowrap;
-  }
-}
+// 通用样式
 .render {
   /deep/ .el-row--flex {
     flex-wrap: wrap;
@@ -557,38 +678,148 @@ export default {
       margin-right: 5px;
     }
   }
-}
-/deep/ .formMode-ws-buttons.el-form-item {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  .searchMode-ws-buttons {
-    margin-right: 10px;
+  .form-item-with-suffixLabel {
+    /deep/ .el-form-item__content {
+      display: flex;
+      align-items: center;
+    }
+    .suffix-label {
+      margin-left: 4px;
+    }
   }
-  /deep/ .el-form-item__content {
-    margin-left: 0 !important;
+  .border-bottom {
+    border-bottom: 1px solid #ebeef5;
+  }
+  .border-line {
+    width: 100%;
+    height: 1px;
+    background: #ebeef5;
   }
 }
-.fold {
-  height: 50px;
+.isFold {
   overflow: hidden;
-  // /deep/ .el-form {
-  //   transform: translateY(-100%) translateY(50px);
+}
+// 搜索模式样式
+.searchMode {
+  /deep/ .has_rules {
+    .el-form-item {
+      margin-bottom: 18px;
+    }
+  }
+  /deep/ .no_rules {
+    .el-form-item {
+      margin-bottom: 5ch;
+    }
+  }
+  /deep/ .el-form-item {
+    margin-bottom: 5px;
+    display: flex;
+    .el-form-item__error {
+      white-space: nowrap;
+    }
+    .el-form-item__content {
+      margin-left: 0 !important;
+      flex: 1;
+      line-height: normal;
+    }
+  }
+  .notLeftMargin {
+    /deep/ .el-form-item__label-wrap {
+      margin-left: 0px !important;
+    }
+  }
+
+  .form-item-buttons.el-form-item {
+    margin-bottom: 0;
+    .buttons {
+      margin-left: 40px;
+      /deep/ .el-button + .el-button,
+      .el-checkbox.is-bordered + .el-checkbox.is-bordered {
+        margin-left: 0;
+      }
+      /deep/ .el-button {
+        margin-right: 10px;
+      }
+    }
+  }
+  // /deep/ .el-form-item__label-wrap {
+  //   margin-left: 20px !important;
   // }
 }
-.searchMode .searchMode-list {
-  margin-bottom: 0;
-}
-
-.form-item-with-suffixLabel {
-  /deep/ .el-form-item__content {
+// 表单模式样式
+.formMode {
+  /deep/ .form-item-buttons.el-form-item {
     display: flex;
-    align-items: center;
-  }
-  .suffix-label {
-    margin-left: 4px;
+    justify-content: flex-end;
+    width: 100%;
+    .el-form-item__content {
+      margin-left: 0 !important;
+    }
+    .buttons {
+      margin-right: 10px;
+    }
   }
 }
+// 额外的勾选模式
+.checkform {
+  /deep/ .el-row {
+    position: relative;
+  }
+  /deep/ .el-col {
+    padding: 10px 0;
+  }
+  .form-item-buttons.el-form-item {
+    padding-top: 10px;
+  }
+  .form-item-condition {
+    padding-bottom: 10px;
+  }
+  // /deep/ .el-col::after {
+  //   position: absolute;
+  //   content: '';
+  //   height: 1px;
+  //   width: 100%;
+  //   bottom: 0;
+  //   left: 0;
+  //   background: #ebeef5;
+  // }
+  /deep/ .el-form .el-form-item {
+    margin-bottom: 0;
+    .el-form-item__label {
+      padding: 0 6px 0;
+      line-height: initial;
+    }
+    .el-form-item__content {
+      margin-left: 12px !important;
+    }
+  }
+  /deep/.has_lable_wrap {
+    .el-form-item__label-wrap {
+      align-self: flex-start;
+      font-weight: 600;
+      color: #333;
+      background: #ececec;
+      border-radius: 2px;
+      padding: 4px 0;
+    }
+  }
+  /deep/ .no_lable_wrap {
+    .el-form-item__label {
+      align-self: flex-start;
+      font-weight: 600;
+      color: #333;
+      background: #ececec;
+      border-radius: 2px;
+      padding: 4px 6px;
+    }
+  }
+}
+.checkform.isFold {
+  .form-item-buttons.el-form-item {
+    padding-top: 0;
+  }
+}
+// 表单元素样式，
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;
 }
@@ -617,10 +848,10 @@ export default {
   }
 }
 /deep/ .el-radio-group {
-  // height: 100%;
-  // display: flex;
-  // align-items: center;
-  // flex-wrap: wrap;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   .el-radio {
     margin-right: 10px;
   }

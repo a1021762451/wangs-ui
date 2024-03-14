@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-04 17:06:11
+ * @LastEditTime: 2024-03-14 13:07:06
 -->
 <template>
   <div class="table-container">
@@ -106,8 +106,6 @@
                 select: () => {},
                 'select-all': () => {},
                 'selection-change': () => {},
-                'current-change': () => {},
-                'cell-dblclick': () => {},
               }
             : {}),
         }"
@@ -282,7 +280,7 @@ export default {
       default: '',
       type: String,
     },
-    // 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false
+    // 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法.为false，则会篡改原来的回调参数selection
     checkStrictly: {
       default: false,
       type: Boolean,
@@ -359,9 +357,20 @@ export default {
   },
   watch: {
     tableColumns: {
-      handler(newData) {
+      handler(newData,oldData) {
         const columns = deepClone(newData)
         this.columns = columns
+        // listeners绑定this.$parent
+        this.flatColums.forEach((item) => {
+          const { listeners } = item
+          // listeners处理
+          if (listeners && typeof listeners === 'object') {
+            Object.keys(listeners).forEach((key) => {
+              listeners[key] = listeners[key].bind(this.$parent)
+            })
+            window.testlis = listeners
+          }
+        })
         // 搜索行处理勾选和索引
         if (this.showSearchRow && !this.showSingleStatus) {
           this.setSelectable(columns)
@@ -870,7 +879,7 @@ export default {
         this.property = column.property
         this.index = index
       }
-      this.$emit('cell-dblclick', row, column, cell, event)
+      // this.$emit('cell-dblclick', row, column, cell, event)
     },
     // 勾选操作
     selectionChangeCallback(selection) {
@@ -942,7 +951,7 @@ export default {
     currentChange(currentRow, oldCurrentRow) {
       if (this.showSingleStatus) return
       this.currentRow = currentRow
-      this.$emit('current-change', currentRow, oldCurrentRow)
+      // this.$emit('current-change', currentRow, oldCurrentRow)
     },
     // 处理工具箱点击事件
     happenUtilEvent(util) {
