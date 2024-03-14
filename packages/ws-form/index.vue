@@ -19,6 +19,7 @@
           ? `translateY(-100%) translateY(${colHeight}px)`
           : undefined,
       }"
+      class="weighting"
       :class="{
         no_lable_wrap: labelWidth !== 'auto',
         has_lable_wrap: labelWidth === 'auto',
@@ -673,9 +674,9 @@ export default {
   }
   .fold-button {
     // margin-left: 10px;
-    line-height: initial;
+    // line-height: initial;
     .fold-text {
-      margin-right: 5px;
+      margin: 0 5px;
     }
   }
   .form-item-with-suffixLabel {
@@ -702,25 +703,46 @@ export default {
 // 搜索模式样式
 .searchMode {
   /deep/ .has_rules {
+    .el-form-item--mini {
+      margin-bottom: 14px;
+    }
+    .el-form-item--small {
+      margin-bottom: 16px;
+    }
     .el-form-item {
       margin-bottom: 18px;
     }
   }
   /deep/ .no_rules {
     .el-form-item {
-      margin-bottom: 5ch;
+      margin-bottom: 10px;
     }
   }
-  /deep/ .el-form-item {
-    margin-bottom: 5px;
-    display: flex;
-    .el-form-item__error {
-      white-space: nowrap;
+  // weighting加权重
+  /deep/ .weighting {
+    .el-form-item {
+      display: flex;
+      .el-form-item__error {
+        white-space: nowrap;
+      }
+      .el-form-item__content {
+        margin-left: 0 !important;
+        flex: 1;
+        // line-height: initial;
+      }
     }
-    .el-form-item__content {
-      margin-left: 0 !important;
-      flex: 1;
-      line-height: normal;
+    .form-item-buttons.el-form-item {
+      margin-bottom: 0;
+      .buttons {
+        margin-left: 40px;
+        /deep/ .el-button + .el-button,
+        .el-checkbox.is-bordered + .el-checkbox.is-bordered {
+          margin-left: 0;
+        }
+        /deep/ .el-button {
+          margin-right: 10px;
+        }
+      }
     }
   }
   .notLeftMargin {
@@ -728,23 +750,6 @@ export default {
       margin-left: 0px !important;
     }
   }
-
-  .form-item-buttons.el-form-item {
-    margin-bottom: 0;
-    .buttons {
-      margin-left: 40px;
-      /deep/ .el-button + .el-button,
-      .el-checkbox.is-bordered + .el-checkbox.is-bordered {
-        margin-left: 0;
-      }
-      /deep/ .el-button {
-        margin-right: 10px;
-      }
-    }
-  }
-  // /deep/ .el-form-item__label-wrap {
-  //   margin-left: 20px !important;
-  // }
 }
 // 表单模式样式
 .formMode {
@@ -762,35 +767,19 @@ export default {
 }
 // 额外的勾选模式
 .checkform {
-  /deep/ .el-row {
-    position: relative;
-  }
   /deep/ .el-col {
     padding: 10px 0;
   }
-  .form-item-buttons.el-form-item {
-    padding-top: 10px;
-  }
-  .form-item-condition {
-    padding-bottom: 10px;
-  }
-  // /deep/ .el-col::after {
-  //   position: absolute;
-  //   content: '';
-  //   height: 1px;
-  //   width: 100%;
-  //   bottom: 0;
-  //   left: 0;
-  //   background: #ebeef5;
-  // }
-  /deep/ .el-form .el-form-item {
-    margin-bottom: 0;
-    .el-form-item__label {
-      padding: 0 6px 0;
-      line-height: initial;
-    }
-    .el-form-item__content {
-      margin-left: 12px !important;
+  /deep/ .weighting {
+    .el-form-item {
+      margin-bottom: 0;
+      .el-form-item__label {
+        padding: 0 6px 0;
+        line-height: initial;
+      }
+      .el-form-item__content {
+        margin-left: 12px !important;
+      }
     }
   }
   /deep/.has_lable_wrap {
@@ -800,7 +789,7 @@ export default {
       color: #333;
       background: #ececec;
       border-radius: 2px;
-      padding: 4px 0;
+      padding: 3px 0;
     }
   }
   /deep/ .no_lable_wrap {
@@ -813,13 +802,19 @@ export default {
       padding: 4px 6px;
     }
   }
+  .form-item-buttons.el-form-item {
+    padding-top: 10px;
+  }
+  .form-item-condition {
+    padding-bottom: 10px;
+  }
 }
 .checkform.isFold {
   .form-item-buttons.el-form-item {
     padding-top: 0;
   }
 }
-// 表单元素样式，
+// 表单元素样式
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;
 }
@@ -833,10 +828,10 @@ export default {
   width: 100%;
 }
 /deep/ .el-checkbox-group {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  // height: 100%;
+  // display: flex;
+  // align-items: center;
+  // flex-wrap: wrap;
   .el-checkbox {
     margin-right: 10px;
   }
@@ -848,10 +843,10 @@ export default {
   }
 }
 /deep/ .el-radio-group {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  // height: 100%;
+  // display: flex;
+  // align-items: center;
+  // flex-wrap: wrap;
   .el-radio {
     margin-right: 10px;
   }

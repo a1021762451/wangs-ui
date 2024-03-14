@@ -82,6 +82,7 @@
         {{ fieldItem.label }}
       </template>
       <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
+      <!-- 表头搜索 -->
       <el-form-item v-if="fieldItem.component && showHeaderSearch">
         <!-- 表单元素显示 -->
         <component
@@ -481,9 +482,6 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-/deep/ .el-table tr input[type='checkbox'] {
-  cursor: pointer;
-}
 .overflow_tip {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -497,10 +495,64 @@ export default {
 .el-table__cell {
   .el-form-item {
     width: 100%;
+    margin-right: 0;
     /deep/ .el-form-item__content {
       width: 100%;
-      line-height: initial;
+      // line-height: initial;
     }
+  }
+}
+// 表单元素样式
+/deep/ .el-table tr input[type='checkbox'] {
+  cursor: pointer;
+}
+/deep/ .el-input.is-disabled .el-input__inner {
+  color: #959090;
+}
+/deep/ .el-textarea.is-disabled .el-textarea__inner {
+  color: #959090;
+}
+/deep/ .el-input-number {
+  width: 100%;
+  overflow: hidden;
+}
+/deep/ .el-select {
+  width: 100%;
+}
+/deep/ .el-date-editor.el-input__inner {
+  width: 100%;
+}
+/deep/ .el-date-editor.el-input {
+  width: 100%;
+}
+/deep/ .el-checkbox-group {
+  // height: 100%;
+  // display: flex;
+  // align-items: center;
+  // flex-wrap: wrap;
+  .el-checkbox {
+    margin-right: 10px;
+  }
+  .el-checkbox:last-child {
+    margin-right: 0;
+  }
+  .el-checkbox__label {
+    padding-left: 2px;
+  }
+}
+/deep/ .el-radio-group {
+  // height: 100%;
+  // display: flex;
+  // align-items: center;
+  // flex-wrap: wrap;
+  .el-radio {
+    margin-right: 10px;
+  }
+  .el-radio:last-child {
+    margin-right: 0;
+  }
+  .el-radio__label {
+    padding-left: 2px;
   }
 }
 </style>

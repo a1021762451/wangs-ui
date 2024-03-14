@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-14 13:07:06
+ * @LastEditTime: 2024-03-14 17:11:37
 -->
 <template>
   <div class="table-container">
@@ -357,7 +357,7 @@ export default {
   },
   watch: {
     tableColumns: {
-      handler(newData,oldData) {
+      handler(newData, oldData) {
         const columns = deepClone(newData)
         this.columns = columns
         // listeners绑定this.$parent
@@ -1080,95 +1080,36 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.talbe-utils {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 6px;
-  padding-right: 12px;
-
-  .icon-setting {
-    font-size: 20px;
-    cursor: pointer;
-    margin-right: 8px;
-  }
-}
-
-.common-table-pagination {
-  text-align: right;
-  margin: 10px 0;
-}
-
-/deep/ .el-input.is-disabled .el-input__inner {
-  color: #959090;
-}
-
-/deep/ .el-textarea.is-disabled .el-textarea__inner {
-  color: #959090;
-}
-
-/deep/ .el-input-number {
-  width: 100%;
-  overflow: hidden;
-}
-
-/deep/ .el-select {
-  width: 100%;
-}
-
-/deep/ .el-date-editor.el-input__inner {
-  width: 100%;
-}
-
-/deep/ .el-date-editor.el-input {
-  width: 100%;
-}
-/deep/ .el-checkbox-group {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  .el-checkbox {
-    margin-right: 10px;
-  }
-  .el-checkbox:last-child {
-    margin-right: 0;
-  }
-  .el-checkbox__label {
-    padding-left: 2px;
-  }
-}
-/deep/ .el-radio-group {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  .el-radio {
-    margin-right: 10px;
-  }
-  .el-radio:last-child {
-    margin-right: 0;
-  }
-  .el-radio__label {
-    padding-left: 2px;
-  }
-}
-/deep/ .table-buttons {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 6px;
-}
+// 通用样式
 .table-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
+  .common-table {
+    flex: 1;
+    min-height: 0;
+  }
+  .talbe-utils {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+    padding-right: 12px;
 
-.common-table {
-  flex: 1;
-  min-height: 0;
-}
-/deep/ .el-form--inline .el-form-item {
-  margin-right: 0;
+    .icon-setting {
+      font-size: 20px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+  }
+  .common-table-pagination {
+    text-align: right;
+    margin: 10px 0;
+  }
+  /deep/ .table-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+  }
 }
 /deep/ .search-cell {
   .cell > .el-checkbox {
