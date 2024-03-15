@@ -1,24 +1,25 @@
 <template>
   <div class="conditon">
-    <div v-for="item in value" :key="item.label" class="conditon-item">
-      <span class="item-label"> {{ item.label }}： </span>
-      <template v-if="Array.isArray(item.value)">
-        <span
-          class="item-value"
-          v-for="(nextitem, nextindex) in item.value"
-          :key="nextitem.label"
-        >
-          {{ nextitem.label }}
-          {{ item.value.length === nextindex + 1 ? '' : ',' }}
-        </span>
-      </template>
-      <template v-else>
-        <span class="item-value">{{ item.value }}</span>
-      </template>
-      <div class="item-remove" @click="removeTag(item)">
-        <i class="el-icon-close"></i>
+    <template v-for="item in value">
+      <div v-if="judgeExist(item)" :key="item.label" class="conditon-item">
+        <span class="item-label"> {{ item.label }}： </span>
+        <template v-if="Array.isArray(item.value)">
+          <span
+            class="item-value"
+            v-for="(nextitem, nextindex) in item.value"
+            :key="nextitem.label"
+          >
+            {{ nextitem.label }}
+            {{ item.value.length === nextindex + 1 ? '' : ',' }}
+          </span>
+        </template>
+        <span v-else class="item-value">{{ item.value }}</span>
+        <div class="item-remove" @click="removeTag(item)">
+          <i class="el-icon-close"></i>
+        </div>
       </div>
-    </div>
+    </template>
+    <el-link type="primary" :underline="false" @click="clear">清空条件</el-link>
   </div>
 </template>
 
@@ -37,13 +38,31 @@ export default {
     },
   },
   methods: {
+    // 判断值是否存在
+    judgeExist({ value }) {
+      const valueIsArray = Array.isArray(value)
+      const valueExist =
+        (valueIsArray && value.length) || (!valueIsArray && value)
+      return valueExist
+    },
+    // 移除
     removeTag(item) {
       const { prop } = item
-      const newValue = deepClone(this.value)
-      const index = newValue.findIndex((condition) => condition.prop === prop)
-      newValue.splice(index, 1)
-      this.$emit('change', newValue)
+      const findItem = this.value.findIndex(
+        (condition) => condition.prop === prop
+      )
+      const valueIsArray = Array.isArray(findItem.value)
+      findItem.value = valueIsArray ? [] : ''
+      this.$emit('change', this.value)
       this.$emit('remove-tag', item)
+    },
+    clear() {
+      this.value.forEach((item) => {
+        const valueIsArray = Array.isArray(item.value)
+        item.value = valueIsArray ? [] : ''
+      })
+      this.$emit('change', this.value)
+      this.$emit('clear')
     },
   },
 }

@@ -695,6 +695,25 @@ export function def(obj, key, value, config) {
     ...config,
   })
 }
+
+// 事件派发,用于自定义表单触发校验
+export function dispatch(componentName, eventName, params) {
+  // @param 1: 触发事件的组件名称 2: 事件名称 3. 额外参数
+  var parent = this.$parent || this.$root
+  var name = parent.$options.componentName
+  while (parent && (!name || name !== componentName)) {
+    // 根据componentName自下而上递归查找目标组件
+    parent = parent.$parent
+    if (parent) {
+      name = parent.$options.componentName
+    }
+  }
+  if (parent) {
+    // 用名称为[componentName]的组件$emit事件
+    parent.$emit.apply(parent, [eventName].concat(params))
+  }
+}
+
 // vue指令，监听元素大小变化(重点是宽度变化)
 export const vResize = {
   bind(el, binding) {

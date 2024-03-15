@@ -44,7 +44,11 @@
           label="已选条件"
           :required="undefined"
         >
-          <condition v-model="conditionOptions" @remove-tag="conditionRemove" />
+          <condition
+            v-model="conditionOptions"
+            @remove-tag="conditionRemove"
+            @clear="conditionClear"
+          />
         </el-form-item>
         <div class="border-line"></div>
       </template>
@@ -373,17 +377,7 @@ export default {
           // 勾选表单处理
           if (this.isCheckform) {
             // 初始化conditionOptions
-            const value = this.formData[item.prop]
-            const valueIsArray = Array.isArray(value)
-            const valueExist =
-              (valueIsArray && value.length) || (!valueIsArray && value)
-            if (valueExist) {
-              this.conditionOptions.push({
-                label: item.label,
-                prop: item.prop,
-                value: this.formData[item.prop],
-              })
-            }
+            this.changeItem(this.formData[item.prop], item)
             // 处理换行逻辑
             if (item.childern || component === 'check') {
               item.span = 24
@@ -391,6 +385,7 @@ export default {
               item.isRow = true
             }
           }
+          // 处理isRow属性
           if (item.isRow) {
             item.offestRight = 24 - item.span
           }
@@ -530,12 +525,16 @@ export default {
         }
       }
     },
-    // 变更条件
+    // 变更条件或者用于初始化
     changeItem(value, { prop, label }) {
       let checkedValue
       if (this.allOptions[prop]) {
         const options = this.allOptions[prop]
-        checkedValue = options.filter((item) => value.includes(item.value))
+        checkedValue = options.filter((item) => {
+          return Array.isArray(value)
+            ? value.includes(item.value)
+            : value === item.value
+        })
       } else {
         checkedValue = value
       }
@@ -555,6 +554,26 @@ export default {
       const { prop } = item
       this.formData[prop] = ''
     },
+    // 删除所有条件
+    async conditionClear() {
+      this.resetFields()
+      // 没有按钮组时，触发刷新事件
+      if (!this.showButtons && this.isSearchList) {
+        this.resetValidate()
+      }
+    },
+    resetValidate() {
+      this.validate((valid) => {
+        // 重置完再次校验，校验通过则触发查询,否则清空校验
+        if (valid) {
+          this.handleSearch()
+        } else {
+          this.$nextTick(() => {
+            this.clearValidate()
+          })
+        }
+      })
+    },
     // 增加额外的组件
     addComponents() {
       for (const key in this.extraComponents) {
@@ -573,13 +592,13 @@ export default {
       // 没有按钮组时，触发刷新事件
       if (!this.showButtons && this.isSearchList) {
         // 校验单个字段
-        await this.validateField(fieldItem.prop)
+        await this.validateOneField(fieldItem.prop)
         this.handleSearch()
       }
     },
-    validateField(prop) {
+    validateOneField(prop) {
       return new Promise((resolve, reject) => {
-        this.$refs.form.validateField(prop, (valid) => {
+        this.validateField(prop, (valid) => {
           valid ? reject(`${prop} is required`) : resolve()
         })
       })
@@ -611,17 +630,18 @@ export default {
       if (method === 'reset') {
         // const obj = deepClone(this.cloneForm)
         // this.$emit('update:formData', obj)
-        // await this.$refs.form.validate()
-        // this.$nextTick(() => {
-        //   this.$refs.form.clearValidate()
-        // })
         this.resetFields()
+        this.resetValidate()
+        // await this.validate()
+        // this.$nextTick(() => {
+        //   this.clearValidate()
+        // })
         // 同时触发重置事件，用于区分
-        this.handleSearch()
+        // this.handleSearch()
       }
       // method为search,comfirm则进行校验
       if (['search', 'confirm'].includes(method)) {
-        await this.$refs.form.validate()
+        await this.validate()
       }
       this.$emit('happenEvent', {
         method,

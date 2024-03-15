@@ -3,14 +3,15 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-14 12:12:31
+ * @LastEditTime: 2024-03-15 17:22:21
 -->
 <template>
   <div>
     <ws-form
       label-suffix=":"
       :formConfigList="formConfigList"
-      :buttonConfigList="formButtons"
+      :buttonConfigList="[]"
+      :useDefaultButtons="false"
       :allOptions="allOptions"
       :isSearchList="true"
       :isCheckform="true"

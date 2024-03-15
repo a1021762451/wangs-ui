@@ -93,6 +93,12 @@ export const formConfigList = [
     required: true,
   },
   {
+    component: 'check',
+    prop: 'testcheck',
+    label: 'check组件',
+    required: true,
+  },
+  {
     component: 'el-checkbox-group',
     prop: 'testCheckbox',
     label: '复选框',
@@ -105,6 +111,9 @@ export const formConfigList = [
     required: true,
   },
 ]
+// formConfigList.forEach((item) => {
+//   item.required = false
+// })
 
 // 下拉框选项
 export const allOptions = {
@@ -120,6 +129,10 @@ export const allOptions = {
     { label: '选项一', value: '1' },
     { label: '选项二', value: '2' },
   ],
+  testcheck: Array.from({ length: 100 }).map((_, index) => ({
+    label: `选项${index}`,
+    value: index,
+  })),
 }
 
 // 表格列配置
