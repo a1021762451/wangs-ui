@@ -45,6 +45,7 @@
           :required="undefined"
         >
           <condition
+            clearButtontext="重置条件"
             v-model="conditionOptions"
             @remove-tag="conditionRemove"
             @clear="conditionClear"
@@ -170,7 +171,7 @@
         </template>
         <!-- 按钮 -->
         <el-form-item
-          v-if="showButtons"
+          v-if="hasButtons"
           class="form-item-buttons"
           ref="searchModeList"
         >
@@ -377,7 +378,7 @@ export default {
           // 勾选表单处理
           if (this.isCheckform) {
             // 初始化conditionOptions
-            this.changeItem(this.formData[item.prop], item)
+            this.changeConditionItem(item)
             // 处理换行逻辑
             if (item.childern || component === 'check') {
               item.span = 24
@@ -398,7 +399,9 @@ export default {
       handler() {
         const arr = this.useDefaultButtons
           ? this.isSearchList
-            ? defaultButtons
+            ? this.isCheckform
+              ? defaultButtons.filter((item) => item.method !== 'reset')
+              : defaultButtons
             : defaultButtonsForForm
           : []
         this.buttonsList = this.buttonConfigList.concat(arr)
@@ -449,9 +452,17 @@ export default {
       })
       return obj
     },
-    showButtons() {
+    // 是否显示按钮组
+    hasButtons() {
       // this.configList.length > 0 &&
       return this.buttonsList.length > 0 && !this.isDetail
+    },
+    // 是否有查询按钮
+    hasSearchButton() {
+      return (
+        this.hasButtons &&
+        this.buttonsList.some((item) => item.method === 'search')
+      )
     },
     size() {
       return this.$attrs.size
@@ -526,7 +537,8 @@ export default {
       }
     },
     // 变更条件或者用于初始化
-    changeItem(value, { prop, label }) {
+    changeConditionItem({ prop, label }) {
+      const value = this.formData[prop]
       let checkedValue
       if (this.allOptions[prop]) {
         const options = this.allOptions[prop]
@@ -556,11 +568,16 @@ export default {
     },
     // 删除所有条件
     async conditionClear() {
-      this.resetFields()
+      // this.resetFields()
+      this.happenEvent({ method: 'reset' })
+      // 初始化conditionOptions
+      this.configList.forEach((fieldItem) => {
+        this.changeConditionItem(fieldItem)
+      })
       // 没有按钮组时，触发刷新事件
-      if (!this.showButtons && this.isSearchList) {
-        this.resetValidate()
-      }
+      // if (this.isSearchList && !this.hasSearchButton) {
+      //   this.resetValidate()
+      // }
     },
     resetValidate() {
       this.validate((valid) => {
@@ -582,15 +599,15 @@ export default {
     },
     // 表格内复选框变更
     async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
-      this.changeItem(formData[fieldItem.prop], fieldItem)
+      this.changeConditionItem(fieldItem)
       this.$emit('happenEvent', {
         method,
         buttonItem: { method },
         fieldItem,
         formData,
       })
-      // 没有按钮组时，触发刷新事件
-      if (!this.showButtons && this.isSearchList) {
+      // 没有按钮组或没有查询按钮时，触发刷新事件
+      if (this.isSearchList && !this.hasSearchButton) {
         // 校验单个字段
         await this.validateOneField(fieldItem.prop)
         this.handleSearch()
@@ -605,7 +622,7 @@ export default {
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
     judgeOneRow() {
-      if (!this.isSearchList || !this.showButtons) return
+      if (!this.isSearchList || !this.hasButtons) return
       // 判断是否单行, 第一个col高度或者第一个row高度 与 整个form高度比较
       const el = this.$refs.wsForm
       if (!el) return
@@ -796,6 +813,7 @@ export default {
       .el-form-item__label {
         padding: 0 6px 0;
         line-height: initial;
+        white-space: nowrap;
       }
       .el-form-item__content {
         margin-left: 12px !important;
@@ -840,6 +858,10 @@ export default {
 }
 /deep/ .el-textarea.is-disabled .el-textarea__inner {
   color: #959090;
+}
+/deep/ .el-textarea .el-input__count {
+  // 避免form-item line-height影响
+  line-height: initial;
 }
 /deep/ .el-input-number {
   width: 100%;

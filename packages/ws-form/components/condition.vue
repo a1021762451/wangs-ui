@@ -19,12 +19,13 @@
         </div>
       </div>
     </template>
-    <el-link type="primary" :underline="false" @click="clear">清空条件</el-link>
+    <el-link type="primary" :underline="false" @click="clear">{{
+      clearButtontext
+    }}</el-link>
   </div>
 </template>
 
 <script>
-import { deepClone } from '../../utils/util'
 export default {
   name: 'condition',
   model: {
@@ -35,6 +36,11 @@ export default {
     value: {
       type: Array,
       default: () => [],
+    },
+    // 清空按钮文案
+    clearButtontext: {
+      type: String,
+      default: '清空条件',
     },
   },
   methods: {
@@ -48,9 +54,7 @@ export default {
     // 移除
     removeTag(item) {
       const { prop } = item
-      const findItem = this.value.findIndex(
-        (condition) => condition.prop === prop
-      )
+      const findItem = this.value.find((condition) => condition.prop === prop)
       const valueIsArray = Array.isArray(findItem.value)
       findItem.value = valueIsArray ? [] : ''
       this.$emit('change', this.value)
@@ -70,7 +74,7 @@ export default {
 
 <style lang="less" scoped>
 .conditon {
-  // padding: 10px 0;
+  // 避免form-item line-height影响
   line-height: initial;
   .conditon-item {
     display: inline-block;
@@ -80,9 +84,7 @@ export default {
     font-size: 12px;
     border: 1px solid #489393;
     color: #666;
-    height: 24px;
-    line-height: 24px;
-    padding: 0 3px;
+    padding: 4px;
     .item-remove {
       cursor: pointer;
       display: inline-block;
@@ -92,9 +94,9 @@ export default {
       background: #2faf9c;
       color: white;
       text-align: center;
+      font-size: 12px;
       width: 14px;
       height: 14px;
-      font-size: 12px;
       line-height: 14px;
     }
     // .item-remove:hover {

@@ -3,15 +3,15 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-15 17:22:21
+ * @LastEditTime: 2024-03-16 13:52:22
 -->
 <template>
   <div>
     <ws-form
       label-suffix=":"
       :formConfigList="formConfigList"
-      :buttonConfigList="[]"
-      :useDefaultButtons="false"
+      :buttonConfigList="formButtons"
+      :useDefaultButtons="true"
       :allOptions="allOptions"
       :isSearchList="true"
       :isCheckform="true"
@@ -22,12 +22,13 @@
       ref="wsForm"
     >
       <!-- 指向ws-form组件的插槽 -->
-      <template #testSlot="{ fieldItem, formData }">
+      <template #testSlot="{ fieldItem, formData, fieldItemChange }">
         <el-input
           clearable
           v-model="formData[fieldItem.prop]"
           :placeholder="fieldItem.disabled ? '' : '请输入内容'"
           :disabled="fieldItem.disabled"
+          @change="fieldItemChange(fieldItem, formData)"
         ></el-input>
       </template>
       <!-- 指向ws-buttons组件的插槽 -->

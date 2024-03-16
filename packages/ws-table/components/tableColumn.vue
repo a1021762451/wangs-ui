@@ -512,6 +512,10 @@ export default {
 /deep/ .el-textarea.is-disabled .el-textarea__inner {
   color: #959090;
 }
+/deep/ .el-textarea .el-input__count {
+  // 避免form-item line-height影响
+  line-height: initial;
+}
 /deep/ .el-input-number {
   width: 100%;
   overflow: hidden;
