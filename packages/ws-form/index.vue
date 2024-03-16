@@ -6,21 +6,27 @@
       searchMode: isSearchList,
       formMode: !isSearchList,
       checkform: isCheckform,
-      isFold,
-    }"
-    :style="{
-      height: isFold ? colHeight + 'px' : undefined,
     }"
     ref="wsForm"
   >
+    <!-- 条件行 -->
+    <template v-if="isCheckform">
+      <condition
+        style="padding-bottom: 10px"
+        clearButtontext="重置条件"
+        v-model="conditionOptions"
+        @remove-tag="conditionRemove"
+        @clear="conditionClear"
+      />
+      <div class="border-line"></div>
+    </template>
     <el-form
       :style="{
-        transform: isFold
-          ? `translateY(-100%) translateY(${colHeight}px)`
-          : undefined,
+        height: isFold ? colHeight + 'px' : undefined,
       }"
       class="weighting"
       :class="{
+        isFold,
         no_lable_wrap: labelWidth !== 'auto',
         has_lable_wrap: labelWidth === 'auto',
         has_rules: Object.keys(rules).length,
@@ -37,23 +43,15 @@
       }"
       v-on="$listeners"
     >
-      <!-- 条件行 -->
-      <template v-if="isCheckform">
-        <el-form-item
-          class="form-item-condition"
-          label="已选条件"
-          :required="undefined"
-        >
-          <condition
-            clearButtontext="重置条件"
-            v-model="conditionOptions"
-            @remove-tag="conditionRemove"
-            @clear="conditionClear"
-          />
-        </el-form-item>
-        <div class="border-line"></div>
-      </template>
-      <el-row :gutter="gutter" type="flex">
+      <el-row
+        :gutter="gutter"
+        type="flex"
+        :style="{
+          transform: isFold
+            ? `translateY(-100%) translateY(${colHeight}px)`
+            : undefined,
+        }"
+      >
         <!-- 表单元素 -->
         <template v-for="(fieldItem, index) in configList">
           <el-col
