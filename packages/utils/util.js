@@ -713,6 +713,30 @@ export function dispatch(componentName, eventName, params) {
     parent.$emit.apply(parent, [eventName].concat(params))
   }
 }
+// 遍历列的所有内容，获取最宽一列的宽度
+export function getMaxLength(arr) {
+  const width = arr.reduce((acc, item) => {
+    if (item) {
+      let calcLen = getTextWidth(item)
+      if (acc < calcLen) {
+        acc = calcLen
+      }
+    }
+    return acc
+  }, 0)
+  return width
+}
+// 使用span标签包裹内容，然后计算span的宽度 width： px
+export function getTextWidth(str) {
+  let width = 0
+  let html = document.createElement('span')
+  html.innerText = str
+  html.className = 'getTextWidth'
+  document.querySelector('body').appendChild(html)
+  width = document.querySelector('.getTextWidth').offsetWidth
+  document.querySelector('.getTextWidth').remove()
+  return width
+}
 
 // vue指令，监听元素大小变化(重点是宽度变化)
 export const vResize = {

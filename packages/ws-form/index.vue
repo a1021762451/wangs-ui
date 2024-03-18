@@ -6,27 +6,21 @@
       searchMode: isSearchList,
       formMode: !isSearchList,
       checkform: isCheckform,
+      isFold,
+    }"
+    :style="{
+      height: isFold ? colHeight + 'px' : undefined,
     }"
     ref="wsForm"
   >
-    <!-- 条件行 -->
-    <template v-if="isCheckform">
-      <condition
-        style="padding-bottom: 10px"
-        clearButtontext="重置条件"
-        v-model="conditionOptions"
-        @remove-tag="conditionRemove"
-        @clear="conditionClear"
-      />
-      <div class="border-line"></div>
-    </template>
     <el-form
       :style="{
-        height: isFold ? colHeight + 'px' : undefined,
+        transform: isFold
+          ? `translateY(-100%) translateY(${colHeight}px)`
+          : undefined,
       }"
       class="weighting"
       :class="{
-        isFold,
         no_lable_wrap: labelWidth !== 'auto',
         has_lable_wrap: labelWidth === 'auto',
         has_rules: Object.keys(rules).length,
@@ -43,15 +37,25 @@
       }"
       v-on="$listeners"
     >
-      <el-row
-        :gutter="gutter"
-        type="flex"
-        :style="{
-          transform: isFold
-            ? `translateY(-100%) translateY(${colHeight}px)`
-            : undefined,
-        }"
-      >
+      <el-row :gutter="gutter" type="flex">
+        <el-col :span="24" class="border-bottom">
+          <!-- 条件行 -->
+          <template v-if="isCheckform">
+            <el-form-item
+              class="form-item-condition"
+              label="已选条件"
+              :required="undefined"
+            >
+              <condition
+                clearButtontext="重置条件"
+                v-model="conditionOptions"
+                @remove-tag="conditionRemove"
+                @clear="conditionClear"
+              />
+            </el-form-item>
+            <!-- <div class="border-line"></div> -->
+          </template>
+        </el-col>
         <!-- 表单元素 -->
         <template v-for="(fieldItem, index) in configList">
           <el-col
@@ -61,6 +65,7 @@
               'border-bottom': isCheckform && !judgeIsRow(fieldItem),
             }"
             :key="fieldItem.prop"
+            v-show="!isCheckform || (isCheckform && !isFold)"
           >
             <!-- notLeftMargin: fieldItem.isSide && isSearchList, -->
             <el-form-item
@@ -157,12 +162,7 @@
             </el-form-item>
           </el-col>
           <div
-            v-if="
-              isCheckform &&
-              judgeIsRow(fieldItem) &&
-              (index !== configList.length - 1 ||
-                (index == configList.length - 1 && !isFold))
-            "
+            v-show="isCheckform && !isFold && judgeIsRow(fieldItem)"
             class="border-line"
             :key="fieldItem.prop + 'line'"
           ></div>
@@ -237,6 +237,7 @@ import {
   getDefaultTime,
   vResize,
   getObjAttr,
+  getMaxLength,
 } from '../utils/util'
 import check from './components/check.vue'
 import condition from './components/condition.vue'
@@ -493,6 +494,15 @@ export default {
     judgeIsRow(fieldItem) {
       return fieldItem.isRow || fieldItem.span === 24
     },
+    getDynamicWidth() {
+      const arr = []
+      this.configList.forEach((item) => {
+        if (item.label) {
+          arr.push(item.label)
+        }
+      })
+      this.labelMaxWidth = getMaxLength(arr) * 1.5 + 'px'
+    },
     // 将form label的margin转换为padding
     async formMarginToPadding() {
       if (!this.isCheckform) return
@@ -502,19 +512,27 @@ export default {
       const formItems = el.getElementsByClassName('el-form-item')
       for (let i = 0; i < formItems.length; i++) {
         const formItem = formItems[i]
-        const labelWrap = formItem.getElementsByClassName(
-          'el-form-item__label-wrap'
-        )[0]
+        let labelWrap =
+          formItem.querySelector('el-form-item__label-wrap') ||
+          formItem.querySelector('.el-form-item__label')
         if (labelWrap) {
+          if (this.labelWidth === 'auto') {
+            this.getDynamicWidth()
+            labelWrap.style.width = this.labelMaxWidth
+          } else {
+            this.labelPosition &&
+              (labelWrap.style.textAlign = this.labelPosition)
+          }
+          continue
           const { marginLeft, marginRight, width } =
             window.getComputedStyle(labelWrap)
-          if (this.labelWidth === 'auto' && marginRight) {
-            // 正则匹配数字（小数或整数）和单位
-            const reg = /(\d+)(\w+)/
-            // marginLeft转换为数字和单位
-            const marginLeftArr = marginLeft.match(reg)
-            const marginLeftNum = +marginLeftArr[1]
-            const marginLeftUnit = marginLeftArr[2]
+          // 正则匹配数字（小数或整数）和单位
+          const reg = /(\d+)(\w+)/
+          // marginLeft转换为数字和单位
+          const marginLeftArr = marginLeft.match(reg)
+          const marginLeftNum = +marginLeftArr[1]
+          const marginLeftUnit = marginLeftArr[2]
+          if (this.labelWidth === 'auto' && marginLeftNum) {
             const marginLeftHalf = marginLeftNum / 2 + marginLeftUnit
             if (this.labelPosition === 'left') {
               labelWrap.style.paddingRight = marginLeft
@@ -626,17 +644,18 @@ export default {
       if (!el) return
       let compareEle = el.getElementsByClassName('el-col')[0]
       if (!compareEle) compareEle = el.getElementsByClassName('el-row')[0]
-      // exceedOneRow变动后，按钮组高度可能会变化，nextTick中获取按钮组高度
-      this.$nextTick(() => {
-        let searchModeListEl = this.$refs.searchModeList.$el
-        this.colHeight = searchModeListEl.offsetHeight
-      })
       if (!compareEle) {
         this.exceedOneRow = false
         return
       }
       const compareHeight = compareEle.offsetHeight
       this.exceedOneRow = el.offsetHeight - 10 > compareHeight
+      // exceedOneRow变动后，按钮组高度可能会变化，nextTick中获取按钮组高度
+      this.$nextTick(() => {
+        let searchModeListEl = this.$refs.searchModeList.$el
+        this.colHeight = searchModeListEl.offsetHeight
+        if (this.isCheckform) this.colHeight += compareEle.offsetHeight
+      })
     },
     // 集中处理事件
     async happenEvent(buttonItem) {
@@ -805,51 +824,63 @@ export default {
   /deep/ .el-col {
     padding: 10px 0;
   }
+  /deep/.el-col:first-child {
+    padding-top: 0;
+  }
   /deep/ .weighting {
     .el-form-item {
       margin-bottom: 0;
       .el-form-item__label {
-        padding: 0 6px 0;
+        // padding: 0 6px 0;
         line-height: initial;
         white-space: nowrap;
+        font-weight: 600;
+        color: #333;
       }
       .el-form-item__content {
         margin-left: 12px !important;
       }
     }
   }
+  // labelWidth auto
   /deep/.has_lable_wrap {
     .el-form-item__label-wrap {
       align-self: flex-start;
-      font-weight: 600;
-      color: #333;
       background: #ececec;
       border-radius: 2px;
-      padding: 3px 0;
+      padding: 3px 5px;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+    .el-form-item__label {
+      padding: 0;
+      text-align: center;
     }
   }
+  // labelWidth 非auto
   /deep/ .no_lable_wrap {
     .el-form-item__label {
       align-self: flex-start;
-      font-weight: 600;
-      color: #333;
       background: #ececec;
       border-radius: 2px;
-      padding: 4px 6px;
+      padding: 3px 5px;
+      text-align: center;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
   }
   .form-item-buttons.el-form-item {
     padding-top: 10px;
   }
-  .form-item-condition {
-    padding-bottom: 10px;
-  }
+  // .form-item-condition {
+  //   padding-bottom: 10px;
+  // }
 }
-.checkform.isFold {
-  .form-item-buttons.el-form-item {
-    padding-top: 0;
-  }
-}
+// .checkform.isFold {
+//   .form-item-buttons.el-form-item {
+//     padding-top: 0;
+//   }
+// }
 // 表单元素样式
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #959090;

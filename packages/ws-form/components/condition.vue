@@ -1,7 +1,13 @@
 <template>
   <div class="conditon">
     <template v-for="item in value">
-      <div v-if="judgeExist(item)" :key="item.label" class="conditon-item">
+      <div
+        v-if="judgeExist(item)"
+        @mouseenter="mouseenterTag(item)"
+        @mouseleave="mouseleaveTag"
+        :key="item.label"
+        class="conditon-item"
+      >
         <span class="item-label"> {{ item.label }}： </span>
         <template v-if="Array.isArray(item.value)">
           <span
@@ -14,6 +20,7 @@
           </span>
         </template>
         <span v-else class="item-value">{{ item.value }}</span>
+        <!-- v-show="iAct === item" -->
         <div class="item-remove" @click="removeTag(item)">
           <i class="el-icon-close"></i>
         </div>
@@ -43,7 +50,22 @@ export default {
       default: '清空条件',
     },
   },
+  data() {
+    return {
+      // 鼠标是否在tag上
+      iAct: null,
+    }
+  },
   methods: {
+    // 鼠标移入tag
+    mouseenterTag(item) {
+      console.log('mouseenterTag', item)
+      this.iAct = item
+    },
+    // 鼠标移出tag
+    mouseleaveTag() {
+      this.iAct = null
+    },
     // 判断值是否存在
     judgeExist({ value }) {
       const valueIsArray = Array.isArray(value)
@@ -53,10 +75,8 @@ export default {
     },
     // 移除
     removeTag(item) {
-      const { prop } = item
-      const findItem = this.value.find((condition) => condition.prop === prop)
-      const valueIsArray = Array.isArray(findItem.value)
-      findItem.value = valueIsArray ? [] : ''
+      const valueIsArray = Array.isArray(item.value)
+      item.value = valueIsArray ? [] : ''
       this.$emit('change', this.value)
       this.$emit('remove-tag', item)
     },

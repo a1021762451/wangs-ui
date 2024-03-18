@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-14 17:11:37
+ * @LastEditTime: 2024-03-18 10:24:33
 -->
 <template>
   <div class="table-container">
@@ -195,6 +195,7 @@ import {
   vResize,
   getDefaultTime,
   def,
+  getMaxLength,
 } from '../utils/util'
 import mixins from './mixins'
 import tableColumn from './components/tableColumn'
@@ -715,7 +716,8 @@ export default {
           const arr = this.getColumnData(tableData, column, childrenKey)
           // 迭代获取每一列的所有数据
           arr.push(column.label) // 把每列的表头也加进去算
-          this.$set(column, 'width', this.getMaxLength(arr) + 40)
+          const width = Math.min(getMaxLength(arr), 600) + 40
+          this.$set(column, 'width', width)
         }
         if (!conditon && column.children) {
           this.getDynamicWidth(column.children)
@@ -767,30 +769,6 @@ export default {
       //   this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
       //   this.handleSearch()
       // }
-    },
-    // 遍历列的所有内容，获取最宽一列的宽度
-    getMaxLength(arr) {
-      const width = arr.reduce((acc, item) => {
-        if (item) {
-          let calcLen = this.getTextWidth(item)
-          if (acc < calcLen) {
-            acc = calcLen
-          }
-        }
-        return acc
-      }, 0)
-      return width > 600 ? 600 : width
-    },
-    // 使用span标签包裹内容，然后计算span的宽度 width： px
-    getTextWidth(str) {
-      let width = 0
-      let html = document.createElement('span')
-      html.innerText = str
-      html.className = 'getTextWidth'
-      document.querySelector('body').appendChild(html)
-      width = document.querySelector('.getTextWidth').offsetWidth
-      document.querySelector('.getTextWidth').remove()
-      return width
     },
     // 校验单行
     async validateRow(row) {
