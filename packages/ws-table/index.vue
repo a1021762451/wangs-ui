@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-18 10:24:33
+ * @LastEditTime: 2024-04-17 15:18:46
 -->
 <template>
   <div class="table-container">
@@ -201,6 +201,7 @@ import mixins from './mixins'
 import tableColumn from './components/tableColumn'
 import wsForm from '../ws-form/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
+let Sortable = null
 export default {
   name: 'ws-table',
   mixins: [mixins],
@@ -211,6 +212,16 @@ export default {
     wsButtons,
   },
   props: {
+    // 允许拖拽行
+    sortableRow: {
+      default: false,
+      type: Boolean,
+    },
+    // 允许拖拽列
+    sortableColumn: {
+      default: false,
+      type: Boolean,
+    },
     // 必传,
     // 表格列
     tableColumns: {
@@ -334,6 +345,15 @@ export default {
     },
   },
   data() {
+    // 判断是否有拖拽,有就引入Sortable
+    try {
+      if (this.sortableRow || this.sortableColumn) {
+        const sortablejs = require('sortablejs')
+        Sortable = sortablejs.Sortable
+      }
+    } catch (error) {
+      console.error('请安装sortablejs')
+    }
     return {
       columns: [], // 列数据
       originColunms: [], // 复制列数据，用于列筛选
@@ -354,6 +374,7 @@ export default {
       property: '',
       index: '',
       switchModeData: this.switchMode,
+      dataNoChange: false,
     }
   },
   watch: {
@@ -406,6 +427,10 @@ export default {
     },
     data: {
       handler(newData) {
+        if (this.dataNoChange) {
+          this.dataNoChange = false
+          return
+        }
         // 初始化数据
         // this.tableForm.tableData = deepClone(newData)
         // 引用不能丢失 否则表格方法会失效（使用row）
@@ -487,12 +512,89 @@ export default {
   },
   mounted() {
     this.getSingleColunms()
+    this.rowDrop()
+    this.columnDrop()
     // window.addEventListener('resize', this.doLayout)
   },
   beforeDestroy() {
     // window.removeEventListener('resize', this.doLayout)
   },
   methods: {
+    // 根据索引和第二个参数row,变更拖拽后的数据，考虑tableDada中的children
+    changeDataByIndex(rowIndex, row) {
+      // console.log(rowIndex, row, 'changeDataByIndex')
+      const { tableData } = this.tableForm
+      const childrenKey = this.childrenKey
+      let realIndex = -1
+      const iterateChange = (dataList) => {
+        for (let i = 0; i < dataList.length; i++) {
+          realIndex++
+          if (realIndex === rowIndex) {
+            // console.log(realIndex, dataList[i], 'realIndex')
+            if (row) {
+              dataList.splice(i, 0, row)
+              return true
+            } else {
+              const delteRow = dataList[i]
+              dataList.splice(i, 1)
+              return delteRow
+            }
+          }
+          const children = dataList[i][childrenKey]
+          if (Array.isArray(children) && children.length) {
+            const value = iterateChange(children)
+            if (value) return value
+          }
+        }
+      }
+      return iterateChange(tableData)
+    },
+    // 行拖拽
+    rowDrop() {
+      if (!this.sortableRow) return
+      // 要侦听拖拽响应的DOM对象
+      const tbody = document.querySelector('.el-table__body-wrapper tbody')
+      const that = this
+      // 如果handle变成了fixed, 会导致拖拽失效，因为handle是相对于tbody的
+      const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
+      const handle = dragColumn ? '.drag-handle' : undefined
+      Sortable.create(tbody, {
+        // 结束拖拽后的回调函数
+        // 树形表格的时候，有缺陷，只会拖动父级，子级不会跟着动
+        onChange(evt) {
+          console.log(evt, 'end')
+          const { newIndex, oldIndex } = evt
+          // 根据newIndex, oldIndex大小关系, 确定bigIndex, smallIndex
+          that.dataNoChange = true
+          const bigIndex = newIndex > oldIndex ? newIndex : oldIndex
+          const smallIndex = newIndex > oldIndex ? oldIndex : newIndex
+          const bigRow = that.changeDataByIndex(bigIndex)
+          that.changeDataByIndex(smallIndex, bigRow)
+          //  解决只会拖动父级，子级不会跟着动 todo
+        },
+        handle,
+      })
+    },
+
+    // 列拖拽
+    columnDrop() {
+      if (!this.sortableColumn) return
+      // 要侦听拖拽响应的DOM对象
+      const wrapperTr = document.querySelector('.el-table__body-wrapper tr')
+      const that = this
+      Sortable.create(wrapperTr, {
+        animation: 180,
+        delay: 0,
+        // 结束拖拽后的回调函数
+        onEnd: (evt) => {
+          this.dataNoChange = true
+          console.log('拖动了列：')
+          const oldItem = that.dropCol[evt.oldIndex]
+          that.dropCol.splice(evt.oldIndex, 1)
+          that.dropCol.splice(evt.newIndex, 0, oldItem)
+        },
+      })
+    },
     // 数据或者表格列变更都要执行
     dataOrColumnsChangeCallback() {
       // 初始化首行

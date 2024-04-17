@@ -138,6 +138,7 @@ export const allOptions = {
 // 表格列配置
 export const tableColumns = [
   { type: 'selection' },
+  { type: 'drag' },
   { type: 'index', label: '序号' },
   { type: 'expand', slotName: 'expand' },
   // 基本配置

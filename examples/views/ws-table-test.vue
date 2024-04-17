@@ -18,6 +18,7 @@
       buttonConfigList: formButtons,
       allOptions,
     }"
+    sortableRow
     switchMode="rowControl, dblclick"
     @happenEvent="happenEvent"
     @selection-change="selectionChange"

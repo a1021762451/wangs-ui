@@ -60,6 +60,26 @@
       </ws-buttons>
     </template>
   </el-table-column>
+  <!-- 拖拽列 -->
+  <el-table-column
+    v-else-if="fieldItem.type === 'drag'"
+    v-bind="{
+      align: 'center',
+      resizable: true,
+      width: (fieldItem.buttonConfigList || []).length * 55,
+      ...fieldItem,
+    }"
+  >
+    <!-- 表头插槽 -->
+    <template v-slot:header="scope" v-if="fieldItem.headerSlotName">
+      <slot :name="fieldItem.headerSlotName" v-bind="{ ...scope, fieldItem }">
+        {{ fieldItem.label || '操作' }}
+      </slot>
+    </template>
+    <template>
+      <i class="el-icon-rank drag-handle"></i>
+    </template>
+  </el-table-column>
   <!-- 内容列 -->
   <el-table-column
     v-else
@@ -103,7 +123,9 @@
           }"
         >
           <template v-if="fieldItem.component === 'el-select'">
-            <template v-for="item in getOptions(fieldItem, allOptions, formData)">
+            <template
+              v-for="item in getOptions(fieldItem, allOptions, formData)"
+            >
               <el-option-group
                 v-if="item.children"
                 :key="item.label"
@@ -485,6 +507,10 @@ export default {
 }
 </style>
 <style lang="less" scoped>
+.drag-handle {
+  cursor: move;
+  font-size: 20px;
+}
 .overflow_tip {
   overflow: hidden;
   text-overflow: ellipsis;

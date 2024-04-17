@@ -695,6 +695,7 @@ function judgeHidden(el) {
 // 创建不可枚举的属性
 // 注意深度克隆后，不可枚举的属性会丢失
 export function def(obj, key, value, config) {
+  if(obj[key] !== undefined) return
   Object.defineProperty(obj, key, {
     value,
     enumerable: false,
