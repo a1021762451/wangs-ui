@@ -265,7 +265,7 @@ export function getShowValue(
     value && (value = format(new Date(value), componentAttrs.format))
   }
   if (component === 'el-select') {
-    const options = allOptions[prop] || []
+    const options = getOptions(fieldItem, allOptions, row)
     const option = options.find((item) => item.value === row[prop])
     option && (value = option.label)
   }
@@ -274,6 +274,12 @@ export function getShowValue(
     : value || value === 0
     ? value
     : fieldItem.placeholder || placeholder
+}
+// 获取下拉框，勾选框等选项
+export function getOptions(fieldItem, allOptions, row) {
+  const { prop } = fieldItem
+  // 选项关联行内/配置/全局
+  return row[`${prop}__options`] || fieldItem.options || allOptions[prop] || []
 }
 /**
  * 对象深拷贝

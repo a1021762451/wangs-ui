@@ -94,7 +94,7 @@
           v-bind="{
             size: 'mini',
             'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-            options: allOptions[fieldItem.prop],
+            options: getOptions(fieldItem, allOptions, formData),
             ...getAttrs(fieldItem, formData),
           }"
           v-on="{
@@ -103,7 +103,7 @@
           }"
         >
           <template v-if="fieldItem.component === 'el-select'">
-            <template v-for="item in allOptions[fieldItem.prop]">
+            <template v-for="item in getOptions(fieldItem, allOptions, formData)">
               <el-option-group
                 v-if="item.children"
                 :key="item.label"
@@ -132,7 +132,7 @@
           </template>
           <template v-if="fieldItem.component === 'el-radio-group'">
             <el-radio
-              v-for="item in allOptions[fieldItem.prop]"
+              v-for="item in getOptions(fieldItem, allOptions, formData)"
               :key="item.value"
               v-bind="{
                 ...item,
@@ -143,7 +143,7 @@
           </template>
           <template v-if="fieldItem.component === 'el-checkbox-group'">
             <el-checkbox
-              v-for="item in allOptions[fieldItem.prop]"
+              v-for="item in getOptions(fieldItem, allOptions, formData)"
               :key="item.value"
               v-bind="{
                 ...item,
@@ -183,6 +183,7 @@
             size: 'mini',
             'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
             disabled: row[fieldItem.disabledKey],
+            options: getOptions(fieldItem, allOptions, row),
             ...getAttrs(fieldItem, row),
           }"
           v-focus="switchModeData.includes('dblclick') && !row[switchKey]"
@@ -196,7 +197,7 @@
           }"
         >
           <template v-if="fieldItem.component === 'el-select'">
-            <template v-for="item in allOptions[fieldItem.prop]">
+            <template v-for="item in getOptions(fieldItem, allOptions, row)">
               <el-option-group
                 v-if="item.children"
                 :key="item.label"
@@ -225,7 +226,7 @@
           </template>
           <template v-if="fieldItem.component === 'el-radio-group'">
             <el-radio
-              v-for="item in allOptions[fieldItem.prop]"
+              v-for="item in getOptions(fieldItem, allOptions, row)"
               :key="item.value"
               v-bind="{
                 ...item,
@@ -236,7 +237,7 @@
           </template>
           <template v-if="fieldItem.component === 'el-checkbox-group'">
             <el-checkbox
-              v-for="item in allOptions[fieldItem.prop]"
+              v-for="item in getOptions(fieldItem, allOptions, row)"
               :key="item.value"
               v-bind="{
                 ...item,
@@ -291,6 +292,7 @@ import {
   getMinValidator,
   getRandomId,
   getShowValue,
+  getOptions,
 } from '../../utils/util'
 import wsButtons from '../../ws-buttons/index.vue'
 export default {
@@ -379,6 +381,7 @@ export default {
     getAttrs,
     getRandomId,
     getShowValue,
+    getOptions,
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
       this.$emit('happenEvent', {

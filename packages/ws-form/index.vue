@@ -93,7 +93,7 @@
                 @blur="handleBlur(formData, fieldItem)"
                 @input="handleInput($event, formData, fieldItem)"
                 v-bind="{
-                  options: allOptions[fieldItem.prop],
+                  options: getOptions(fieldItem, allOptions, formData),
                   ...getAttrs(fieldItem, formData, isDetail),
                 }"
                 v-on="{
@@ -102,7 +102,7 @@
                 }"
               >
                 <template v-if="fieldItem.component === 'el-select'">
-                  <template v-for="item in allOptions[fieldItem.prop]">
+                  <template v-for="item in getOptions(fieldItem, allOptions, formData)">
                     <el-option-group
                       v-if="item.children"
                       :key="item.label"
@@ -135,7 +135,7 @@
                 </template>
                 <template v-if="fieldItem.component === 'el-radio-group'">
                   <el-radio
-                    v-for="item in allOptions[fieldItem.prop]"
+                    v-for="item in getOptions(fieldItem, allOptions, formData)"
                     :key="item.value"
                     v-bind="{
                       ...item,
@@ -146,7 +146,7 @@
                 </template>
                 <template v-if="fieldItem.component === 'el-checkbox-group'">
                   <el-checkbox
-                    v-for="item in allOptions[fieldItem.prop]"
+                    v-for="item in getOptions(fieldItem, allOptions, formData)"
                     :key="item.value"
                     v-bind="{
                       ...item,
@@ -238,6 +238,7 @@ import {
   vResize,
   getObjAttr,
   getMaxLength,
+  getOptions,
 } from '../utils/util'
 import check from './components/check.vue'
 import condition from './components/condition.vue'
@@ -490,6 +491,7 @@ export default {
   },
   methods: {
     getAttrs,
+    getOptions,
     // 判断是否占据一行
     judgeIsRow(fieldItem) {
       return fieldItem.isRow || fieldItem.span === 24
@@ -553,11 +555,12 @@ export default {
       }
     },
     // 变更条件或者用于初始化
-    changeConditionItem({ prop, label }) {
+    changeConditionItem(fieldItem) {
+      const { prop, label } = fieldItem
       const value = this.formData[prop]
       let checkedValue
-      if (this.allOptions[prop]) {
-        const options = this.allOptions[prop]
+      const options = this.getOptions(fieldItem, this.allOptions, this.formData)
+      if (options.length) {
         checkedValue = options.filter((item) => {
           return Array.isArray(value)
             ? value.includes(item.value)
@@ -932,6 +935,9 @@ export default {
   width: 100%;
 }
 /deep/ .el-date-editor.el-input {
+  width: 100%;
+}
+/deep/ .el-autocomplete {
   width: 100%;
 }
 </style>
