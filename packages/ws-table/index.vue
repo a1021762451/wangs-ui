@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-04-17 15:18:46
+ * @LastEditTime: 2024-04-18 11:15:08
 -->
 <template>
   <div class="table-container">
@@ -521,7 +521,7 @@ export default {
   },
   methods: {
     // 根据索引和第二个参数row,变更拖拽后的数据，考虑tableDada中的children
-    changeDataByIndex(rowIndex, row) {
+    changeDataByIndex(rowIndex, row, getRow) {
       // console.log(rowIndex, row, 'changeDataByIndex')
       const { tableData } = this.tableForm
       const childrenKey = this.childrenKey
@@ -531,7 +531,9 @@ export default {
           realIndex++
           if (realIndex === rowIndex) {
             // console.log(realIndex, dataList[i], 'realIndex')
-            if (row) {
+            if (getRow) {
+              return dataList[i]
+            } else if (row) {
               dataList.splice(i, 0, row)
               return true
             } else {
@@ -551,26 +553,54 @@ export default {
     },
     // 行拖拽
     rowDrop() {
-      if (!this.sortableRow) return
+      if (!this.sortableRow || !Sortable) return
       // 要侦听拖拽响应的DOM对象
       const tbody = document.querySelector('.el-table__body-wrapper tbody')
-      const that = this
       // 如果handle变成了fixed, 会导致拖拽失效，因为handle是相对于tbody的
       const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
       const handle = dragColumn ? '.drag-handle' : undefined
       Sortable.create(tbody, {
         // 结束拖拽后的回调函数
         // 树形表格的时候，有缺陷，只会拖动父级，子级不会跟着动
-        onChange(evt) {
+        onEnd: (evt) => {
           console.log(evt, 'end')
           const { newIndex, oldIndex } = evt
+          if (newIndex === oldIndex) return
           // 根据newIndex, oldIndex大小关系, 确定bigIndex, smallIndex
-          that.dataNoChange = true
+          this.dataNoChange = true
+          const oldRow = this.changeDataByIndex(oldIndex, undefined, true)
+          const newRow = this.changeDataByIndex(newIndex, undefined, true)
           const bigIndex = newIndex > oldIndex ? newIndex : oldIndex
           const smallIndex = newIndex > oldIndex ? oldIndex : newIndex
-          const bigRow = that.changeDataByIndex(bigIndex)
-          that.changeDataByIndex(smallIndex, bigRow)
+          const bigRow = this.changeDataByIndex(bigIndex)
+          this.changeDataByIndex(smallIndex, bigRow)
+          this.$emit('dragRow', {
+            newIndex,
+            oldIndex,
+            oldRow,
+            newRow,
+            tableData: this.tableForm.tableData,
+          })
           //  解决只会拖动父级，子级不会跟着动 todo
+          // 方案一，直接重新赋值 -> 报错
+          // const temTableData = this.tableForm.tableData
+          // this.tableForm.tableData = []
+          // this.$nextTick(() => {
+          //   this.tableForm.tableData = temTableData
+          // })
+          // 方案二，直接赋值columns -> 元素发生变更,导致拖拽失效
+          // const temColumns = this.columns
+          // this.columns = []
+          // this.$nextTick(() => {
+          //   this.columns = temColumns
+          // })
+          // 方案三，操作dom
+          // const tbody = document.querySelector('.el-table__body-wrapper tbody')
+          // const trs = tbody.querySelectorAll('tr')
+          // const trsArr = Array.from(trs)
+          // const bigTr = trsArr[bigIndex]
+          // const smallTr = trsArr[smallIndex]
+          // tbody.insertBefore(bigTr, smallTr)
         },
         handle,
       })
@@ -578,10 +608,9 @@ export default {
 
     // 列拖拽
     columnDrop() {
-      if (!this.sortableColumn) return
+      if (!this.sortableColumn || !Sortable) return
       // 要侦听拖拽响应的DOM对象
       const wrapperTr = document.querySelector('.el-table__body-wrapper tr')
-      const that = this
       Sortable.create(wrapperTr, {
         animation: 180,
         delay: 0,
@@ -589,9 +618,9 @@ export default {
         onEnd: (evt) => {
           this.dataNoChange = true
           console.log('拖动了列：')
-          const oldItem = that.dropCol[evt.oldIndex]
-          that.dropCol.splice(evt.oldIndex, 1)
-          that.dropCol.splice(evt.newIndex, 0, oldItem)
+          const oldItem = this.dropCol[evt.oldIndex]
+          this.dropCol.splice(evt.oldIndex, 1)
+          this.dropCol.splice(evt.newIndex, 0, oldItem)
         },
       })
     },
