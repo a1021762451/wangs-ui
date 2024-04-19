@@ -18,7 +18,7 @@
       style="margin-bottom: 6px"
       v-bind="{
         formData: formData,
-        isSearchList: true,
+        isSearchForm: true,
         ...seachConfig,
         formConfigList,
       }"

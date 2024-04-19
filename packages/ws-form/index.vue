@@ -3,9 +3,10 @@
     v-resize.window.immediate="judgeOneRow"
     class="render"
     :class="{
-      searchMode: isSearchList,
-      formMode: !isSearchList,
-      checkform: isCheckform,
+      searchMode: isSearchForm,
+      formMode: !isSearchForm,
+      checkform: isCheckForm,
+      tableform: isTableForm,
       isFold,
     }"
     :style="{
@@ -33,28 +34,27 @@
         labelWidth,
         labelPosition,
         'validate-on-rule-change': false,
+        'show-message': !this.isTableForm,
         ...$attrs,
       }"
       v-on="$listeners"
     >
       <el-row :gutter="gutter" type="flex">
-        <el-col :span="24" class="border-bottom">
+        <el-col :span="24" class="border-bottom" v-if="isCheckForm">
           <!-- 条件行 -->
-          <template v-if="isCheckform">
-            <el-form-item
-              class="form-item-condition"
-              label="已选条件"
-              :required="undefined"
-            >
-              <condition
-                clearButtontext="重置条件"
-                v-model="conditionOptions"
-                @remove-tag="conditionRemove"
-                @clear="conditionClear"
-              />
-            </el-form-item>
-            <!-- <div class="border-line"></div> -->
-          </template>
+          <el-form-item
+            class="form-item-condition"
+            label="已选条件"
+            :required="undefined"
+          >
+            <condition
+              clearButtontext="重置条件"
+              v-model="conditionOptions"
+              @remove-tag="conditionRemove"
+              @clear="conditionClear"
+            />
+          </el-form-item>
+          <!-- <div class="border-line"></div> -->
         </el-col>
         <!-- 表单元素 -->
         <template v-for="(fieldItem, index) in configList">
@@ -62,12 +62,12 @@
             :span="fieldItem.span"
             :style="{ marginRight: `${(fieldItem.offestRight * 100) / 24}%` }"
             :class="{
-              'border-bottom': isCheckform && !judgeIsRow(fieldItem),
+              'border-bottom': isCheckForm && !judgeIsRow(fieldItem),
             }"
             :key="fieldItem.prop"
-            v-show="!isCheckform || (isCheckform && !isFold)"
+            v-show="!isCheckForm || (isCheckForm && !isFold)"
           >
-            <!-- notLeftMargin: fieldItem.isSide && isSearchList, -->
+            <!-- notLeftMargin: fieldItem.isSide && isSearchForm, -->
             <el-form-item
               :class="{
                 'form-item-with-suffixLabel': fieldItem.suffixLabel,
@@ -102,7 +102,9 @@
                 }"
               >
                 <template v-if="fieldItem.component === 'el-select'">
-                  <template v-for="item in getOptions(fieldItem, allOptions, formData)">
+                  <template
+                    v-for="item in getOptions(fieldItem, allOptions, formData)"
+                  >
                     <el-option-group
                       v-if="item.children"
                       :key="item.label"
@@ -162,7 +164,7 @@
             </el-form-item>
           </el-col>
           <div
-            v-show="isCheckform && !isFold && judgeIsRow(fieldItem)"
+            v-show="isCheckForm && !isFold && judgeIsRow(fieldItem)"
             class="border-line"
             :key="fieldItem.prop + 'line'"
           ></div>
@@ -187,7 +189,7 @@
             </template>
             <template slot="suffix">
               <el-link
-                v-show="isSearchList && (exceedOneRow || isFold)"
+                v-show="isSearchForm && (exceedOneRow || isFold)"
                 :underline="false"
                 :size="buttonSize || size"
                 type="primary"
@@ -282,12 +284,17 @@ export default {
       type: Object,
     },
     // 是否是搜索控件
-    isSearchList: {
+    isSearchForm: {
       default: false,
       type: Boolean,
     },
     // 是否是勾选表单--勾选组件多，且标签带边框
-    isCheckform: {
+    isCheckForm: {
+      default: false,
+      type: Boolean,
+    },
+    // 表格类型表单
+    isTableForm: {
       default: false,
       type: Boolean,
     },
@@ -313,11 +320,6 @@ export default {
       default: true,
       type: Boolean,
     },
-    // el-row 属性
-    gutter: {
-      default: 12,
-      type: Number,
-    },
     // 额外的引入的组件
     extraComponents: {
       default() {
@@ -341,7 +343,7 @@ export default {
           const { component, listeners } = item
           item.span = item.span || this.span
           // 搜索模式下判断表单元素是否在最左边
-          if (this.isSearchList) {
+          if (this.isSearchForm) {
             const span = item.span || 6
             total += span
             const newRemain = Math.floor((total - 1) / 24)
@@ -376,7 +378,7 @@ export default {
             })
           }
           // 勾选表单处理
-          if (this.isCheckform) {
+          if (this.isCheckForm) {
             // 初始化conditionOptions
             this.changeConditionItem(item)
             // 处理换行逻辑
@@ -398,8 +400,8 @@ export default {
     buttonConfigList: {
       handler() {
         const arr = this.useDefaultButtons
-          ? this.isSearchList
-            ? this.isCheckform
+          ? this.isSearchForm
+            ? this.isCheckForm
               ? defaultButtons.filter((item) => item.method !== 'reset')
               : defaultButtons
             : defaultButtonsForForm
@@ -471,7 +473,14 @@ export default {
       return getObjAttr(this.$attrs, 'labelPosition')
     },
     labelWidth() {
-      return getObjAttr(this.$attrs, 'labelWidth') || 'auto'
+      let labelWidthDefault = 'auto'
+      if (this.isCheckForm || this.isTableForm) labelWidthDefault = '100px'
+      return getObjAttr(this.$attrs, 'labelWidth') || labelWidthDefault
+    },
+    gutter() {
+      let gutterDefault = 12
+      if (this.isTableForm) gutterDefault = 0
+      return this.$attrs.gutter || gutterDefault
     },
   },
   created() {
@@ -484,7 +493,7 @@ export default {
     // this.judgeOneRow()
     // window.addEventListener('resize', this.judgeOneRow)
     this.cloneForm = deepClone(this.formData)
-    this.formMarginToPadding()
+    // this.formMarginToPadding()
   },
   beforeDestroy() {
     // window.removeEventListener('resize', this.judgeOneRow)
@@ -507,7 +516,7 @@ export default {
     },
     // 将form label的margin转换为padding
     async formMarginToPadding() {
-      if (!this.isCheckform) return
+      if (!this.isCheckForm) return
       await this.$nextTick()
       const el = this.$refs.wsForm
       if (!el) return
@@ -594,7 +603,7 @@ export default {
         this.changeConditionItem(fieldItem)
       })
       // 没有按钮组时，触发刷新事件
-      // if (this.isSearchList && !this.hasSearchButton) {
+      // if (this.isSearchForm && !this.hasSearchButton) {
       //   this.resetValidate()
       // }
     },
@@ -626,7 +635,7 @@ export default {
         formData,
       })
       // 没有按钮组或没有查询按钮时，触发刷新事件
-      if (this.isSearchList && !this.hasSearchButton) {
+      if (this.isSearchForm && !this.hasSearchButton) {
         // 校验单个字段
         await this.validateOneField(fieldItem.prop)
         this.handleSearch()
@@ -641,7 +650,7 @@ export default {
     },
     // 判断高度是否只有一行，从而隐藏折叠按钮
     judgeOneRow() {
-      if (!this.isSearchList || !this.hasButtons) return
+      if (!this.isSearchForm || !this.hasButtons) return
       // 判断是否单行, 第一个col高度或者第一个row高度 与 整个form高度比较
       const el = this.$refs.wsForm
       if (!el) return
@@ -657,7 +666,7 @@ export default {
       this.$nextTick(() => {
         let searchModeListEl = this.$refs.searchModeList.$el
         this.colHeight = searchModeListEl.offsetHeight
-        if (this.isCheckform) this.colHeight += compareEle.offsetHeight
+        if (this.isCheckForm) this.colHeight += compareEle.offsetHeight
       })
     },
     // 集中处理事件
@@ -878,6 +887,44 @@ export default {
   // .form-item-condition {
   //   padding-bottom: 10px;
   // }
+}
+.tableform {
+  /deep/ .el-form-item {
+    margin-bottom: 0;
+    display: flex;
+    .el-form-item__label {
+      background: #f4f5f7;
+      border: 0.5px solid #bfbfc0;
+    }
+    .el-form-item__content {
+      flex: 1;
+      line-height: initial;
+      border: 0.5px solid #e2e2e2;
+      margin-left: 0 !important;
+    }
+  }
+  /deep/ .form-item-buttons {
+    margin-top: 20px;
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .el-form-item__content {
+      border: none;
+    }
+  }
+  /deep/ .el-form-item:not(.form-item-buttons) {
+    // border-bottom: 0.5px solid #d7d7d7;
+  }
+  /deep/ .el-input.is-disabled .el-input__inner {
+    background: #f0f0f0;
+    color: #333333;
+  }
+  /deep/ .el-input__inner {
+    // border: none;
+    border-radius: 0;
+    border-width: 0.5px;
+  }
 }
 // .checkform.isFold {
 //   .form-item-buttons.el-form-item {

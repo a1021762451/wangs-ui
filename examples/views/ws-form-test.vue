@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-16 09:03:42
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-16 13:52:22
+ * @LastEditTime: 2024-04-19 09:55:34
 -->
 <template>
   <div>
@@ -13,8 +13,8 @@
       :buttonConfigList="formButtons"
       :useDefaultButtons="true"
       :allOptions="allOptions"
-      :isSearchList="true"
-      :isCheckform="true"
+      :isSearchForm="true"
+      :isCheckForm="true"
       size="mini"
       @happenEvent="happenEvent"
       :formData.sync="formData"
