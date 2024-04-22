@@ -422,7 +422,7 @@ export default {
       ]
       this.formConfigList.forEach((fieldItem) => {
         const { component = '', required, disabled } = fieldItem
-        if (!required || disabled) return
+        if (this.isDetail || !required || disabled) return
         const messageSuffix =
           !component || component.includes('input') ? '输入' : '选择'
         obj[fieldItem.prop] = fieldItem.rule || [
@@ -514,7 +514,7 @@ export default {
       })
       this.labelMaxWidth = getMaxLength(arr) * 1.5 + 'px'
     },
-    // 将form label的margin转换为padding
+    // 将form label的margin转换为padding -- 放弃，改为传入labelWidth
     async formMarginToPadding() {
       if (!this.isCheckForm) return
       await this.$nextTick()
@@ -924,6 +924,9 @@ export default {
     // border: none;
     border-radius: 0;
     border-width: 0.5px;
+  }
+  /deep/ .el-input-number .el-input__inner {
+    text-align: left;
   }
 }
 // .checkform.isFold {

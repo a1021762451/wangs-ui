@@ -21,5 +21,10 @@ module.exports = defineConfig({
         '@': resolve('packages')
       }
     }
-  }
+  },
+  devServer: {
+    client: {
+      overlay: false,
+    },
+  },
 })

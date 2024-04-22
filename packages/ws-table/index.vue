@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-04-18 11:15:08
+ * @LastEditTime: 2024-04-22 09:56:46
 -->
 <template>
   <div class="table-container">
@@ -201,7 +201,9 @@ import mixins from './mixins'
 import tableColumn from './components/tableColumn'
 import wsForm from '../ws-form/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
-let Sortable = null
+let sortablejs = null
+let SortableObj = null
+let tableExcel = null
 export default {
   name: 'ws-table',
   mixins: [mixins],
@@ -346,13 +348,16 @@ export default {
   },
   data() {
     // 判断是否有拖拽,有就引入Sortable
+    // 判断是否工具箱是否有下载,有就引入table-excel
     try {
       if (this.sortableRow || this.sortableColumn) {
-        const sortablejs = require('sortablejs')
-        Sortable = sortablejs.Sortable
+        sortablejs = require('sortablejs')
+      }
+      if (this.utilsList.includes('download')) {
+        tableExcel = require('table-excel')
       }
     } catch (error) {
-      console.error('请安装sortablejs')
+      console.error('请安装对应的依赖包')
     }
     return {
       columns: [], // 列数据
@@ -375,6 +380,7 @@ export default {
       index: '',
       switchModeData: this.switchMode,
       dataNoChange: false,
+      columnsNoChange: false,
     }
   },
   watch: {
@@ -419,6 +425,11 @@ export default {
     // 列表变更更新表单布局
     columns: {
       handler() {
+        // console.log('columns change', this.columnsNoChange)
+        if (this.columnsNoChange) {
+          this.columnsNoChange = false
+          return
+        }
         this.dataOrColumnsChange()
         this.$nextTick(() => {
           this.doLayout()
@@ -427,6 +438,7 @@ export default {
     },
     data: {
       handler(newData) {
+        // console.log('data change', this.dataNoChange)
         if (this.dataNoChange) {
           this.dataNoChange = false
           return
@@ -517,29 +529,33 @@ export default {
     // window.addEventListener('resize', this.doLayout)
   },
   beforeDestroy() {
+    SortableObj && SortableObj.destroy()
     // window.removeEventListener('resize', this.doLayout)
   },
   methods: {
     // 根据索引和第二个参数row,变更拖拽后的数据，考虑tableDada中的children
-    changeDataByIndex(rowIndex, row, getRow) {
-      // console.log(rowIndex, row, 'changeDataByIndex')
+    changeDataByIndex(dragIndex, row, type = 'delete') {
       const { tableData } = this.tableForm
       const childrenKey = this.childrenKey
       let realIndex = -1
       const iterateChange = (dataList) => {
         for (let i = 0; i < dataList.length; i++) {
           realIndex++
-          if (realIndex === rowIndex) {
+          if (realIndex === dragIndex) {
             // console.log(realIndex, dataList[i], 'realIndex')
-            if (getRow) {
-              return dataList[i]
-            } else if (row) {
+            if (type === 'get') {
+              return { row: dataList[i] }
+            } else if (type === 'set') {
+              dataList[i] = row
+              return { row }
+            } else if (type === 'add') {
+              const temRow = dataList[i]
               dataList.splice(i, 0, row)
-              return true
-            } else {
+              return { row: temRow }
+            } else if (type === 'delete') {
               const delteRow = dataList[i]
               dataList.splice(i, 1)
-              return delteRow
+              return { row: delteRow }
             }
           }
           const children = dataList[i][childrenKey]
@@ -553,61 +569,96 @@ export default {
     },
     // 行拖拽
     rowDrop() {
-      if (!this.sortableRow || !Sortable) return
+      // 注意事项
+      // 1.一定要设置rowKey，否则会导致拖拽错乱
+      // 2.不能先增再删，会导致出现rowKey相同的数据，容易出错
+      // 3.树形表格的时候，有缺陷，只会拖动父级，子级不会跟着动 -- 重新渲染并重新加载Sortable
+      // 4.将元素拖拽到树形节点时，新索引是根节点的索引
+      // 虽然1,2,3已经解决了，但是因为4，树形表格拖拽基本实现不了了，因为4的时候甚至要考虑节点是否已经展开
+      // 综上所述，放弃实现树节点时不同层级的拖拽功能， 后续只关注同级拖拽
       // 要侦听拖拽响应的DOM对象
+      const Sortable = sortablejs.Sortable
+      if (!this.sortableRow || !Sortable) return
+      // 保存原始排序，以便在需要时进行恢复
+      let originSort = null
       const tbody = document.querySelector('.el-table__body-wrapper tbody')
       // 如果handle变成了fixed, 会导致拖拽失效，因为handle是相对于tbody的
       const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
       const handle = dragColumn ? '.drag-handle' : undefined
-      Sortable.create(tbody, {
+      SortableObj = Sortable.create(tbody, {
+        onStart: function (/**Event*/ evt) {
+          originSort = SortableObj.toArray()
+        },
         // 结束拖拽后的回调函数
-        // 树形表格的时候，有缺陷，只会拖动父级，子级不会跟着动
         onEnd: (evt) => {
-          console.log(evt, 'end')
           const { newIndex, oldIndex } = evt
           if (newIndex === oldIndex) return
-          // 根据newIndex, oldIndex大小关系, 确定bigIndex, smallIndex
           this.dataNoChange = true
-          const oldRow = this.changeDataByIndex(oldIndex, undefined, true)
-          const newRow = this.changeDataByIndex(newIndex, undefined, true)
-          const bigIndex = newIndex > oldIndex ? newIndex : oldIndex
-          const smallIndex = newIndex > oldIndex ? oldIndex : newIndex
-          const bigRow = this.changeDataByIndex(bigIndex)
-          this.changeDataByIndex(smallIndex, bigRow)
-          this.$emit('dragRow', {
-            newIndex,
-            oldIndex,
-            oldRow,
-            newRow,
-            tableData: this.tableForm.tableData,
-          })
-          //  解决只会拖动父级，子级不会跟着动 todo
-          // 方案一，直接重新赋值 -> 报错
-          // const temTableData = this.tableForm.tableData
-          // this.tableForm.tableData = []
-          // this.$nextTick(() => {
-          //   this.tableForm.tableData = temTableData
-          // })
-          // 方案二，直接赋值columns -> 元素发生变更,导致拖拽失效
-          // const temColumns = this.columns
-          // this.columns = []
-          // this.$nextTick(() => {
-          //   this.columns = temColumns
-          // })
-          // 方案三，操作dom
-          // const tbody = document.querySelector('.el-table__body-wrapper tbody')
-          // const trs = tbody.querySelectorAll('tr')
-          // const trsArr = Array.from(trs)
-          // const bigTr = trsArr[bigIndex]
-          // const smallTr = trsArr[smallIndex]
-          // tbody.insertBefore(bigTr, smallTr)
+          const { row: oldRow } = this.changeDataByIndex(oldIndex, null, 'get')
+          const { row: newRow } = this.changeDataByIndex(newIndex, null, 'get')
+          const oldRowLength = this.findChildrenAndOwnNode(oldRow).length
+          const { tableData } = this.tableForm
+          const oldRowParent = this.findParentNode(tableData, oldRow)
+          const newRowParent = this.findParentNode(tableData, newRow)
+          // 只允许同级拖拽
+          if (oldRowParent !== newRowParent) {
+            forceUpdate()
+            return
+            SortableObj.sort(originSort) // 失效
+            this.$message.error('只允许同级拖拽')
+            return
+          }
+          // 删除旧的
+          this.changeDataByIndex(oldIndex)
+          if (newIndex > oldIndex) {
+            // 如果newIndex大于oldIndex,则newIndex对应的元素位置会变化
+            // 根据旧元素对应的长度（可能有children），确定新元素的位置
+            const newIndexChange = newIndex - oldRowLength
+            // 插入旧元素 注意newIndexChange是变更后的，所以旧元素插入了新元素前面
+            // 并且插入后旧元素索引变成了newIndexChange，新元素索引变成了newIndexChange+1。后续交换一次位置就好
+            this.changeDataByIndex(newIndexChange, oldRow, 'add')
+            // 交换一次位置
+            this.changeDataByIndex(newIndexChange, newRow, 'set')
+            this.changeDataByIndex(newIndexChange + 1, oldRow, 'set')
+          } else {
+            // 新元素位置不会变
+            this.changeDataByIndex(newIndex, oldRow, 'add')
+          }
+          // 因为拖拽树节点时，子元素不会动，所以 需要重新渲染，重新加载Sortable
+          if (oldRowLength > 1) {
+            forceUpdate()
+            // const temTableData = this.tableForm.tableData
+            // this.tableForm.tableData = []
+            // SortableObj.destroy()
+            // this.$nextTick(() => {
+            //   this.tableForm.tableData = temTableData
+            //   this.$nextTick(() => {
+            //     this.rowDrop()
+            //   })
+            // })
+          }
         },
+        draggable: '.el-table__row',
         handle,
       })
+      const forceUpdate = () => {
+        this.columnsNoChange = true
+        const temColumns = this.columns
+        this.columns = []
+        SortableObj.destroy()
+        this.$nextTick(() => {
+          this.columnsNoChange = true
+          this.columns = temColumns
+          this.$nextTick(() => {
+            this.rowDrop()
+          })
+        })
+      }
     },
 
     // 列拖拽
     columnDrop() {
+      const Sortable = sortablejs.Sortable
       if (!this.sortableColumn || !Sortable) return
       // 要侦听拖拽响应的DOM对象
       const wrapperTr = document.querySelector('.el-table__body-wrapper tr')
@@ -1127,6 +1178,9 @@ export default {
     },
     // 下载工具
     download() {
+      if (!tableExcel) {
+        return
+      }
       const { tableData } = this.tableForm
       let hasSelection = false
       function getcolumn(columns) {
@@ -1173,16 +1227,12 @@ export default {
             ))
         })
       })
-      try {
-        const ElMapExportTable = require('table-excel').ElMapExportTable
-        const instance = new ElMapExportTable(
-          { column: columns, data }
-          // { progress: (progress) => console.log(progress) } // 进度条回调
-        )
-        instance.download('表格数据')
-      } catch (error) {
-        console.log('没有找到包')
-      }
+      const ElMapExportTable = tableExcel.ElMapExportTable
+      const instance = new ElMapExportTable(
+        { column: columns, data }
+        // { progress: (progress) => console.log(progress) } // 进度条回调
+      )
+      instance.download('表格数据')
     },
   },
 }
