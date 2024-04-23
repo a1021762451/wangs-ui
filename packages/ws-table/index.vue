@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-04-22 09:56:46
+ * @LastEditTime: 2024-04-23 09:25:02
 -->
 <template>
   <div class="table-container">
@@ -577,8 +577,8 @@ export default {
       // 虽然1,2,3已经解决了，但是因为4，树形表格拖拽基本实现不了了，因为4的时候甚至要考虑节点是否已经展开
       // 综上所述，放弃实现树节点时不同层级的拖拽功能， 后续只关注同级拖拽
       // 要侦听拖拽响应的DOM对象
+      if (!this.sortableRow) return
       const Sortable = sortablejs.Sortable
-      if (!this.sortableRow || !Sortable) return
       // 保存原始排序，以便在需要时进行恢复
       let originSort = null
       const tbody = document.querySelector('.el-table__body-wrapper tbody')
@@ -658,8 +658,8 @@ export default {
 
     // 列拖拽
     columnDrop() {
+      if (!this.sortableColumn) return
       const Sortable = sortablejs.Sortable
-      if (!this.sortableColumn || !Sortable) return
       // 要侦听拖拽响应的DOM对象
       const wrapperTr = document.querySelector('.el-table__body-wrapper tr')
       Sortable.create(wrapperTr, {

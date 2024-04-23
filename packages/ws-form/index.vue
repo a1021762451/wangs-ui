@@ -158,6 +158,14 @@
                   >
                 </template>
               </component>
+              <div v-else-if="formData[fieldItem.prop]" class="content">
+                <span
+                  class="content-text"
+                  :style="{ textAlign: fieldItem.align || 'left' }"
+                >
+                  {{ formData[fieldItem.prop] }}
+                </span>
+              </div>
               <span class="suffix-label" v-if="fieldItem.suffixLabel">{{
                 fieldItem.suffixLabel
               }}</span>
@@ -766,6 +774,16 @@ export default {
 .isFold {
   overflow: hidden;
 }
+.content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  .content-text {
+    flex: 1;
+  }
+}
 // 搜索模式样式
 .searchMode {
   /deep/ .has_rules {
@@ -889,6 +907,10 @@ export default {
   // }
 }
 .tableform {
+  .content {
+    background: #f0f0f0;
+    color: #333333;
+  }
   /deep/ .el-form-item {
     margin-bottom: 0;
     display: flex;
@@ -898,7 +920,7 @@ export default {
     }
     .el-form-item__content {
       flex: 1;
-      line-height: initial;
+      line-height: 0;
       border: 0.5px solid #e2e2e2;
       margin-left: 0 !important;
     }
