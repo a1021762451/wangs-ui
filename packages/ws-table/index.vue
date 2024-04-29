@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-04-23 09:25:02
+ * @LastEditTime: 2024-04-29 14:21:02
 -->
 <template>
   <div class="table-container">
@@ -82,7 +82,7 @@
       <!-- 表格 -->
       <el-table
         style="width: 100%"
-        :data="tableForm.tableData"
+        :data="tableDataCpt"
         v-loading="loading"
         v-bind="{
           stripe: true,
@@ -214,11 +214,6 @@ export default {
     wsButtons,
   },
   props: {
-    // 允许拖拽行
-    sortableRow: {
-      default: false,
-      type: Boolean,
-    },
     // 允许拖拽列
     sortableColumn: {
       default: false,
@@ -347,18 +342,6 @@ export default {
     },
   },
   data() {
-    // 判断是否有拖拽,有就引入Sortable
-    // 判断是否工具箱是否有下载,有就引入table-excel
-    try {
-      if (this.sortableRow || this.sortableColumn) {
-        sortablejs = require('sortablejs')
-      }
-      if (this.utilsList.includes('download')) {
-        tableExcel = require('table-excel')
-      }
-    } catch (error) {
-      console.error('请安装对应的依赖包')
-    }
     return {
       columns: [], // 列数据
       originColunms: [], // 复制列数据，用于列筛选
@@ -456,6 +439,11 @@ export default {
     },
   },
   computed: {
+    tableDataCpt() {
+      return this.formData.rowType__table === 'searchRow'
+        ? [this.formData].concat(this.tableForm.tableData)
+        : this.tableForm.tableData
+    },
     containerIsForm() {
       return this.flatColums.some((item) => {
         return item.component
@@ -518,9 +506,17 @@ export default {
     formConfigList() {
       return this.getDefaultFormConfigList(true)
     },
+    // 允许拖拽行
+    sortableRow() {
+      const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
+      return getObjAttr(this.$attrs, 'sortableRow') || !!dragColumn
+    },
   },
   directives: {
     resize: vResize,
+  },
+  created() {
+    this.importPackage()
   },
   mounted() {
     this.getSingleColunms()
@@ -533,6 +529,21 @@ export default {
     // window.removeEventListener('resize', this.doLayout)
   },
   methods: {
+    // 导入包
+    importPackage() {
+      // 判断是否有拖拽,有就引入Sortable
+      // 判断是否工具箱是否有下载,有就引入table-excel
+      try {
+        if (this.sortableRow || this.sortableColumn) {
+          sortablejs = require('sortablejs')
+        }
+        if (this.utilsList.includes('download')) {
+          tableExcel = require('table-excel')
+        }
+      } catch (error) {
+        console.error('请安装对应的依赖包')
+      }
+    },
     // 根据索引和第二个参数row,变更拖拽后的数据，考虑tableDada中的children
     changeDataByIndex(dragIndex, row, type = 'delete') {
       const { tableData } = this.tableForm
@@ -655,7 +666,6 @@ export default {
         })
       }
     },
-
     // 列拖拽
     columnDrop() {
       if (!this.sortableColumn) return
@@ -749,11 +759,11 @@ export default {
       this.initFormData()
       const obj = this.formData
       def(obj, 'rowType__table', 'searchRow')
-      if (tableData[0] && tableData[0].rowType__table === 'searchRow') {
-        tableData[0] = obj
-      } else {
-        tableData.unshift(obj)
-      }
+      // if (tableData[0] && tableData[0].rowType__table === 'searchRow') {
+      //   tableData[0] = obj
+      // } else {
+      //   tableData.unshift(obj)
+      // }
       this.switchStatus(obj, true)
     },
     initFormData() {
@@ -863,7 +873,7 @@ export default {
     },
     // 迭代增加prop
     addFormPropForTable() {
-      const { tableData } = this.tableForm
+      const { tableData } = this.tableForm   
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {

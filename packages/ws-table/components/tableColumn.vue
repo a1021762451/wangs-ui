@@ -186,7 +186,9 @@
       <!-- 表单元素编辑模式 -->
       <el-form-item
         v-if="judgeShowFormItem(fieldItem, row, $index)"
-        :prop="`${row.prop__table}.${fieldItem.prop}`"
+        :prop="
+          row.prop__table ? `${row.prop__table}.${fieldItem.prop}` : undefined
+        "
         :rules="getRules(fieldItem, row)"
       >
         <!-- 命名插槽 -->

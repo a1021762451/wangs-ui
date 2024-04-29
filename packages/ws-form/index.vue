@@ -158,8 +158,9 @@
                   >
                 </template>
               </component>
-              <div v-else-if="formData[fieldItem.prop]" class="content">
+              <div v-else class="content">
                 <span
+                  v-if="formData[fieldItem.prop]"
                   class="content-text"
                   :style="{ textAlign: fieldItem.align || 'left' }"
                 >
@@ -779,9 +780,9 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 15px;
   .content-text {
     flex: 1;
+    padding: 0 15px;
   }
 }
 // 搜索模式样式
