@@ -430,7 +430,7 @@ export default {
         'el-time-picker',
       ]
       this.formConfigList.forEach((fieldItem) => {
-        const { component = '', required, disabled } = fieldItem
+        const { component = '', required, disabled, ruleExtra = {} } = fieldItem
         if (this.isDetail || !required || disabled) return
         const messageSuffix =
           !component || component.includes('input') ? '输入' : '选择'
@@ -439,6 +439,7 @@ export default {
             required: true,
             message: `请${messageSuffix}${fieldItem.label}`,
             trigger: 'change',
+            ...ruleExtra,
             // trigger: blurEletypes.includes(fieldItem.component)
             //   ? 'blur'
             //   : 'change',

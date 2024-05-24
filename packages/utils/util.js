@@ -695,7 +695,7 @@ function judgeHidden(el) {
 // 创建不可枚举的属性
 // 注意深度克隆后，不可枚举的属性会丢失
 export function def(obj, key, value, config) {
-  if(obj[key] !== undefined) return
+  if (obj[key] !== undefined) return
   Object.defineProperty(obj, key, {
     value,
     enumerable: false,
@@ -812,4 +812,36 @@ export const vResize = {
     // delete el.__resizeObserver__
     // delete el.__bindingValue__
   },
+}
+
+// 连接url和参数
+export function concatUrlAndParams(url, params = {}) {
+  if (!params || typeof params !== 'object' || !Object.keys(params).length)
+    return url
+  // 解析url中的参数
+  let urlParamsStr = url.split('?')[1]
+  url = url.split('?')[0]
+  let urlParams = {}
+  if (urlParamsStr) {
+    let urlParamsArr = urlParamsStr.split('&')
+    urlParamsArr.forEach((item) => {
+      if (!item || !item.includes('=')) return
+      const urlParamsItemArr = item.split('=')
+      let key = urlParamsItemArr[0]
+      let value = urlParamsItemArr[1]
+      urlParams[key] = value
+    })
+  }
+  params = Object.assign({}, urlParams, params)
+  let str = ''
+  const paramsKeys = Object.keys(params)
+  paramsKeys.forEach((key) => {
+    let value = params[key]
+    value = typeof value === 'object' ? JSON.stringify(value) : value
+    str += `${key}=${value}&`
+  })
+  // 删除最后的&
+  if (str.endsWith('&')) str = str.substring(0, str.length - 1)
+  // 判断url中是否?
+  return url + '?' + str
 }
