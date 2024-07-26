@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-04-29 14:21:02
+ * @LastEditTime: 2024-07-26 16:11:16
 -->
 <template>
   <div class="table-container">
@@ -929,11 +929,12 @@ export default {
     },
     // 分页操作
     handleCurrentChange(val) {
+      this.$emit('current-change', val)
       this.$emit('update:pageInfo', { ...this.pageInfo, current: val })
       this.handleSearch()
     },
     handleSizeChange(val) {
-      // this.pageInfo.current = 1
+      this.$emit('size-change', val)
       this.$emit('update:pageInfo', { ...this.pageInfo, size: val, current: 1 })
       this.handleSearch()
     },
@@ -1254,6 +1255,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   .common-table {
     flex: 1;
     min-height: 0;
