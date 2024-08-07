@@ -3,17 +3,12 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-08-07 14:42:01
+ * @LastEditTime: 2024-08-07 16:31:04
 -->
 <template>
   <div class="table-container">
     <ws-form
       v-if="showSearch"
-      @update:formData="
-        (params) => {
-          $emit('update:formData', params)
-        }
-      "
       @happenEvent="happenEvent"
       style="margin-bottom: 6px"
       v-bind="{
@@ -173,7 +168,7 @@ let defaultTableRequestConfig = {
   // 后台请求是否返回columns
   hasColumns: false,
   // 没有requestFn,需传入以下参数
-  request: window.request, // axios等封装，没有window.request
+  request: null, // axios等封装，没有window.request
   url: '', // 请求地址
   method: 'get', // 请求方法
   params: {}, // 请求参数
@@ -187,11 +182,6 @@ let defaultTableRequestConfig = {
     current: 'pageNum',
   },
 }
-// 针对项目的全局配置
-defaultTableRequestConfig = deepMerge(
-  defaultTableRequestConfig,
-  window.defaultTableRequestConfig || {}
-)
 let singleColunms = [] // 单条展示
 let temColumns = [] // 临时列配置
 let temTableData = [] // 临时数据
@@ -277,7 +267,11 @@ export default {
     // 分页数据
     pageInfo: {
       default() {
-        return {}
+        return {
+          size: 10,
+          current: 1,
+          total: 0,
+        }
       },
       type: Object,
     },
@@ -478,7 +472,14 @@ export default {
       return getObjAttr(this.$attrs, 'sortableRow') || !!dragColumn
     },
     requestConfigCpt() {
-      return deepMerge(defaultTableRequestConfig, this.requestConfig)
+      // 针对项目的全局配置
+      defaultTableRequestConfig = deepMerge(
+        defaultTableRequestConfig,
+        window.defaultTableRequestConfig || {}
+      )
+      const obj = deepMerge(defaultTableRequestConfig, this.requestConfig)
+      obj.request = obj.request || window.request
+      return obj
     },
     requestFn() {
       return this.createRequestFn() || this.requestConfigCpt.requestFn
@@ -555,15 +556,29 @@ export default {
         console.error('请安装对应的依赖包')
       }
     },
+    changePageInfo(obj) {
+      // obj = { ...this.pageInfo, ...obj }
+      // if (this.$listeners['update:pageInfo']) {
+      //   this.$emit('update:pageInfo', obj)
+      // }
+      // this.pageInfo = obj
+      Object.keys(obj).forEach((key) => {
+        this.pageInfo[key] = obj[key]
+      })
+    },
     // 通过配置的接口获取数据
     async getTabledataByFn() {
       if (!this.requestFn) return
       this.loadingData = true
-      const { rows = [], columns = [], total = 0 } = await this.requestFn()
+      const {
+        rows = [],
+        columns = [],
+        total = 0,
+      } = await this.requestFn(this.formData, this.pageInfo)
       this.loadingData = false
       this.initData(rows)
       this.requestHasColumns && this.initTableColumns(columns)
-      this.pageInfo.total = total
+      this.changePageInfo({ total })
     },
     // 创建请求函数
     createRequestFn() {
@@ -571,29 +586,36 @@ export default {
         this.requestConfigCpt
       const { rows, columns, total, size, current } = fields
       if (!url || !request) return
+      const pageInfo = this.showPagination
+        ? {
+            [size]: this.pageInfo.size,
+            [current]: this.pageInfo.current,
+          }
+        : {}
       const obj = {
         ...params,
-        [size]: this.pageInfo.size,
-        [current]: this.pageInfo.current,
+        ...pageInfo,
       }
-      return new Promise((resolve, reject) => {
-        request({
-          url,
-          method,
-          params: obj,
-          data: obj,
-        }).then((res) => {
-          while (dataLevel > 0) {
-            res = res.data
-            dataLevel--
-          }
-          resolve({
-            rows: res[rows],
-            columns: res[columns],
-            total: res[total],
+      return () => {
+        return new Promise((resolve, reject) => {
+          request({
+            url,
+            method,
+            params: obj,
+            data: obj,
+          }).then((res) => {
+            while (dataLevel > 0) {
+              res = res.data
+              dataLevel--
+            }
+            resolve({
+              rows: res[rows],
+              columns: res[columns],
+              total: res[total],
+            })
           })
         })
-      })
+      }
     },
     // tableColumns变更、初始化
     initTableColumns(newData) {
@@ -1035,12 +1057,12 @@ export default {
     // 分页操作
     handleCurrentChange(val) {
       this.$emit('current-change', val)
-      this.$emit('update:pageInfo', { ...this.pageInfo, current: val })
+      this.changePageInfo({ current: val })
       this.handleSearch()
     },
     handleSizeChange(val) {
       this.$emit('size-change', val)
-      this.$emit('update:pageInfo', { ...this.pageInfo, size: val, current: 1 })
+      this.changePageInfo({ size: val, current: 1 })
       this.handleSearch()
     },
     handleSearch() {
@@ -1056,7 +1078,7 @@ export default {
         row,
       } = params
       if (method === 'search') {
-        this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+        this.changePageInfo({ current: 1 })
         this.getTabledataByFn()
       }
       this.$emit('happenEvent', params)
@@ -1066,7 +1088,7 @@ export default {
       //   this.showSearchRow &&
       //   row.rowType__table === 'searchRow'
       // ) {
-      //   this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+      // this.changePageInfo({ current: 1 })
       //   this.handleSearch()
       // }
     },

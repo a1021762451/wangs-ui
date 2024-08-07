@@ -7,6 +7,8 @@ import "./mock";
 import './reset.less'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'nprogress/nprogress.css' // progress bar style
+import request from './request'
+window.request = request
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 import WSUI from '@'
