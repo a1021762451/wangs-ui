@@ -210,7 +210,11 @@
             options: getOptions(fieldItem, allOptions, row),
             ...getAttrs(fieldItem, row),
           }"
-          v-focus="switchModeData.includes('dblclick') && !row[switchKey]"
+          v-focus="
+            switchModeData.includes('dblclick') &&
+            property === fieldItem.prop &&
+            index === $index
+          "
           v-model="row[fieldItem.prop]"
           @change="fieldItemChange(fieldItem, row)"
           @blur="handleBlur(fieldItem, row)"

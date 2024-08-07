@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-08-07 11:46:23
+ * @LastEditTime: 2024-08-07 14:42:01
 -->
 <template>
   <div class="table-container">
@@ -83,7 +83,7 @@
       <el-table
         style="width: 100%"
         :data="tableDataCpt"
-        v-loading="loading"
+        v-loading="loadingData"
         v-bind="{
           stripe: true,
           border: true,
@@ -167,6 +167,31 @@
 </template>
 
 <script>
+let defaultTableRequestConfig = {
+  //  后台请求，promise, resole值为{rows: 表格数据, columns: 列设置,total: 总数-非必填}
+  requestFn: null,
+  // 后台请求是否返回columns
+  hasColumns: false,
+  // 没有requestFn,需传入以下参数
+  request: window.request, // axios等封装，没有window.request
+  url: '', // 请求地址
+  method: 'get', // 请求方法
+  params: {}, // 请求参数
+  dataLevel: 2, // 请求返回数据层级
+  // 请求字段映射
+  fields: {
+    rows: 'records',
+    columns: 'columns',
+    total: 'total',
+    size: 'pageSize',
+    current: 'pageNum',
+  },
+}
+// 针对项目的全局配置
+defaultTableRequestConfig = deepMerge(
+  defaultTableRequestConfig,
+  window.defaultTableRequestConfig || {}
+)
 let singleColunms = [] // 单条展示
 let temColumns = [] // 临时列配置
 let temTableData = [] // 临时数据
@@ -197,6 +222,7 @@ import {
   getDefaultTime,
   def,
   getMaxLength,
+  deepMerge,
 } from '../utils/util'
 import mixins from './mixins'
 import tableColumn from './components/tableColumn'
@@ -215,14 +241,10 @@ export default {
     wsButtons,
   },
   props: {
-    requestObj: {
+    // 请求配置，会与defaultRequestConfig合并
+    requestConfig: {
       default() {
-        return {
-          //  后台请求，promise, resole值为{rows: 表格数据, columns: 列设置,total: 总数-非必填}
-          requestFn: null,
-          // 后台请求是否返回columns
-          hasColumns: false,
-        }
+        return {}
       },
     },
     // 允许拖拽列
@@ -376,9 +398,10 @@ export default {
       ),
       property: '',
       index: '',
-      switchModeData: this.switchMode,
       dataNoChange: false,
       columnsNoChange: false,
+      switchModeData: this.switchMode,
+      loadingData: this.loading,
     }
   },
   computed: {
@@ -454,11 +477,14 @@ export default {
       const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
       return getObjAttr(this.$attrs, 'sortableRow') || !!dragColumn
     },
+    requestConfigCpt() {
+      return deepMerge(defaultTableRequestConfig, this.requestConfig)
+    },
     requestFn() {
-      return this.requestObj.requestFn
+      return this.createRequestFn() || this.requestConfigCpt.requestFn
     },
     requestHasColumns() {
-      return this.requestObj.hasColumns
+      return this.requestConfigCpt.hasColumns
     },
   },
   directives: {
@@ -489,6 +515,12 @@ export default {
     data: {
       handler(newData) {
         !this.requestFn && this.initData(newData)
+      },
+      immediate: true,
+    },
+    loading: {
+      handler(newData) {
+        this.loadingData = newData
       },
       immediate: true,
     },
@@ -526,10 +558,42 @@ export default {
     // 通过配置的接口获取数据
     async getTabledataByFn() {
       if (!this.requestFn) return
-      const { rows = [], columns = [], total = 0 } = await requestFn()
+      this.loadingData = true
+      const { rows = [], columns = [], total = 0 } = await this.requestFn()
+      this.loadingData = false
       this.initData(rows)
       this.requestHasColumns && this.initTableColumns(columns)
       this.pageInfo.total = total
+    },
+    // 创建请求函数
+    createRequestFn() {
+      const { request, params, method, url, dataLevel, fields } =
+        this.requestConfigCpt
+      const { rows, columns, total, size, current } = fields
+      if (!url || !request) return
+      const obj = {
+        ...params,
+        [size]: this.pageInfo.size,
+        [current]: this.pageInfo.current,
+      }
+      return new Promise((resolve, reject) => {
+        request({
+          url,
+          method,
+          params: obj,
+          data: obj,
+        }).then((res) => {
+          while (dataLevel > 0) {
+            res = res.data
+            dataLevel--
+          }
+          resolve({
+            rows: res[rows],
+            columns: res[columns],
+            total: res[total],
+          })
+        })
+      })
     },
     // tableColumns变更、初始化
     initTableColumns(newData) {
