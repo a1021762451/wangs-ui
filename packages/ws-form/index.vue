@@ -349,7 +349,7 @@ export default {
         let remain = 0
         let total = 0
         configList.forEach((item, index) => {
-          const { component, listeners } = item
+          const { component, listeners, componentAttrs = {} } = item
           item.span = item.span || this.span
           // 搜索模式下判断表单元素是否在最左边
           if (this.isSearchForm) {
@@ -363,7 +363,6 @@ export default {
           }
           // 设置默认时间
           if (item.defaultTimeType) {
-            const { componentAttrs = {} } = item
             this.$set(
               this.formData,
               item.prop,
@@ -377,7 +376,10 @@ export default {
           if (!this.formData.hasOwnProperty(item.prop)) {
             this.$set(this.formData, item.prop, '')
             // 特殊情况
-            component === 'el-checkbox-group' &&
+            if (
+              component === 'el-checkbox-group' ||
+              (component === 'el-select' && componentAttrs.multiple)
+            )
               this.$set(this.formData, item.prop, [])
           }
           // listeners处理

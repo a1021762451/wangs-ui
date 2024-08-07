@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-07-26 16:11:16
+ * @LastEditTime: 2024-08-06 10:54:32
 -->
 <template>
   <div class="table-container">
@@ -120,6 +120,7 @@
           :rules="rules"
           :allOptions="allOptions"
           :placeholder="placeholder"
+          :switchFn="switchFn"
           :switchModeData="switchModeData"
           :switchKey="switchKey"
           :property.sync="property"
@@ -301,12 +302,16 @@ export default {
       },
       type: Object,
     },
-    // 列切换模式
+    // 表单元素切换判断函数
+    switchFn: {
+      type: Function,
+    },
+    // 表单元素切换模式
     switchMode: {
       default: '', // dblclick/rowControl
       type: String | Array,
     },
-    // 列切换字段
+    // 表单元素切换字段
     switchKey: {
       default: 'isEdit__table',
       type: String,
@@ -782,7 +787,10 @@ export default {
         if (prop && !this.formData.hasOwnProperty(prop)) {
           this.$set(this.formData, prop, '')
           // 特殊情况
-          component === 'el-checkbox-group' &&
+          if (
+            component === 'el-checkbox-group' ||
+            (component === 'el-select' && componentAttrs.multiple)
+          )
             this.$set(this.formData, prop, [])
         }
       })
@@ -873,7 +881,7 @@ export default {
     },
     // 迭代增加prop
     addFormPropForTable() {
-      const { tableData } = this.tableForm   
+      const { tableData } = this.tableForm
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
         data.forEach((item, index) => {

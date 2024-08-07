@@ -20,6 +20,7 @@
     }"
     sortableRow
     switchMode="rowControl, dblclick"
+    :switchFn="switchFn"
     @happenEvent="happenEvent"
     @selection-change="selectionChange"
   >
@@ -220,6 +221,9 @@ export default {
     search(eventData) {
       console.log('search', eventData, this.formData)
     },
+    switchFn(fieldItem, row, column, $index) {
+      if(fieldItem.prop === 'testSelect' && $index === 0) return true
+    }
   },
 }
 </script>

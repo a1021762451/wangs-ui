@@ -185,7 +185,7 @@
       <!-- 表单元素 -->
       <!-- 表单元素编辑模式 -->
       <el-form-item
-        v-if="judgeShowFormItem(fieldItem, row, $index)"
+        v-if="judgeShowFormItem(fieldItem, row, column, $index)"
         :prop="
           row.prop__table ? `${row.prop__table}.${fieldItem.prop}` : undefined
         "
@@ -356,6 +356,15 @@ export default {
       },
       type: Function,
     },
+    // 表单元素切换判断函数
+    switchFn: {
+      type: Function,
+    },
+    // 列切换模式
+    switchModeData: {
+      default: '', // dblclick/rowControl
+      type: String | Array,
+    },
     // 列切换字段
     switchKey: {
       default: 'isEdit__table',
@@ -368,11 +377,6 @@ export default {
     index: {
       default: '',
       type: String | Number,
-    },
-    // 列切换模式
-    switchModeData: {
-      default: '', // dblclick/rowControl
-      type: String | Array,
     },
     // 表单数据
     formData: {
@@ -486,15 +490,16 @@ export default {
       })
     },
     // 判断是否显示表单元素
-    judgeShowFormItem(fieldItem, row, $index) {
-      const { switchModeData, switchKey, property, index } = this
+    judgeShowFormItem(fieldItem, row, column, $index) {
+      const { switchModeData, switchKey, property, index, switchFn } = this
       return (
-        fieldItem.component &&
-        (!switchModeData ||
+        (fieldItem.component || fieldItem.formSlotName) &&
+        ((!switchModeData && !switchFn) ||
           (switchModeData.includes('dblclick') &&
             property === fieldItem.prop &&
             index === $index) ||
-          (switchModeData.includes('rowControl') && row[switchKey]))
+          (switchModeData.includes('rowControl') && row[switchKey]) ||
+          (switchFn && switchFn(fieldItem, row, column, $index)))
       )
     },
   },
