@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-08-06 10:54:32
+ * @LastEditTime: 2024-08-07 11:46:23
 -->
 <template>
   <div class="table-container">
@@ -215,6 +215,16 @@ export default {
     wsButtons,
   },
   props: {
+    requestObj: {
+      default() {
+        return {
+          //  后台请求，promise, resole值为{rows: 表格数据, columns: 列设置,total: 总数-非必填}
+          requestFn: null,
+          // 后台请求是否返回columns
+          hasColumns: false,
+        }
+      },
+    },
     // 允许拖拽列
     sortableColumn: {
       default: false,
@@ -371,78 +381,6 @@ export default {
       columnsNoChange: false,
     }
   },
-  watch: {
-    tableColumns: {
-      handler(newData, oldData) {
-        const columns = deepClone(newData)
-        this.columns = columns
-        // listeners绑定this.$parent
-        this.flatColums.forEach((item) => {
-          const { listeners } = item
-          // listeners处理
-          if (listeners && typeof listeners === 'object') {
-            Object.keys(listeners).forEach((key) => {
-              listeners[key] = listeners[key].bind(this.$parent)
-            })
-            window.testlis = listeners
-          }
-        })
-        // 搜索行处理勾选和索引
-        if (this.showSearchRow && !this.showSingleStatus) {
-          this.setSelectable(columns)
-          this.setIndex(columns)
-          // switchModeData 默认有rowControl
-          if (!this.switchModeData.includes('rowControl')) {
-            if (Array.isArray(this.switchModeData)) {
-              this.switchModeData.push('rowControl')
-            } else {
-              this.switchModeData += this.switchModeData
-                ? ',rowControl'
-                : 'rowControl'
-            }
-          }
-          // this.setFilterButtons(columns)
-        }
-        // 初始化表单配置
-        this.getDefaultFormConfigList()
-        this.addLabelForColumns(columns)
-        this.originColunms = deepClone(columns)
-      },
-      immediate: true,
-    },
-    // 列表变更更新表单布局
-    columns: {
-      handler() {
-        // console.log('columns change', this.columnsNoChange)
-        if (this.columnsNoChange) {
-          this.columnsNoChange = false
-          return
-        }
-        this.dataOrColumnsChange()
-        this.$nextTick(() => {
-          this.doLayout()
-        })
-      },
-    },
-    data: {
-      handler(newData) {
-        // console.log('data change', this.dataNoChange)
-        if (this.dataNoChange) {
-          this.dataNoChange = false
-          return
-        }
-        // 初始化数据
-        // this.tableForm.tableData = deepClone(newData)
-        // 引用不能丢失 否则表格方法会失效（使用row）
-        this.tableForm.tableData = newData
-        // 清空勾选
-        this.selection = []
-        // 重新处理数据
-        this.dataOrColumnsChange()
-      },
-      immediate: true,
-    },
-  },
   computed: {
     tableDataCpt() {
       return this.formData.rowType__table === 'searchRow'
@@ -516,12 +454,48 @@ export default {
       const dragColumn = this.tableColumns.find((item) => item.type === 'drag')
       return getObjAttr(this.$attrs, 'sortableRow') || !!dragColumn
     },
+    requestFn() {
+      return this.requestObj.requestFn
+    },
+    requestHasColumns() {
+      return this.requestObj.hasColumns
+    },
   },
   directives: {
     resize: vResize,
   },
+  watch: {
+    tableColumns: {
+      handler(newData, oldData) {
+        if (this.requestHasColumns) return
+        this.initTableColumns(newData)
+      },
+      immediate: true,
+    },
+    // 列表变更更新表单布局
+    columns: {
+      handler() {
+        // console.log('columns change', this.columnsNoChange)
+        if (this.columnsNoChange) {
+          this.columnsNoChange = false
+          return
+        }
+        this.dataOrColumnsChange()
+        this.$nextTick(() => {
+          this.doLayout()
+        })
+      },
+    },
+    data: {
+      handler(newData) {
+        !this.requestFn && this.initData(newData)
+      },
+      immediate: true,
+    },
+  },
   created() {
     this.importPackage()
+    this.getTabledataByFn()
   },
   mounted() {
     this.getSingleColunms()
@@ -548,6 +522,65 @@ export default {
       } catch (error) {
         console.error('请安装对应的依赖包')
       }
+    },
+    // 通过配置的接口获取数据
+    async getTabledataByFn() {
+      if (!this.requestFn) return
+      const { rows = [], columns = [], total = 0 } = await requestFn()
+      this.initData(rows)
+      this.requestHasColumns && this.initTableColumns(columns)
+      this.pageInfo.total = total
+    },
+    // tableColumns变更、初始化
+    initTableColumns(newData) {
+      const columns = deepClone(newData)
+      this.columns = columns
+      // listeners绑定this.$parent
+      this.flatColums.forEach((item) => {
+        const { listeners } = item
+        // listeners处理
+        if (listeners && typeof listeners === 'object') {
+          Object.keys(listeners).forEach((key) => {
+            listeners[key] = listeners[key].bind(this.$parent)
+          })
+        }
+      })
+      // 搜索行处理勾选和索引
+      if (this.showSearchRow && !this.showSingleStatus) {
+        this.setSelectable(columns)
+        this.setIndex(columns)
+        // switchModeData 默认有rowControl
+        if (!this.switchModeData.includes('rowControl')) {
+          if (Array.isArray(this.switchModeData)) {
+            this.switchModeData.push('rowControl')
+          } else {
+            this.switchModeData += this.switchModeData
+              ? ',rowControl'
+              : 'rowControl'
+          }
+        }
+        // this.setFilterButtons(columns)
+      }
+      // 初始化表单配置
+      this.getDefaultFormConfigList()
+      this.addLabelForColumns(columns)
+      this.originColunms = deepClone(columns)
+    },
+    // data变更、初始化
+    initData(newData) {
+      // console.log('data change', this.dataNoChange)
+      if (this.dataNoChange) {
+        this.dataNoChange = false
+        return
+      }
+      // 初始化数据
+      // this.tableForm.tableData = deepClone(newData)
+      // 引用不能丢失 否则表格方法会失效（使用row）
+      this.tableForm.tableData = newData
+      // 清空勾选
+      this.selection = []
+      // 重新处理数据
+      this.dataOrColumnsChange()
     },
     // 根据索引和第二个参数row,变更拖拽后的数据，考虑tableDada中的children
     changeDataByIndex(dragIndex, row, type = 'delete') {
@@ -951,6 +984,7 @@ export default {
         method: 'search',
         buttonItem: { method: 'search' },
       })
+      this.getTabledataByFn()
     },
     happenEvent(params) {
       const {
@@ -959,6 +993,7 @@ export default {
       } = params
       if (method === 'search') {
         this.$emit('update:pageInfo', { ...this.pageInfo, current: 1 })
+        this.getTabledataByFn()
       }
       this.$emit('happenEvent', params)
       // 首行搜索逻辑
