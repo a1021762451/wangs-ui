@@ -530,7 +530,7 @@ const typeFuMap = {
     getFn: 'getMilliseconds',
   },
 }
-function handleDate(num, type = 'day', date = new Date(), hasCalculate = true) {
+export function handleDate(num, type = 'day', date = new Date(), hasCalculate = true) {
   //计算出要加/减的毫秒数
   const { setFn, getFn } = typeFuMap[type]
   const time = new Date(date)

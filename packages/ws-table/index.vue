@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-08-07 16:31:04
+ * @LastEditTime: 2024-08-20 11:24:44
 -->
 <template>
   <div class="table-container">
@@ -582,8 +582,8 @@ export default {
     },
     // 创建请求函数
     createRequestFn() {
-      const { request, params, method, url, dataLevel, fields } =
-        this.requestConfigCpt
+      const { request, params, method, url, fields } = this.requestConfigCpt
+      let { dataLevel } = this.requestConfigCpt
       const { rows, columns, total, size, current } = fields
       if (!url || !request) return
       const pageInfo = this.showPagination
