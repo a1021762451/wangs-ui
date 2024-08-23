@@ -534,7 +534,8 @@ export default {
 }
 .el-table__cell {
   .el-form-item {
-    width: 100%;
+    // 防止宽度小数，触发tooltip
+    width: 99%;
     margin-right: 0;
     /deep/ .el-form-item__content {
       width: 100%;
