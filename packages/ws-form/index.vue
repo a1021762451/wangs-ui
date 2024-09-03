@@ -518,12 +518,7 @@ export default {
       return fieldItem.isRow || fieldItem.span === 24
     },
     getDynamicWidth() {
-      const arr = []
-      this.configList.forEach((item) => {
-        if (item.label) {
-          arr.push(item.label)
-        }
-      })
+      const arr =  this.configList.filter(item => item.label).map(item => item.label)
       this.labelMaxWidth = getMaxLength(arr) * 1.5 + 'px'
     },
     // 将form label的margin转换为padding -- 放弃，改为传入labelWidth

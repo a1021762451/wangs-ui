@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-08-20 11:24:44
+ * @LastEditTime: 2024-09-03 09:18:31
 -->
 <template>
   <div class="table-container">
@@ -14,6 +14,7 @@
       v-bind="{
         formData: formData,
         isSearchForm: true,
+        allOptions,
         ...seachConfig,
         formConfigList,
       }"
@@ -473,11 +474,11 @@ export default {
     },
     requestConfigCpt() {
       // 针对项目的全局配置
-      defaultTableRequestConfig = deepMerge(
-        defaultTableRequestConfig,
+      const defaulConfig = deepMerge(
+        deepClone(defaultTableRequestConfig),
         window.defaultTableRequestConfig || {}
       )
-      const obj = deepMerge(defaultTableRequestConfig, this.requestConfig)
+      const obj = deepMerge(defaulConfig, this.requestConfig)
       obj.request = obj.request || window.request
       return obj
     },
@@ -853,7 +854,7 @@ export default {
             finditem || {
               prop,
               label,
-              component: 'el-input',
+              component: component || 'el-input',
             }
           )
         }
