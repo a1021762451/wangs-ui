@@ -22,8 +22,8 @@
       }"
       class="weighting"
       :class="{
-        no_lable_wrap: labelWidth !== 'auto',
-        has_lable_wrap: labelWidth === 'auto',
+        no_label_wrap: labelWidth !== 'auto',
+        has_label_wrap: labelWidth === 'auto',
         has_rules: Object.keys(rules).length,
         no_rules: !Object.keys(rules).length,
       }"
@@ -872,7 +872,7 @@ export default {
     }
   }
   // labelWidth auto
-  /deep/.has_lable_wrap {
+  /deep/.has_label_wrap {
     .el-form-item__label-wrap {
       align-self: flex-start;
       background: #ececec;
@@ -887,7 +887,7 @@ export default {
     }
   }
   // labelWidth 非auto
-  /deep/ .no_lable_wrap {
+  /deep/ .no_label_wrap {
     .el-form-item__label {
       align-self: flex-start;
       background: #ececec;

@@ -84,7 +84,7 @@ export default {
     },
     // 迭代处理列数据
     handleData(dataList, isGetValue = false) {
-      const typeLableMap = {
+      const typeLabelMap = {
         selection: '勾选列',
         index: '索引列',
         expand: '折叠功能',
@@ -103,7 +103,7 @@ export default {
           const value = isGetValue
             ? `type_${type}`
             : {
-                label: typeLableMap[type],
+                label: typeLabelMap[type],
                 value: `type_${type}`,
                 disabled: item.alwaysVisible,
               }
