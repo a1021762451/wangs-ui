@@ -233,6 +233,7 @@ const defaultButtonsForForm = [
   {
     method: 'confirm',
     label: '确认',
+    loading: false,
   },
   {
     method: 'cancel',
@@ -634,7 +635,7 @@ export default {
     },
     // 表格内复选框变更
     async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
-      this.changeConditionItem(fieldItem)
+      this.isCheckForm && this.changeConditionItem(fieldItem)
       this.$emit('happenEvent', {
         method,
         buttonItem: { method },
