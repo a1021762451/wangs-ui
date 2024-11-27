@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-04 17:22:26
+ * @LastEditTime: 2024-11-14 13:32:51
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -33,6 +33,12 @@
             ...buttonItem,
           }"
         >
+          <img
+            class="button-img"
+            v-if="buttonItem.src"
+            :src="buttonItem.src"
+            alt=""
+          />
           {{ buttonItem.label }}
         </component>
         <el-dropdown-menu slot="dropdown">
@@ -42,7 +48,14 @@
             :icon="child.icon"
             :command="child.method"
             @click.native.stop
-            >{{ child.label }}</el-dropdown-item
+          >
+            <img
+              class="button-img"
+              v-if="buttonItem.src"
+              :src="buttonItem.src"
+              alt=""
+            />
+            {{ child.label }}</el-dropdown-item
           >
         </el-dropdown-menu>
       </el-dropdown>
@@ -59,6 +72,12 @@
         }"
         @click="$emit('happenEvent', buttonItem)"
       >
+        <img
+          class="button-img"
+          v-if="buttonItem.src"
+          :src="buttonItem.src"
+          alt=""
+        />
         {{ buttonItem.label }}
       </component>
     </template>
@@ -107,5 +126,9 @@ export default {
 <style lang="less" scoped>
 /deep/ .el-link {
   margin-right: 6px;
+}
+.button-img {
+  width: 12px;
+  height: 12px;
 }
 </style>

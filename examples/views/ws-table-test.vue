@@ -5,6 +5,7 @@
     placeholder="-"
     :loading="loading"
     utilsList="download,showSingle"
+    getDefaultSearchConfig
     :data="tableData"
     :tableColumns="tableColumns"
     :allOptions="allOptions"

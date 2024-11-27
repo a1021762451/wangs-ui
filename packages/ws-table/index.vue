@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-09-03 09:18:31
+ * @LastEditTime: 2024-11-27 13:56:31
 -->
 <template>
   <div class="table-container">
@@ -361,7 +361,7 @@ export default {
       type: Boolean,
     },
     // 是否生成默认表单配置
-    getDefault: {
+    getDefaultSearchConfig: {
       default: false,
       type: Boolean,
     },
@@ -840,28 +840,38 @@ export default {
     },
     // 根据表格配置生成默认表单配置
     getDefaultFormConfigList(getForm = false) {
+      // 搜索表单配置以formConfigList为主，表格配置为辅
+      //  noDefaultSearchConfig: true, 不变更原配置
       const { formConfigList = [] } = this.seachConfig
-      if (!this.getDefault) return formConfigList
+      if (!this.getDefaultSearchConfig) return formConfigList
       const arr = []
       this.flatColums.forEach((item) => {
-        const { component, prop, label, noDefaultNeed } = item
-        // 不需要默认配置
-        if (!prop || noDefaultNeed) return
+        const { component, prop, label,  noDefaultSearchConfig } = item
+        if (!prop) return
+        const finditem = formConfigList.find((x) => x.prop === prop) || {}
         // 搜索表单默认配置
         if (this.showSearch && getForm) {
-          const finditem = formConfigList.find((x) => x.prop === prop)
-          arr.push(
-            finditem || {
-              prop,
-              label,
-              component: component || 'el-input',
-            }
-          )
+          if ( noDefaultSearchConfig) {
+            finditem.prop && arr.push(finditem)
+            return
+          }
+          const obj = {
+            label,
+            prop,
+            component,
+            ...finditem,
+          }
+          obj.component = obj.component || 'el-input'
+          arr.push(obj)
         }
         // 表格搜索行默认配置
-        else if (!getForm) {
-          if ((this.showSearchRow || this.showHeaderSearch) && !component) {
-            this.$set(item, 'component', 'el-input')
+        else if (!getForm && ! noDefaultSearchConfig) {
+          if (this.showSearchRow || this.showHeaderSearch) {
+            Object.keys(finditem).forEach((key) => {
+              this.$set(item, key, finditem[key])
+            })
+            this.$set(item, 'component', item.component || 'el-input')
+            // this.$set(item, 'component', 'el-input')
           }
           // if (this.showHeaderSearch && !headerConfig) {
           //   this.$set(item, 'headerConfig', {

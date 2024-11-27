@@ -76,9 +76,9 @@ export function getAttrs(fieldItem, formData = {}, isDetail) {
     ...obj,
     ...globalAttrs,
     ...(allTypes[type] || allTypes.default || {}),
-    disabled: isDetail,
     ...componentAttrs,
   }
+  if (isDetail) obj.disabled = true
   obj.placeholder = obj.disabled ? '' : obj.placeholder
   return obj
 }

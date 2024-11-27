@@ -337,7 +337,9 @@ tableColumns 配置 slotName 和 headerSlotName 和 selectSlotName
 #### 特点
 
 - 配置化开发
-- 支持搜索栏模式和普通表单模式
+- 校验规则自动生成
+- 支持搜索栏模式/普通表单模式/表格模式/勾选模式
+- 时间组件可进行时间自由限制
 - 搜索栏模式自适应增加折叠按钮
 - 增加默认按钮，默认进行校验
 - 保留`elementui el-form`原有功能

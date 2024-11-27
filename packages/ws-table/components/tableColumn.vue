@@ -66,14 +66,13 @@
     v-bind="{
       align: 'center',
       resizable: true,
-      width: (fieldItem.buttonConfigList || []).length * 55,
       ...fieldItem,
     }"
   >
     <!-- 表头插槽 -->
     <template v-slot:header="scope" v-if="fieldItem.headerSlotName">
       <slot :name="fieldItem.headerSlotName" v-bind="{ ...scope, fieldItem }">
-        {{ fieldItem.label || '操作' }}
+        {{ fieldItem.label}}
       </slot>
     </template>
     <template>
