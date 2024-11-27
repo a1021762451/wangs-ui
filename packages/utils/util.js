@@ -259,6 +259,7 @@ export function getShowValue(
   allOptions,
   placeholder
 ) {
+  if (row.rowType__table === 'searchRow') return ''
   const { prop, componentAttrs = {}, component } = fieldItem
   let value = row[prop]
   if (value && component === 'el-date-picker' && componentAttrs.format) {
@@ -272,8 +273,8 @@ export function getShowValue(
   return fieldItem.formatter
     ? fieldItem.formatter(row, column, value, $index)
     : value || value === 0
-    ? value
-    : fieldItem.placeholder || placeholder
+      ? value
+      : fieldItem.placeholder || placeholder
 }
 // 获取下拉框，勾选框等选项
 export function getOptions(fieldItem, allOptions, row) {
@@ -378,9 +379,9 @@ export function deepMerge(obj1, obj2) {
     // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
     obj1[key] =
       obj1[key] &&
-      obj1[key].toString() === '[object Object]' &&
-      obj2[key] &&
-      obj2[key].toString() === '[object Object]'
+        obj1[key].toString() === '[object Object]' &&
+        obj2[key] &&
+        obj2[key].toString() === '[object Object]'
         ? deepMerge(obj1[key], obj2[key])
         : (obj1[key] = obj2[key])
   }

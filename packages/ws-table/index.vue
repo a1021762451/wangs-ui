@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-11-27 13:56:31
+ * @LastEditTime: 2024-11-27 14:09:42
 -->
 <template>
   <div class="table-container">
@@ -1431,6 +1431,9 @@ export default {
   }
   .el-form-item {
     margin-bottom: 0;
+  }
+  .drag-handle {
+    display: none;
   }
 }
 /deep/ .tree-cell {
