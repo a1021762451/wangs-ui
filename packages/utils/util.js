@@ -16,8 +16,8 @@ const commonAttrs = {
       placeholder: '请输入',
     },
     textarea: {
-      'show-word-limit': true,
-      maxlength: 1000,
+      // 'show-word-limit': true,
+      // maxlength: 1000,
       placeholder: '请输入',
       rows: 2,
     },

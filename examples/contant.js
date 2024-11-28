@@ -177,6 +177,7 @@ export const tableColumns = [
     slotName: 'testTableSlot',
     prop: 'testTableSlot',
     label: '插槽',
+    noDefaultSearchConfig: true,
   },
   // 过滤举例
   {
@@ -185,6 +186,7 @@ export const tableColumns = [
     formatter: function (row, column, cellValue, index) {
       return cellValue + '-过滤'
     },
+    noDefaultSearchConfig: true,
   },
   // 富文本举例
   {

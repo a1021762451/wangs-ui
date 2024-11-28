@@ -72,7 +72,7 @@
     <!-- 表头插槽 -->
     <template v-slot:header="scope" v-if="fieldItem.headerSlotName">
       <slot :name="fieldItem.headerSlotName" v-bind="{ ...scope, fieldItem }">
-        {{ fieldItem.label}}
+        {{ fieldItem.label }}
       </slot>
     </template>
     <template>
@@ -278,7 +278,9 @@
       <!-- 表单元素 非编辑模式 -->
       <template v-else>
         <!-- 命名插槽 -->
-        <template v-if="fieldItem.slotName">
+        <template
+          v-if="fieldItem.slotName && row.rowType__table !== 'searchRow'"
+        >
           <slot
             :name="fieldItem.slotName"
             v-bind="{ row, column, $index, fieldItem }"

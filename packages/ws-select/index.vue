@@ -132,7 +132,7 @@ export default {
   computed: {
     multiple() {
       // 布尔值简写获取到的是空字符串
-      return this.$attrs.multiple === '' || this.$attrs.multiple
+      return this.$attrs.multiple === '' || !!this.$attrs.multiple
     },
     flatOptions() {
       return treeToFlat(this.options)
@@ -208,6 +208,7 @@ export default {
     },
     // 树节点选中事件
     handleCheck() {
+      if (!this.multiple) return
       const checkedValues = this.$refs.wsTree.getCheckedKeys(this.treeLeafOnly)
       this.$emit('change', checkedValues)
     },

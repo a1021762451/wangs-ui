@@ -1,7 +1,7 @@
 <template>
   <ws-table
     ref="wsTable"
-    showSearch
+    showSearchRow
     placeholder="-"
     :loading="loading"
     utilsList="download,showSingle"
