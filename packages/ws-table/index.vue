@@ -3,12 +3,12 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-11-29 09:19:26
+ * @LastEditTime: 2024-11-29 10:56:45
 -->
 <template>
   <div class="table-container">
     <ws-form
-      v-if="showSearch"
+      v-if="showSearchForm"
       @happenEvent="happenEvent"
       style="margin-bottom: 6px"
       v-bind="{
@@ -350,6 +350,11 @@ export default {
       default: 'form',
       type: String,
     },
+    // 显示搜索栏
+    showSearch: {
+      default: true,
+      type: Boolean,
+    },
     // 是否生成默认表单配置
     getDefaultSearchConfig: {
       default: false,
@@ -478,14 +483,14 @@ export default {
     requestHasColumns() {
       return this.requestConfigCpt.hasColumns
     },
-    showSearch() {
-      return this.searchMode === 'form'
+    showSearchForm() {
+      return this.showSearch && this.searchMode === 'form'
     },
     showSearchRow() {
-      return this.searchMode === 'row'
+      return this.showSearch && this.searchMode === 'row'
     },
     showHeaderSearch() {
-      return this.searchMode === 'header'
+      return this.showSearch && this.searchMode === 'header'
     },
   },
   directives: {
@@ -849,7 +854,7 @@ export default {
         if (!prop) return
         const finditem = formConfigList.find((x) => x.prop === prop) || {}
         // 搜索表单默认配置
-        if (this.showSearch && getForm) {
+        if (this.showSearchForm && getForm) {
           if (noDefaultSearchConfig) {
             finditem.prop && arr.push(finditem)
             return
