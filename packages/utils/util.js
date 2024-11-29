@@ -846,3 +846,21 @@ export function concatUrlAndParams(url, params = {}) {
   // 判断url中是否?
   return url + '?' + str
 }
+
+// 二次确认
+export function twiceConfirm(msg = '是否继续此操作?', tip = '提示', options = {}) {
+  return new Promise((resolve, reject) => {
+    this.$confirm(msg, tip, {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      ...options,
+    })
+      .then(() => {
+        resolve()
+      })
+      .catch(() => {
+        reject()
+      })
+  })
+}

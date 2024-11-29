@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-11-27 14:09:42
+ * @LastEditTime: 2024-11-29 09:19:26
 -->
 <template>
   <div class="table-container">
@@ -13,7 +13,7 @@
       style="margin-bottom: 6px"
       v-bind="{
         formData: formData,
-        isSearchForm: true,
+        formStyle: 'search',
         allOptions,
         ...seachConfig,
         formConfigList,
@@ -307,11 +307,6 @@ export default {
       default: true,
       type: Boolean,
     },
-    // 显示搜索栏
-    showSearch: {
-      default: false,
-      type: Boolean,
-    },
     // 表格单元格占位
     placeholder: {
       default: '',
@@ -350,15 +345,10 @@ export default {
       },
       type: Object,
     },
-    // 首行是搜索栏
-    showSearchRow: {
-      default: false,
-      type: Boolean,
-    },
-    // 标题栏有搜索功能
-    showHeaderSearch: {
-      default: false,
-      type: Boolean,
+    // 搜索模式: form:普通表单搜索, row:行搜索, header:表头搜索
+    searchMode: {
+      default: 'form',
+      type: String,
     },
     // 是否生成默认表单配置
     getDefaultSearchConfig: {
@@ -487,6 +477,15 @@ export default {
     },
     requestHasColumns() {
       return this.requestConfigCpt.hasColumns
+    },
+    showSearch() {
+      return this.searchMode === 'form'
+    },
+    showSearchRow() {
+      return this.searchMode === 'row'
+    },
+    showHeaderSearch() {
+      return this.searchMode === 'header'
     },
   },
   directives: {
@@ -846,12 +845,12 @@ export default {
       if (!this.getDefaultSearchConfig) return formConfigList
       const arr = []
       this.flatColums.forEach((item) => {
-        const { component, prop, label,  noDefaultSearchConfig } = item
+        const { component, prop, label, noDefaultSearchConfig } = item
         if (!prop) return
         const finditem = formConfigList.find((x) => x.prop === prop) || {}
         // 搜索表单默认配置
         if (this.showSearch && getForm) {
-          if ( noDefaultSearchConfig) {
+          if (noDefaultSearchConfig) {
             finditem.prop && arr.push(finditem)
             return
           }
@@ -865,7 +864,7 @@ export default {
           arr.push(obj)
         }
         // 表格搜索行默认配置
-        else if (!getForm && ! noDefaultSearchConfig) {
+        else if (!getForm && !noDefaultSearchConfig) {
           if (this.showSearchRow || this.showHeaderSearch) {
             Object.keys(finditem).forEach((key) => {
               this.$set(item, key, finditem[key])

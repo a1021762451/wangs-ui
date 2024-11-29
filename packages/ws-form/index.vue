@@ -94,7 +94,7 @@
                 @input="handleInput($event, formData, fieldItem)"
                 v-bind="{
                   options: getOptions(fieldItem, allOptions, formData),
-                  ...getAttrs(fieldItem, formData, isDetail),
+                  ...getAttrs(fieldItem, formData, formStatus !== 'edit'),
                 }"
                 v-on="{
                   // fieldItem.listeners和上面的事件一起触发，上面先触发
@@ -293,20 +293,16 @@ export default {
       },
       type: Object,
     },
-    // 是否是搜索控件
-    isSearchForm: {
-      default: false,
-      type: Boolean,
+    // 表单风格 -- search：搜索表单,checkSearch：勾选模式搜索表单,form：普通表单, tableForm：表格模式表单
+    formStyle: {
+      default: 'form',
+      type: String,
     },
-    // 是否是勾选表单--勾选组件多，且标签带边框
-    isCheckForm: {
-      default: false,
-      type: Boolean,
-    },
-    // 表格类型表单
-    isTableForm: {
-      default: false,
-      type: Boolean,
+    // 表单模式 -- detail：详情模式, review：审阅模式  edit:新增或编辑模式
+    // detail时，表单元素不可编辑，没有操作按钮；review时，表单元素不可编辑，有操作按钮；edit时，表单元素可编辑，有操作按钮
+    formStatus: {
+      default: 'edit',
+      type: String,
     },
     // 按钮组配置
     buttonConfigList: {
@@ -319,11 +315,6 @@ export default {
     buttonSize: {
       default: '',
       type: String,
-    },
-    // 是否是详情模式
-    isDetail: {
-      default: false,
-      type: Boolean,
     },
     // 是否显示默认查询重置按钮
     useDefaultButtons: {
@@ -434,7 +425,7 @@ export default {
       ]
       this.formConfigList.forEach((fieldItem) => {
         const { component = '', required, disabled, ruleExtra = {} } = fieldItem
-        if (this.isDetail || !required || disabled) return
+        if (this.formStatus !== 'edit' || !required || disabled) return
         const messageSuffix =
           !component || component.includes('input') ? '输入' : '选择'
         obj[fieldItem.prop] = fieldItem.rule || [
@@ -470,7 +461,7 @@ export default {
     // 是否显示按钮组
     hasButtons() {
       // this.configList.length > 0 &&
-      return this.buttonsList.length > 0 && !this.isDetail
+      return this.buttonsList.length > 0 && this.formStatus !== 'detail'
     },
     // 是否有查询按钮
     hasSearchButton() {
@@ -494,6 +485,15 @@ export default {
       let gutterDefault = 12
       if (this.isTableForm) gutterDefault = 0
       return this.$attrs.gutter || gutterDefault
+    },
+    isSearchForm() {
+      return /search/i.test(this.formStyle)
+    },
+    isCheckForm() {
+      return this.formStyle === 'checkSearch'
+    },
+    isTableForm() {
+      return this.formStyle === 'tableForm'
     },
   },
   created() {
@@ -519,7 +519,9 @@ export default {
       return fieldItem.isRow || fieldItem.span === 24
     },
     getDynamicWidth() {
-      const arr =  this.configList.filter(item => item.label).map(item => item.label)
+      const arr = this.configList
+        .filter((item) => item.label)
+        .map((item) => item.label)
       this.labelMaxWidth = getMaxLength(arr) * 1.5 + 'px'
     },
     // 将form label的margin转换为padding -- 放弃，改为传入labelWidth

@@ -1,7 +1,7 @@
 <template>
   <ws-table
     ref="wsTable"
-    showSearchRow
+    searchMode="row"
     placeholder="-"
     :loading="loading"
     utilsList="download,showSingle"
@@ -62,7 +62,7 @@ import {
   formConfigList,
   allOptions,
   tableColumns,
-  happenEvent
+  happenEvent,
 } from '../contant'
 export default {
   name: 'ws-table-test',
@@ -223,8 +223,8 @@ export default {
       console.log('search', eventData, this.formData)
     },
     switchFn(fieldItem, row, column, $index) {
-      if(fieldItem.prop === 'testSelect' && $index === 0) return true
-    }
+      if (fieldItem.prop === 'testSelect' && $index === 0) return true
+    },
   },
 }
 </script>
