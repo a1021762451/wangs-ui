@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-11-29 10:56:45
+ * @LastEditTime: 2024-12-05 09:30:06
 -->
 <template>
   <div class="table-container">
@@ -72,7 +72,7 @@
       class="common-table"
       :class="{
         formNoMarginBottom: !hasRequired,
-        headerWidthForm: showHeaderSearch && containerIsForm,
+        headerWidthForm: showSearchHeader && containerIsForm,
       }"
     >
       <!-- 表格 -->
@@ -122,7 +122,7 @@
           :property.sync="property"
           :index.sync="index"
           :formData="formData"
-          :showHeaderSearch="showHeaderSearch"
+          :showSearchHeader="showSearchHeader"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -489,7 +489,7 @@ export default {
     showSearchRow() {
       return this.showSearch && this.searchMode === 'row'
     },
-    showHeaderSearch() {
+    showSearchHeader() {
       return this.showSearch && this.searchMode === 'header'
     },
   },
@@ -731,8 +731,14 @@ export default {
         },
         // 结束拖拽后的回调函数
         onEnd: (evt) => {
-          const { newIndex, oldIndex } = evt
+          // debugger
+          let { newIndex, oldIndex } = evt
           if (newIndex === oldIndex) return
+          // 考虑首行搜索，索引-1
+          if (this.showSearchRow) {
+            newIndex -= 1
+            oldIndex -= 1
+          }
           this.dataNoChange = true
           const { row: oldRow } = this.changeDataByIndex(oldIndex, null, 'get')
           const { row: newRow } = this.changeDataByIndex(newIndex, null, 'get')
@@ -870,14 +876,14 @@ export default {
         }
         // 表格搜索行默认配置
         else if (!getForm && !noDefaultSearchConfig) {
-          if (this.showSearchRow || this.showHeaderSearch) {
+          if (this.showSearchRow || this.showSearchHeader) {
             Object.keys(finditem).forEach((key) => {
               this.$set(item, key, finditem[key])
             })
             this.$set(item, 'component', item.component || 'el-input')
             // this.$set(item, 'component', 'el-input')
           }
-          // if (this.showHeaderSearch && !headerConfig) {
+          // if (this.showSearchHeader && !headerConfig) {
           //   this.$set(item, 'headerConfig', {
           //     component: 'el-input',
           //     prop,
@@ -888,7 +894,7 @@ export default {
       return arr
     },
     initHeaderSearch() {
-      if (!this.showHeaderSearch || this.showSingleStatus) return
+      if (!this.showSearchHeader || this.showSingleStatus) return
       this.initFormData()
     },
     // 根据配置初始化一个row
@@ -968,12 +974,13 @@ export default {
     setCellClassName({ row, column, rowIndex, columnIndex }) {
       let classStr = ''
       if (
-        row.children &&
+        Array.isArray(row.children) &&
         row.children.length &&
         column.property === this.firstColumnWidthProp.prop
       ) {
         classStr += 'tree-cell '
       }
+      if (column.type === 'index') classStr += 'index-cell '
       if (row.rowType__table === 'searchRow') classStr += 'search-cell '
       const fieldItem = this.flatColums.find(
         (item) => item.prop === column.property

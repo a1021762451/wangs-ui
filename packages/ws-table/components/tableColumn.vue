@@ -102,7 +102,7 @@
       </template>
       <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
       <!-- 表头搜索 -->
-      <el-form-item v-if="fieldItem.component && showHeaderSearch">
+      <el-form-item v-if="fieldItem.component && showSearchHeader">
         <!-- 表单元素显示 -->
         <component
           :is="fieldItem.component"
@@ -391,7 +391,7 @@ export default {
       type: Object,
     },
     // 标题栏有搜索功能
-    showHeaderSearch: {
+    showSearchHeader: {
       default: false,
       type: Boolean,
     },
