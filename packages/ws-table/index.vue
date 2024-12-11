@@ -3,10 +3,10 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-05 09:30:06
+ * @LastEditTime: 2024-12-05 10:33:57
 -->
 <template>
-  <div class="table-container">
+  <div class="table-container" v-resize="resizeTable">
     <ws-form
       v-if="showSearchForm"
       @happenEvent="happenEvent"
@@ -560,6 +560,11 @@ export default {
       } catch (error) {
         console.error('请安装对应的依赖包')
       }
+    },
+    // 表格重新布局
+    resizeTable({width, height}) {
+      // console.log(width, height, 'resizeTable')
+      this.doLayout()
     },
     changePageInfo(obj) {
       // obj = { ...this.pageInfo, ...obj }
