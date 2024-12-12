@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-05 10:33:57
+ * @LastEditTime: 2024-12-12 10:08:55
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -562,7 +562,7 @@ export default {
       }
     },
     // 表格重新布局
-    resizeTable({width, height}) {
+    resizeTable({ width, height }) {
       // console.log(width, height, 'resizeTable')
       this.doLayout()
     },
@@ -979,8 +979,8 @@ export default {
     setCellClassName({ row, column, rowIndex, columnIndex }) {
       let classStr = ''
       if (
-        Array.isArray(row.children) &&
-        row.children.length &&
+        Array.isArray(row[this.childrenKey]) &&
+        row[this.childrenKey].length &&
         column.property === this.firstColumnWidthProp.prop
       ) {
         classStr += 'tree-cell '
@@ -1030,6 +1030,7 @@ export default {
       const { tableData } = this.tableForm
       const childrenKey = this.childrenKey
       const iterateAddProp = (data, childrenKey, prop__table) => {
+        if (!Array.isArray(data)) return
         data.forEach((item, index) => {
           def(item, 'prop__table', `${prop__table}.${index}`)
           // this.$set(item, 'prop__table', `${prop__table}.${index}`)
@@ -1041,9 +1042,9 @@ export default {
             this.$set(item, this.switchKey, false)
           // 需要响应式，所以使用this.$set
           // def(item, this.switchKey, false)
-          if (item.children) {
+          if (Array.isArray(item[childrenKey])) {
             iterateAddProp(
-              item.children,
+              item[childrenKey],
               childrenKey,
               `${prop__table}.${index}.${childrenKey}`
             )
@@ -1272,7 +1273,7 @@ export default {
           }
         })
       }
-      iterateFn(row.children || [])
+      iterateFn(row[childrenKey] || [])
       return hasOwn ? arr.concat(row) : arr
     },
     currentChange(currentRow, oldCurrentRow) {
