@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-16 14:10:43
+ * @LastEditTime: 2024-12-16 14:29:58
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -86,7 +86,6 @@
 </template>
 
 <script>
-const TDFnMap = {}
 import { debounce, throttle } from '../utils/util'
 export default {
   name: 'ws-buttons',
@@ -123,6 +122,11 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      TDFnMap: {},
+    }
+  },
   methods: {
     happenCommand(command, children) {
       const buttonItem = children.find((item) => item.method === command)
@@ -132,6 +136,7 @@ export default {
       this.$emit('happenEvent', buttonItem)
     },
     happenEvent(buttonItem) {
+      const TDFnMap = this.TDFnMap
       const { method, TDConfig } = buttonItem
       const { mode, delay = 500, immediate = false } = TDConfig || this.TDConfig
       if (!TDFnMap[method]) {

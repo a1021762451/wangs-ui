@@ -332,7 +332,7 @@ export const debounce = (fn, delay = 500, immediate) => {
     let args = arguments
     if (timer) {
       clearTimeout(timer)
-      console.log('防抖中')
+      // console.log('防抖中')
     }
     if (immediate) {
       if (!timer) {
@@ -355,7 +355,7 @@ export const throttle = (fn, delay = 500, immediate) => {
   return function () {
     let args = arguments
     if (timer) {
-      console.log('节流中')
+      // console.log('节流中')
       return
     }
     if (immediate) {
