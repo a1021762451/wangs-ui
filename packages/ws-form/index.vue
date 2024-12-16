@@ -187,6 +187,7 @@
           <ws-buttons
             :buttonConfigList="buttonsList"
             :buttonSize="buttonSize || size"
+            :TDConfig="TDConfig"
             class="buttons"
             @happenEvent="happenEvent"
           >
@@ -332,6 +333,13 @@ export default {
     span: {
       default: 6,
       type: Number,
+    },
+    // 节流防抖配置  { mode: 'throttle' | 'debounce', delay: 500, immediate: false | true }
+    TDConfig: {
+      type: Object,
+      default() {
+        return {}
+      },
     },
   },
   watch: {

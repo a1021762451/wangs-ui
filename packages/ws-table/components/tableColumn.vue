@@ -52,6 +52,7 @@
             row.rowType__table === 'searchRow'
               ? []
               : filterButtons(fieldItem.buttonConfigList, row),
+          TDConfig: TDConfig,
         }"
       >
         <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -394,6 +395,13 @@ export default {
     showSearchHeader: {
       default: false,
       type: Boolean,
+    },
+    // 节流防抖配置  { mode: 'throttle' | 'debounce', delay: 500, immediate: false | true }
+    TDConfig: {
+      type: Object,
+      default() {
+        return {}
+      },
     },
   },
   data() {

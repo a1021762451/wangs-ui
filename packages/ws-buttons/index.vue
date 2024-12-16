@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-11-14 13:32:51
+ * @LastEditTime: 2024-12-16 14:10:43
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -70,7 +70,7 @@
           underline: false,
           ...buttonItem,
         }"
-        @click="$emit('happenEvent', buttonItem)"
+        @click="happenEvent(buttonItem)"
       >
         <img
           class="button-img"
@@ -86,6 +86,8 @@
 </template>
 
 <script>
+const TDFnMap = {}
+import { debounce, throttle } from '../utils/util'
 export default {
   name: 'ws-buttons',
   props: {
@@ -113,11 +115,36 @@ export default {
       },
       type: Function,
     },
+    // 节流防抖配置  { mode: 'throttle' | 'debounce', delay: 500, immediate: false | true }
+    TDConfig: {
+      type: Object,
+      default() {
+        return {}
+      },
+    },
   },
   methods: {
     happenCommand(command, children) {
       const buttonItem = children.find((item) => item.method === command)
+      this.happenEvent(buttonItem)
+    },
+    emitHappenEvent(buttonItem) {
       this.$emit('happenEvent', buttonItem)
+    },
+    happenEvent(buttonItem) {
+      const { method, TDConfig } = buttonItem
+      const { mode, delay = 500, immediate = false } = TDConfig || this.TDConfig
+      if (!TDFnMap[method]) {
+        // 初始化节流防抖函数
+        if (mode === 'throttle') {
+          TDFnMap[method] = throttle(this.emitHappenEvent, delay, immediate)
+        } else if (mode === 'debounce') {
+          TDFnMap[method] = debounce(this.emitHappenEvent, delay, immediate)
+        } else {
+          TDFnMap[method] = this.emitHappenEvent
+        }
+      }
+      TDFnMap[method](buttonItem)
     },
   },
 }

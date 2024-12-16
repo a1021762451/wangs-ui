@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-12 10:08:55
+ * @LastEditTime: 2024-12-16 12:37:31
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -123,6 +123,7 @@
           :index.sync="index"
           :formData="formData"
           :showSearchHeader="showSearchHeader"
+          :TDConfig="TDConfig"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -366,6 +367,13 @@ export default {
         return buttonConfigList
       },
       type: Function,
+    },
+    // 节流防抖配置  { mode: 'throttle' | 'debounce', delay: 500, immediate: false | true }
+    TDConfig: {
+      type: Object,
+      default() {
+        return {}
+      },
     },
   },
   data() {
