@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-04 17:08:21
+ * @LastEditTime: 2024-12-17 10:53:12
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -75,7 +75,12 @@
               @mouseleave="mouseleave"
             >
               <!-- 内容 -->
-              <wsTooltip :content="node.label" overflow :placement="'right'">
+              <wsTooltip
+                popper-class="el-tooltip_custom"
+                :content="node.label"
+                overflow
+                :placement="'right'"
+              >
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
                     {{ node.label }}
@@ -108,6 +113,7 @@
               </span>
               <!-- 禁用蒙层 -->
               <wsTooltip
+                popper-class="el-tooltip_custom"
                 :content="node.label"
                 :overflow="false"
                 :placement="'right'"
@@ -555,6 +561,11 @@ export default {
 }
 </script>
 
+<style lang="less">
+.el-tooltip_custom {
+  max-width: 500px;
+}
+</style>
 <style lang="less" scoped>
 .contextmenu {
   transition: all 0.3s;

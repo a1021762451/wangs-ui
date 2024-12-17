@@ -5,7 +5,7 @@
     :filter-method="isTreeSelect ? filterMethodToTree : undefined"
     v-bind="{
       filterable: true,
-      'popper-class': isTreeSelect ? 'ws-treeSelect' : 'ws-select',
+      'popper-class': isTreeSelect ? 'ws-treeSelect ws-select' : 'ws-select',
       ...$attrs,
     }"
     v-on="$listeners"
@@ -57,12 +57,36 @@
             :key="nextItem.label + nextItem.value"
             v-bind="nextItem"
           >
-            <slot v-bind="item"></slot
-          ></el-option>
+            <!-- 内容 -->
+            <wsTooltip
+              popper-class="el-tooltip_custom"
+              :content="nextItem.label"
+              overflow
+              :placement="'right'"
+            >
+              <div class="ws-select__label">
+                <slot name="label" v-bind="nextItem">
+                  {{ nextItem.label }}
+                </slot>
+              </div>
+            </wsTooltip>
+          </el-option>
         </el-option-group>
-        <el-option v-else :key="item.label + item.value" v-bind="item"
-          ><slot v-bind="item"></slot
-        ></el-option>
+        <el-option v-else :key="item.label + item.value" v-bind="item">
+          <!-- 内容 -->
+          <wsTooltip
+            popper-class="el-tooltip_custom"
+            :content="item.label"
+            overflow
+            :placement="'right'"
+          >
+            <div class="ws-select__label">
+              <slot name="label" v-bind="item">
+                {{ item.label }}
+              </slot>
+            </div>
+          </wsTooltip>
+        </el-option>
       </template>
     </template>
     <template v-slot:empty>
@@ -76,10 +100,12 @@
 <script>
 import { treeToFlat, getObjAttr } from '../utils/util'
 import wsTree from '../ws-tree/index.vue'
+import wsTooltip from '../ws-tooltip/index.vue'
 export default {
   name: 'ws-select',
   components: {
     wsTree,
+    wsTooltip,
   },
   model: {
     prop: 'value',
@@ -216,6 +242,9 @@ export default {
 }
 </script>
 <style lang="less">
+.ws-select {
+  max-width: 350px;
+}
 .ws-select__checkbox {
   padding-left: 20px;
 }
@@ -234,5 +263,14 @@ export default {
     max-height: 350px !important;
   }
 }
+.el-tooltip_custom {
+  max-width: 500px;
+}
 </style>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.ws-select__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
