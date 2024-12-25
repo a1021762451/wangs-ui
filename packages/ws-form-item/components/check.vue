@@ -115,7 +115,7 @@ export default {
         this.ownValue = this.getOwnValue()
         this.dispatch('ElFormItem', 'el.form.change', [newVaue])
       },
-      immediate: true,
+      // immediate: true,
     },
     options: {
       handler() {

@@ -24,7 +24,7 @@
       @blur="handleBlur(formData, fieldItem)"
       @input="handleInput($event, formData, fieldItem)"
       v-bind="{
-        disabled: formData[fieldItem.disabledKey],
+        disabled: fieldItem.disabledKey && formData[fieldItem.disabledKey],
         options: getOptions(fieldItem, allOptions, formData),
         ...getAttrs(fieldItem, formData, formStatus !== 'edit'),
       }"
@@ -97,12 +97,12 @@
 </template>
 
 <script>
-import check from './components/check.vue'
-import condition from './components/condition.vue'
 import { getAttrs, getOptions } from '../utils/util'
 export default {
   name: 'ws-form-item',
-  components: { check, condition },
+  components: {
+    check: () => import('./components/check'),
+  },
   props: {
     fieldItem: {
       type: Object,

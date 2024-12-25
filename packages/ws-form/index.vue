@@ -1,3 +1,9 @@
+<!--
+ * @Author: wang shuai
+ * @Date: 2024-12-25 09:59:15
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2024-12-25 14:18:29
+-->
 <template>
   <div
     v-resize.window.immediate="judgeOneRow"
@@ -57,42 +63,26 @@
           <!-- <div class="border-line"></div> -->
         </el-col>
         <!-- 表单元素 -->
-        <template v-for="(fieldItem, index) in configList">
-          <el-col
-            :span="fieldItem.span"
-            :style="{ marginRight: `${(fieldItem.offestRight * 100) / 24}%` }"
-            :class="{
-              'border-bottom': isCheckForm && !judgeIsRow(fieldItem),
-            }"
-            :key="fieldItem.prop"
-            v-show="!isCheckForm || (isCheckForm && !isFold)"
-          >
-            <!-- notLeftMargin: fieldItem.isSide && isSearchForm, -->
-            <ws-form-item
-              v-bind="fieldItem"
-              :required="undefined"
-              :allOptions="allOptions"
-              :fieldItem="fieldItem"
-              :formData="formData"
-              :formStatus="formStatus"
-              :fieldItemChange="fieldItemChange"
-              :extraComponents="extraComponents"
-            >
-              <!-- 将父组件插槽内容转发给子组件 -->
-              <template
-                v-for="(index, name) in $scopedSlots"
-                v-slot:[name]="scope"
-              >
-                <slot :name="name" v-bind="scope"></slot>
-              </template>
-            </ws-form-item>
-          </el-col>
-          <div
-            v-show="isCheckForm && !isFold && judgeIsRow(fieldItem)"
-            class="border-line"
-            :key="fieldItem.prop + 'line'"
-          ></div>
-        </template>
+        <colItem
+          v-for="(fieldItem, index) in configList"
+          :key="fieldItem.prop + fieldItem.label"
+          :class="{
+            'border-bottom': isCheckForm && judgeIsRow(fieldItem),
+          }"
+          v-show="!isCheckForm || (isCheckForm && !isFold)"
+          :isCheckForm="isCheckForm"
+          :allOptions="allOptions"
+          :fieldItem="fieldItem"
+          :formData="formData"
+          :formStatus="formStatus"
+          :fieldItemChange="fieldItemChange"
+          :extraComponents="extraComponents"
+        >
+          <!-- 将父组件插槽内容转发给子组件 -->
+          <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+            <slot :name="name" v-bind="scope"></slot>
+          </template>
+        </colItem>
         <!-- 按钮 -->
         <el-form-item
           v-if="hasButtons"
@@ -166,14 +156,18 @@ import {
   getObjAttr,
   getMaxLength,
   getOptions,
+  treeToFlat,
 } from '../utils/util'
-import wsFormItem from '../ws-form-item/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
 import mixins from './mixins'
 export default {
   name: 'ws-form',
   mixins: [mixins],
-  components: { wsFormItem, wsButtons },
+  components: {
+    wsButtons,
+    condition: () => import('./components/condition'),
+    colItem: () => import('./components/colItem'),
+  },
   data() {
     return {
       cloneForm: {},
@@ -259,9 +253,10 @@ export default {
     formConfigList: {
       handler() {
         const configList = deepClone(this.formConfigList)
+        this.configList = configList
         let remain = 0
         let total = 0
-        configList.forEach((item, index) => {
+        this.flatConfigList.forEach((item, index) => {
           const { component, listeners, componentAttrs = {} } = item
           item.span = item.span || this.span
           // 搜索模式下判断表单元素是否在最左边
@@ -301,6 +296,10 @@ export default {
               listeners[key] = listeners[key].bind(this.$parent)
             })
           }
+          // 有children的表单元素,span24
+          if (item.children) {
+            item.span = 24
+          }
           // 勾选表单处理
           if (this.isCheckForm) {
             // 初始化conditionOptions
@@ -315,9 +314,9 @@ export default {
           // 处理isRow属性
           if (item.isRow) {
             item.offestRight = 24 - item.span
+            item.span = 24
           }
         })
-        this.configList = configList
       },
       immediate: true,
     },
@@ -336,6 +335,9 @@ export default {
     },
   },
   computed: {
+    flatConfigList() {
+      return treeToFlat(this.configList)
+    },
     rules() {
       let obj = {}
       const blurEletypes = ['el-input', 'el-input-number']
@@ -344,7 +346,7 @@ export default {
         'el-time-select',
         'el-time-picker',
       ]
-      this.formConfigList.forEach((fieldItem) => {
+      this.flatConfigList.forEach((fieldItem) => {
         const { component = '', required, disabled, ruleExtra = {} } = fieldItem
         if (this.formStatus !== 'edit' || !required || disabled) return
         const messageSuffix =
