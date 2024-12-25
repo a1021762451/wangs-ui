@@ -103,187 +103,65 @@
       </template>
       <i style="color: #f56c6c" v-if="fieldItem.required">*</i>
       <!-- 表头搜索 -->
-      <el-form-item v-if="fieldItem.component && showSearchHeader">
-        <!-- 表单元素显示 -->
-        <component
-          :is="fieldItem.component"
-          v-model="formData[fieldItem.prop]"
-          @change="fieldItemChange(fieldItem, formData, 'search')"
-          @blur="handleBlur(fieldItem, formData)"
-          @input="handleInput($event, fieldItem, formData)"
-          v-bind="{
-            size: 'mini',
-            'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-            options: getOptions(fieldItem, allOptions, formData),
-            ...getAttrs(fieldItem, formData),
-          }"
-          v-on="{
-            // fieldItem.listeners和上面的事件一起触发，上面先触发
-            ...(fieldItem.listeners || {}),
-          }"
-        >
-          <template v-if="fieldItem.component === 'el-select'">
-            <template
-              v-for="item in getOptions(fieldItem, allOptions, formData)"
-            >
-              <el-option-group
-                v-if="item.children"
-                :key="item.label"
-                v-bind="item"
-              >
-                <el-option
-                  v-for="nextItem in item.children"
-                  :key="nextItem.label + nextItem.value"
-                  v-bind="nextItem"
-                >
-                  <slot
-                    v-if="fieldItem.selectSlotName"
-                    :name="fieldItem.selectSlotName"
-                    v-bind="nextItem"
-                  ></slot>
-                </el-option>
-              </el-option-group>
-              <el-option v-else :key="item.label + item.value" v-bind="item">
-                <slot
-                  v-if="fieldItem.selectSlotName"
-                  :name="fieldItem.selectSlotName"
-                  v-bind="item"
-                ></slot
-              ></el-option>
-            </template>
-          </template>
-          <template v-if="fieldItem.component === 'el-radio-group'">
-            <el-radio
-              v-for="item in getOptions(fieldItem, allOptions, formData)"
-              :key="item.value"
-              v-bind="{
-                ...item,
-                label: item.value,
-              }"
-              >{{ item.label }}</el-radio
-            >
-          </template>
-          <template v-if="fieldItem.component === 'el-checkbox-group'">
-            <el-checkbox
-              v-for="item in getOptions(fieldItem, allOptions, formData)"
-              :key="item.value"
-              v-bind="{
-                ...item,
-                label: item.value,
-              }"
-              >{{ item.label }}</el-checkbox
-            >
-          </template>
-        </component>
-      </el-form-item>
+      <ws-form-item
+        v-if="fieldItem.component && showSearchHeader"
+        :allOptions="allOptions"
+        :fieldItem="fieldItem"
+        :formData="formData"
+        :fieldItemChange="
+          (fieldItem, formData) => {
+            fieldItemChange(fieldItem, formData, 'search')
+          }
+        "
+      >
+        <!-- 将父组件插槽内容转发给子组件 -->
+        <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+          <slot :name="name" v-bind="scope"></slot>
+        </template>
+      </ws-form-item>
     </template>
     <!-- 内容插槽 -->
     <template
       v-slot="{ row, column, $index }"
-      v-if="!fieldItem.type || (fieldItem.type && fieldItem.slotName)"
+      v-if="!fieldItem.type || (fieldItem.type && fieldItem.columnSlotName)"
     >
       <!-- 表单元素 -->
       <!-- 表单元素编辑模式 -->
-      <el-form-item
+      <ws-form-item
         v-if="judgeShowFormItem(fieldItem, row, column, $index)"
+        @blur="handleBlur"
         :prop="
           row.prop__table ? `${row.prop__table}.${fieldItem.prop}` : undefined
         "
         :rules="getRules(fieldItem, row)"
+        :allOptions="allOptions"
+        :fieldItem="fieldItem"
+        :formData="row"
+        :fieldItemChange="fieldItemChange"
+        :vFocus="
+          switchModeData.includes('dblclick') &&
+          property === fieldItem.prop &&
+          index === $index
+        "
       >
-        <!-- 命名插槽 -->
-        <slot
-          v-if="fieldItem.formSlotName"
-          :name="fieldItem.formSlotName"
-          v-bind="{ row, column, $index, fieldItem }"
+        <template
+          v-if="fieldItem.controlSlotName"
+          v-slot:[fieldItem.controlSlotName]
         >
-          <!-- 用了插槽就不会显示默认的内容 -->
-        </slot>
-        <!-- 表单元素显示 -->
-        <component
-          v-else
-          :is="fieldItem.component"
-          v-bind="{
-            size: 'mini',
-            'popper-class': fieldItem.timeDisabled ? 'hideCurrent' : '',
-            disabled: row[fieldItem.disabledKey],
-            options: getOptions(fieldItem, allOptions, row),
-            ...getAttrs(fieldItem, row),
-          }"
-          v-focus="
-            switchModeData.includes('dblclick') &&
-            property === fieldItem.prop &&
-            index === $index
-          "
-          v-model="row[fieldItem.prop]"
-          @change="fieldItemChange(fieldItem, row)"
-          @blur="handleBlur(fieldItem, row)"
-          @input="handleInput($event, fieldItem, row)"
-          v-on="{
-            // fieldItem.listeners和上面的事件一起触发，上面先触发
-            ...(fieldItem.listeners || {}),
-          }"
-        >
-          <template v-if="fieldItem.component === 'el-select'">
-            <template v-for="item in getOptions(fieldItem, allOptions, row)">
-              <el-option-group
-                v-if="item.children"
-                :key="item.label"
-                v-bind="item"
-              >
-                <el-option
-                  v-for="nextItem in item.children"
-                  :key="nextItem.label + nextItem.value"
-                  v-bind="nextItem"
-                >
-                  <slot
-                    v-if="fieldItem.selectSlotName"
-                    :name="fieldItem.selectSlotName"
-                    v-bind="nextItem"
-                  ></slot>
-                </el-option>
-              </el-option-group>
-              <el-option v-else :key="item.label + item.value" v-bind="item">
-                <slot
-                  v-if="fieldItem.selectSlotName"
-                  :name="fieldItem.selectSlotName"
-                  v-bind="item"
-                ></slot
-              ></el-option>
-            </template>
-          </template>
-          <template v-if="fieldItem.component === 'el-radio-group'">
-            <el-radio
-              v-for="item in getOptions(fieldItem, allOptions, row)"
-              :key="item.value"
-              v-bind="{
-                ...item,
-                label: item.value,
-              }"
-              >{{ item.label }}</el-radio
-            >
-          </template>
-          <template v-if="fieldItem.component === 'el-checkbox-group'">
-            <el-checkbox
-              v-for="item in getOptions(fieldItem, allOptions, row)"
-              :key="item.value"
-              v-bind="{
-                ...item,
-                label: item.value,
-              }"
-              >{{ item.label }}</el-checkbox
-            >
-          </template>
-        </component>
-      </el-form-item>
+          <slot
+            :name="fieldItem.controlSlotName"
+            v-bind="{ row, column, $index, fieldItem }"
+          ></slot>
+        </template>
+      </ws-form-item>
       <!-- 表单元素 非编辑模式 -->
       <template v-else>
         <!-- 命名插槽 -->
         <template
-          v-if="fieldItem.slotName && row.rowType__table !== 'searchRow'"
+          v-if="fieldItem.columnSlotName && row.rowType__table !== 'searchRow'"
         >
           <slot
-            :name="fieldItem.slotName"
+            :name="fieldItem.columnSlotName"
             v-bind="{ row, column, $index, fieldItem }"
           >
             <!-- 用了插槽就不会显示默认的内容 -->
@@ -317,17 +195,17 @@
 <script>
 import {
   deepClone,
-  getAttrs,
   getMaxValidator,
   getMinValidator,
   getRandomId,
   getShowValue,
-  getOptions,
 } from '../../utils/util'
+import wsFormItem from '../../ws-form-item/index.vue'
 import wsButtons from '../../ws-buttons/index.vue'
 export default {
   name: 'tableColumn',
   components: {
+    wsFormItem,
     wsButtons,
   },
   props: {
@@ -419,10 +297,8 @@ export default {
     },
   },
   methods: {
-    getAttrs,
     getRandomId,
     getShowValue,
-    getOptions,
     // 监听转发事件
     async happenEvent(buttonItem, { row, column, $index }) {
       this.$emit('happenEvent', {
@@ -462,9 +338,6 @@ export default {
     },
     // input框失焦处理
     handleBlur(fieldItem, row) {
-      const { prop, blurHandler: handler } = fieldItem
-      const temRow = this.temRow
-      this.temRow = {}
       // 延迟清空，防止change事件还没触发，表单元素就切换了
       setTimeout(() => {
         // this.property = ''
@@ -472,26 +345,8 @@ export default {
         this.$emit('update:property', '')
         this.$emit('update:index', '')
       }, 200)
-      // 如果前后值相同则不处理
-      if (row[prop] == temRow[prop]) {
-        return
-      }
-      // 自定义数据过滤
-      if (typeof handler === 'function') {
-        const newValue = handler(row[prop])
-        row[prop] = newValue
-      }
-      // this.fieldItemChange(fieldItem, row, 'tableFieldBlur')
     },
-    // input框输入处理
-    handleInput(value, fieldItem, row) {
-      const { prop, inputHandler: handler } = fieldItem
-      if (typeof handler === 'function') {
-        const newValue = handler(value)
-        row[prop] = newValue
-      }
-      // this.fieldItemChange(fieldItem, row, 'tableFieldInput')
-    },
+
     // 表格内复选框变更
     fieldItemChange(fieldItem, row, method = 'tableFieldChange') {
       if (row.rowType__table === 'searchRow') method = 'search'
@@ -555,58 +410,5 @@ export default {
 // 表单元素样式
 /deep/ .el-table tr input[type='checkbox'] {
   cursor: pointer;
-}
-/deep/ .el-input.is-disabled .el-input__inner {
-  color: #959090;
-}
-/deep/ .el-textarea.is-disabled .el-textarea__inner {
-  color: #959090;
-}
-/deep/ .el-textarea .el-input__count {
-  // 避免form-item line-height影响
-  line-height: initial;
-}
-/deep/ .el-input-number {
-  width: 100%;
-  overflow: hidden;
-}
-/deep/ .el-select {
-  width: 100%;
-}
-/deep/ .el-date-editor.el-input__inner {
-  width: 100%;
-}
-/deep/ .el-date-editor.el-input {
-  width: 100%;
-}
-/deep/ .el-checkbox-group {
-  // height: 100%;
-  // display: flex;
-  // align-items: center;
-  // flex-wrap: wrap;
-  .el-checkbox {
-    margin-right: 10px;
-  }
-  .el-checkbox:last-child {
-    margin-right: 0;
-  }
-  .el-checkbox__label {
-    padding-left: 2px;
-  }
-}
-/deep/ .el-radio-group {
-  // height: 100%;
-  // display: flex;
-  // align-items: center;
-  // flex-wrap: wrap;
-  .el-radio {
-    margin-right: 10px;
-  }
-  .el-radio:last-child {
-    margin-right: 0;
-  }
-  .el-radio__label {
-    padding-left: 2px;
-  }
 }
 </style>

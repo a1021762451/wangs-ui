@@ -220,7 +220,7 @@ export default {
       this.$refs.wsTable.switchStatus(row, false)
     },
     search(eventData) {
-      console.log('search', eventData, this.formData)
+      // console.log('search', eventData, this.formData)
     },
     switchFn(fieldItem, row, column, $index) {
       if (fieldItem.prop === 'testSelect' && $index === 0) return true

@@ -105,7 +105,7 @@ export const formConfigList = [
     required: true,
   },
   {
-    slotName: 'testSlot',
+    controlSlotName: 'testSlot',
     prop: 'testSlot',
     label: '插槽',
     required: true,
@@ -140,7 +140,7 @@ export const tableColumns = [
   { type: 'selection' },
   { type: 'drag' },
   { type: 'index', label: '序号' },
-  { type: 'expand', slotName: 'expand' },
+  { type: 'expand', columnSlotName: 'expand' },
   // 基本配置
   {
     prop: 'testNormal',
@@ -174,7 +174,7 @@ export const tableColumns = [
   // 自定义表头，内容
   {
     headerSlotName: 'testTableSlot_header',
-    slotName: 'testTableSlot',
+    columnSlotName: 'testTableSlot',
     prop: 'testTableSlot',
     label: '插槽',
     noDefaultSearchConfig: true,

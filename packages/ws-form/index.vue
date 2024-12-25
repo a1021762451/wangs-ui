@@ -68,109 +68,24 @@
             v-show="!isCheckForm || (isCheckForm && !isFold)"
           >
             <!-- notLeftMargin: fieldItem.isSide && isSearchForm, -->
-            <el-form-item
-              :class="{
-                'form-item-with-suffixLabel': fieldItem.suffixLabel,
-              }"
+            <ws-form-item
               v-bind="fieldItem"
               :required="undefined"
+              :allOptions="allOptions"
+              :fieldItem="fieldItem"
+              :formData="formData"
+              :formStatus="formStatus"
+              :fieldItemChange="fieldItemChange"
+              :extraComponents="extraComponents"
             >
-              <template v-slot:label v-if="fieldItem.labelSlotName">
-                <slot :name="fieldItem.labelSlotName"></slot>
-              </template>
-              <slot
-                v-if="fieldItem.slotName"
-                :name="fieldItem.slotName"
-                :formData="formData"
-                :fieldItem="fieldItem"
-                :fieldItemChange="fieldItemChange"
-              ></slot>
-              <component
-                v-else-if="fieldItem.component"
-                :is="fieldItem.component"
-                v-model="formData[fieldItem.prop]"
-                @change="fieldItemChange(fieldItem, formData)"
-                @blur="handleBlur(formData, fieldItem)"
-                @input="handleInput($event, formData, fieldItem)"
-                v-bind="{
-                  options: getOptions(fieldItem, allOptions, formData),
-                  ...getAttrs(fieldItem, formData, formStatus !== 'edit'),
-                }"
-                v-on="{
-                  // fieldItem.listeners和上面的事件一起触发，上面先触发
-                  ...(fieldItem.listeners || {}),
-                }"
+              <!-- 将父组件插槽内容转发给子组件 -->
+              <template
+                v-for="(index, name) in $scopedSlots"
+                v-slot:[name]="scope"
               >
-                <template v-if="fieldItem.component === 'el-select'">
-                  <template
-                    v-for="item in getOptions(fieldItem, allOptions, formData)"
-                  >
-                    <el-option-group
-                      v-if="item.children"
-                      :key="item.label"
-                      v-bind="item"
-                    >
-                      <el-option
-                        v-for="nextItem in item.children"
-                        :key="nextItem.label + nextItem.value"
-                        v-bind="nextItem"
-                      >
-                        <slot
-                          v-if="fieldItem.selectSlotName"
-                          :name="fieldItem.selectSlotName"
-                          v-bind="nextItem"
-                        ></slot
-                      ></el-option>
-                    </el-option-group>
-                    <el-option
-                      v-else
-                      :key="item.label + item.value"
-                      v-bind="item"
-                    >
-                      <slot
-                        v-if="fieldItem.selectSlotName"
-                        :name="fieldItem.selectSlotName"
-                        v-bind="item"
-                      ></slot>
-                    </el-option>
-                  </template>
-                </template>
-                <template v-if="fieldItem.component === 'el-radio-group'">
-                  <el-radio
-                    v-for="item in getOptions(fieldItem, allOptions, formData)"
-                    :key="item.value"
-                    v-bind="{
-                      ...item,
-                      label: item.value,
-                    }"
-                    >{{ item.label }}</el-radio
-                  >
-                </template>
-                <template v-if="fieldItem.component === 'el-checkbox-group'">
-                  <el-checkbox
-                    v-for="item in getOptions(fieldItem, allOptions, formData)"
-                    :key="item.value"
-                    v-bind="{
-                      ...item,
-                      label: item.value,
-                    }"
-                    >{{ item.label }}</el-checkbox
-                  >
-                </template>
-              </component>
-              <div v-else class="content">
-                <span
-                  v-if="formData[fieldItem.prop]"
-                  class="content-text"
-                  :style="{ textAlign: fieldItem.align || 'left' }"
-                >
-                  {{ formData[fieldItem.prop] }}
-                </span>
-              </div>
-              <span class="suffix-label" v-if="fieldItem.suffixLabel">{{
-                fieldItem.suffixLabel
-              }}</span>
-            </el-form-item>
+                <slot :name="name" v-bind="scope"></slot>
+              </template>
+            </ws-form-item>
           </el-col>
           <div
             v-show="isCheckForm && !isFold && judgeIsRow(fieldItem)"
@@ -244,7 +159,6 @@ const defaultButtonsForForm = [
 ]
 import {
   deepClone,
-  getAttrs,
   getMaxValidator,
   getMinValidator,
   getDefaultTime,
@@ -253,14 +167,13 @@ import {
   getMaxLength,
   getOptions,
 } from '../utils/util'
-import check from './components/check.vue'
-import condition from './components/condition.vue'
+import wsFormItem from '../ws-form-item/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
 import mixins from './mixins'
 export default {
   name: 'ws-form',
   mixins: [mixins],
-  components: { check, condition, wsButtons },
+  components: { wsFormItem, wsButtons },
   data() {
     return {
       cloneForm: {},
@@ -393,7 +306,7 @@ export default {
             // 初始化conditionOptions
             this.changeConditionItem(item)
             // 处理换行逻辑
-            if (item.childern || component === 'check') {
+            if (component === 'check') {
               item.span = 24
             } else {
               item.isRow = true
@@ -504,9 +417,6 @@ export default {
       return this.formStyle === 'tableForm'
     },
   },
-  created() {
-    this.addComponents()
-  },
   directives: {
     resize: vResize,
   },
@@ -520,7 +430,6 @@ export default {
     // window.removeEventListener('resize', this.judgeOneRow)
   },
   methods: {
-    getAttrs,
     getOptions,
     // 判断是否占据一行
     judgeIsRow(fieldItem) {
@@ -637,12 +546,6 @@ export default {
         }
       })
     },
-    // 增加额外的组件
-    addComponents() {
-      for (const key in this.extraComponents) {
-        this.$options.components[key] = this.extraComponents[key]
-      }
-    },
     // 表格内复选框变更
     async fieldItemChange(fieldItem, formData, method = 'formFieldChange') {
       this.isCheckForm && this.changeConditionItem(fieldItem)
@@ -719,25 +622,6 @@ export default {
         buttonItem: { method: 'search' },
         formData: this.formData,
       })
-    },
-    // input框失焦处理, liseners中的blur事件也会触发，handleBlur方法先触发
-    handleBlur(row, fieldItem) {
-      const { prop, blurHandler: handler } = fieldItem
-      // 自定义数据过滤
-      if (typeof handler === 'function') {
-        const newValue = handler(row[prop])
-        row[prop] = newValue
-      }
-      // this.fieldItemChange(fieldItem, row, 'formFieldBlur')
-    },
-    // input框输入处理
-    handleInput(value, row, fieldItem) {
-      const { prop, inputHandler: handler } = fieldItem
-      if (typeof handler === 'function') {
-        const newValue = handler(value)
-        row[prop] = newValue
-      }
-      // this.fieldItemChange(fieldItem, row, 'formFieldInput')
     },
   },
 }
@@ -966,60 +850,4 @@ export default {
 //     padding-top: 0;
 //   }
 // }
-// 表单元素样式
-/deep/ .el-input.is-disabled .el-input__inner {
-  color: #959090;
-}
-/deep/ .el-textarea.is-disabled .el-textarea__inner {
-  color: #959090;
-}
-/deep/ .el-textarea .el-input__count {
-  // 避免form-item line-height影响
-  line-height: initial;
-}
-/deep/ .el-input-number {
-  width: 100%;
-}
-/deep/ .el-select {
-  width: 100%;
-}
-/deep/ .el-checkbox-group {
-  // height: 100%;
-  // display: flex;
-  // align-items: center;
-  // flex-wrap: wrap;
-  .el-checkbox {
-    margin-right: 10px;
-  }
-  .el-checkbox:last-child {
-    margin-right: 0;
-  }
-  .el-checkbox__label {
-    padding-left: 2px;
-  }
-}
-/deep/ .el-radio-group {
-  // height: 100%;
-  // display: flex;
-  // align-items: center;
-  // flex-wrap: wrap;
-  .el-radio {
-    margin-right: 10px;
-  }
-  .el-radio:last-child {
-    margin-right: 0;
-  }
-  .el-radio__label {
-    padding-left: 2px;
-  }
-}
-/deep/ .el-date-editor.el-input__inner {
-  width: 100%;
-}
-/deep/ .el-date-editor.el-input {
-  width: 100%;
-}
-/deep/ .el-autocomplete {
-  width: 100%;
-}
 </style>
