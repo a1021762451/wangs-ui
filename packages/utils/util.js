@@ -679,7 +679,7 @@ export function flatToTree(data = [], props = {}) {
   return result
 }
 // 判断是否隐藏
-function judgeHidden(el) {
+export function judgeHidden(el) {
   while (el) {
     const { display, visibility, opacity } = window.getComputedStyle(el)
     if (

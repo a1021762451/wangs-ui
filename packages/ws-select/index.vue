@@ -273,4 +273,9 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/deep/ .tree-content {
+  .container-showOverflowTooltip {
+    overflow: visible;
+  }
+}
 </style>
