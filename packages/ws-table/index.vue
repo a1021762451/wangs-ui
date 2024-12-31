@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-16 12:37:31
+ * @LastEditTime: 2024-12-25 17:31:36
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -83,7 +83,7 @@
         v-bind="{
           stripe: true,
           border: true,
-          height: '100%',
+          height: maxHeight ? undefined : '100%',
           'highlight-current-row': true,
           'current-row-key': currentRow[rowKey],
           ...$attrs,
@@ -455,6 +455,9 @@ export default {
     cellClassName() {
       return getObjAttr(this.$attrs, 'cellClassName')
     },
+    maxHeight() {
+      return getObjAttr(this.$attrs, 'maxHeight')
+    },
     // 扁平化列
     flatColums() {
       return treeToFlat(this.columns)
@@ -477,11 +480,11 @@ export default {
     },
     requestConfigCpt() {
       // 针对项目的全局配置
-      const defaulConfig = deepMerge(
+      const defaultConfig = deepMerge(
         deepClone(defaultTableRequestConfig),
         window.defaultTableRequestConfig || {}
       )
-      const obj = deepMerge(defaulConfig, this.requestConfig)
+      const obj = deepMerge(defaultConfig, this.requestConfig)
       obj.request = obj.request || window.request
       return obj
     },

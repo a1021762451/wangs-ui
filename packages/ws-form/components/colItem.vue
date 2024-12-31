@@ -2,24 +2,34 @@
   <el-col
     :span="fieldItem.span"
     :style="{ paddingRight: `${(fieldItem.offestRight * 100) / 24}%` }"
-    :class="{ 'form-group': fieldItem.children }"
+    :class="{ 'form-group': fieldItem.children, collapsible: collapsible }"
   >
     <template v-if="fieldItem.children">
       <slot name="groupTitle">
-        <div class="form-group-title">
+        <div class="form-group-title" @click="changeCollapsed(fieldItem)">
           {{ fieldItem.label }}
         </div>
       </slot>
-      <colItem
-        v-for="subFieldItem in fieldItem.children"
-        :key="subFieldItem.prop + subFieldItem.label"
-        :allOptions="allOptions"
-        :fieldItem="subFieldItem"
-        :formData="formData"
-        :formStatus="formStatus"
-        :fieldItemChange="fieldItemChange"
-        :extraComponents="extraComponents"
-      ></colItem>
+      <div
+        class="form-group-content"
+        v-show="!fieldItem.collapsed"
+      >
+        <colItem
+          v-for="subFieldItem in fieldItem.children"
+          :key="subFieldItem.prop + subFieldItem.label"
+          :allOptions="allOptions"
+          :fieldItem="subFieldItem"
+          :formData="formData"
+          :formStatus="formStatus"
+          :fieldItemChange="fieldItemChange"
+          :extraComponents="extraComponents"
+          :changeCollapsed="changeCollapsed"
+        >
+          <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+            <slot :name="name" v-bind="scope"></slot>
+          </template>
+        </colItem>
+      </div>
     </template>
     <!-- notLeftMargin: fieldItem.isSide && isSearchForm, -->
     <ws-form-item
@@ -79,6 +89,16 @@ export default {
       },
       type: Object,
     },
+    // 分组折叠项变更处理函数
+    changeCollapsed: {
+      type: Function,
+      default: () => {},
+    },
+    // 是否可以折叠
+    collapsible: {
+      default: false,
+      type: Boolean,
+    },
   },
   data() {
     return {}
@@ -90,11 +110,14 @@ export default {
 
 <style lang="less" scoped>
 .form-group {
+  padding: 0 !important;
   .form-group-title {
     font-weight: bold;
     border-bottom: 1px solid #dadada;
     padding: 4px 0;
     margin-bottom: 6px;
+  }
+  .form-group-content {
   }
 }
 </style>

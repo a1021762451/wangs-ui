@@ -2,7 +2,7 @@
  * @Author: wang shuai
  * @Date: 2024-12-25 09:59:15
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-25 14:18:29
+ * @LastEditTime: 2024-12-31 09:07:58
 -->
 <template>
   <div
@@ -77,6 +77,8 @@
           :formStatus="formStatus"
           :fieldItemChange="fieldItemChange"
           :extraComponents="extraComponents"
+          :collapsible="collapsible"
+          :changeCollapsed="changeCollapsed"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
           <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
@@ -248,90 +250,15 @@ export default {
         return {}
       },
     },
-  },
-  watch: {
-    formConfigList: {
-      handler() {
-        const configList = deepClone(this.formConfigList)
-        this.configList = configList
-        let remain = 0
-        let total = 0
-        this.flatConfigList.forEach((item, index) => {
-          const { component, listeners, componentAttrs = {} } = item
-          item.span = item.span || this.span
-          // 搜索模式下判断表单元素是否在最左边
-          if (this.isSearchForm) {
-            const span = item.span || 6
-            total += span
-            const newRemain = Math.floor((total - 1) / 24)
-            if (newRemain !== remain || index === 0) {
-              this.$set(item, 'isSide', true)
-              remain = newRemain
-            }
-          }
-          // 设置默认时间
-          if (item.defaultTimeType) {
-            this.$set(
-              this.formData,
-              item.prop,
-              getDefaultTime(item.defaultTimeType, componentAttrs.valueFormat)
-              // componentAttrs.valueFormat
-              //   ? format(new Date(), componentAttrs.valueFormat)
-              //   : new Date()
-            )
-          }
-          // 判断是否需要初始化表单值
-          if (!this.formData.hasOwnProperty(item.prop)) {
-            this.$set(this.formData, item.prop, '')
-            // 特殊情况
-            if (
-              component === 'el-checkbox-group' ||
-              (component === 'el-select' && componentAttrs.multiple)
-            )
-              this.$set(this.formData, item.prop, [])
-          }
-          // listeners处理
-          if (listeners && typeof listeners === 'object') {
-            Object.keys(listeners).forEach((key) => {
-              listeners[key] = listeners[key].bind(this.$parent)
-            })
-          }
-          // 有children的表单元素,span24
-          if (item.children) {
-            item.span = 24
-          }
-          // 勾选表单处理
-          if (this.isCheckForm) {
-            // 初始化conditionOptions
-            this.changeConditionItem(item)
-            // 处理换行逻辑
-            if (component === 'check') {
-              item.span = 24
-            } else {
-              item.isRow = true
-            }
-          }
-          // 处理isRow属性
-          if (item.isRow) {
-            item.offestRight = 24 - item.span
-            item.span = 24
-          }
-        })
-      },
-      immediate: true,
+    // 分组折叠项,手风琴模式
+    accordion: {
+      default: false,
+      type: Boolean,
     },
-    buttonConfigList: {
-      handler() {
-        const arr = this.useDefaultButtons
-          ? this.isSearchForm
-            ? this.isCheckForm
-              ? defaultButtons.filter((item) => item.method !== 'reset')
-              : defaultButtons
-            : defaultButtonsForForm
-          : []
-        this.buttonsList = this.buttonConfigList.concat(arr)
-      },
-      immediate: true,
+    // 是否可以折叠
+    collapsible: {
+      default: false,
+      type: Boolean,
     },
   },
   computed: {
@@ -419,6 +346,95 @@ export default {
       return this.formStyle === 'tableForm'
     },
   },
+  watch: {
+    formConfigList: {
+      handler() {
+        const configList = deepClone(this.formConfigList)
+        this.configList = configList
+        let remain = 0
+        let total = 0
+        this.flatConfigList.forEach((item, index) => {
+          const { component, listeners, componentAttrs = {} } = item
+          item.span = item.span || this.span
+          // 搜索模式下判断表单元素是否在最左边
+          if (this.isSearchForm) {
+            const span = item.span || 6
+            total += span
+            const newRemain = Math.floor((total - 1) / 24)
+            if (newRemain !== remain || index === 0) {
+              this.$set(item, 'isSide', true)
+              remain = newRemain
+            }
+          }
+          // 设置默认时间
+          if (item.defaultTimeType) {
+            this.$set(
+              this.formData,
+              item.prop,
+              getDefaultTime(item.defaultTimeType, componentAttrs.valueFormat)
+              // componentAttrs.valueFormat
+              //   ? format(new Date(), componentAttrs.valueFormat)
+              //   : new Date()
+            )
+          }
+          // 判断是否需要初始化表单值
+          if (!this.formData.hasOwnProperty(item.prop)) {
+            this.$set(this.formData, item.prop, '')
+            // 特殊情况
+            if (
+              component === 'el-checkbox-group' ||
+              (component === 'el-select' && componentAttrs.multiple)
+            )
+              this.$set(this.formData, item.prop, [])
+          }
+          // listeners处理
+          if (listeners && typeof listeners === 'object') {
+            Object.keys(listeners).forEach((key) => {
+              listeners[key] = listeners[key].bind(this.$parent)
+            })
+          }
+          // 有children的表单元素,span24
+          if (item.children) {
+            item.span = 24
+          }
+          // 勾选表单处理
+          if (this.isCheckForm) {
+            // 初始化conditionOptions
+            this.changeConditionItem(item)
+            // 处理换行逻辑
+            if (component === 'check') {
+              item.span = 24
+            } else {
+              item.isRow = true
+            }
+          }
+          // 初始化collapsed
+          if (this.collapsible && !item.hasOwnProperty('collapsed')) {
+            this.$set(item, 'collapsed', false)
+          }
+          // 处理isRow属性
+          if (item.isRow) {
+            item.offestRight = 24 - item.span
+            item.span = 24
+          }
+        })
+      },
+      immediate: true,
+    },
+    buttonConfigList: {
+      handler() {
+        const arr = this.useDefaultButtons
+          ? this.isSearchForm
+            ? this.isCheckForm
+              ? defaultButtons.filter((item) => item.method !== 'reset')
+              : defaultButtons
+            : defaultButtonsForForm
+          : []
+        this.buttonsList = this.buttonConfigList.concat(arr)
+      },
+      immediate: true,
+    },
+  },
   directives: {
     resize: vResize,
   },
@@ -433,6 +449,18 @@ export default {
   },
   methods: {
     getOptions,
+    // 变更activeNames
+    changeCollapsed(findItem) {
+      if (!this.collapsible) return
+      if (this.accordion) {
+        this.flatConfigList.forEach((item) => {
+          if ((item = findItem)) return
+          item.collapsed = true
+        })
+      }
+      findItem.collapsed = !findItem.collapsed
+      this.$emit('changeCollapsed', findItem)
+    },
     // 判断是否占据一行
     judgeIsRow(fieldItem) {
       return fieldItem.isRow || fieldItem.span === 24
