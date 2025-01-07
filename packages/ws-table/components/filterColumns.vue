@@ -1,5 +1,10 @@
 <template>
-  <el-dialog title="显示的列" :visible.sync="dialogVisable">
+  <el-dialog
+    append-to-body
+    modal-append-to-body
+    title="显示的列"
+    :visible.sync="dialogVisable"
+  >
     <ws-checkbox
       v-model="defaultCheckedData"
       :data="checkboxData"
