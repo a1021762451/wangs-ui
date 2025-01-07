@@ -4,7 +4,7 @@
     searchMode="row"
     placeholder="-"
     :loading="loading"
-    utilsList="download,showSingle"
+    utilsList="download,showSingle,setColumms"
     getDefaultSearchConfig
     :data="tableData"
     :tableColumns="tableColumns"

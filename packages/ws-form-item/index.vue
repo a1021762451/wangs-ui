@@ -189,9 +189,10 @@ export default {
     },
     // 增加额外的组件
     addComponents() {
-      for (const key in this.extraComponents) {
+      const extraComponentsKeys = Object.keys(this.extraComponents)
+      extraComponentsKeys.forEach((key) => {
         this.$options.components[key] = this.extraComponents[key]
-      }
+      })
     },
   },
 }

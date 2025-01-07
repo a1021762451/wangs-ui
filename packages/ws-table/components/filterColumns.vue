@@ -4,7 +4,6 @@
       v-model="defaultCheckedData"
       :data="checkboxData"
       :span="8"
-      allowCheckAll
       ref="wsCheckbox"
     ></ws-checkbox>
     <div class="operation">
@@ -14,14 +13,14 @@
   </el-dialog>
 </template>
 
-<script>  
+<script>
 // import wsCheckbbox from '../../ws-checkbox/index'
 export default {
   name: 'filterColumns',
   components: {
-    wsCheckbox: () => {
+    wsCheckbox: (resolve) => {
       try {
-        return require('../../ws-checkbox/index')
+        require(['../../ws-checkbox/index'], resolve)
       } catch (error) {
         console.log('没有找到包')
       }
@@ -31,7 +30,7 @@ export default {
     return {
       checkboxData: [
         {
-          name: '全选',
+          // name: '全选',
           data: [],
         },
       ],
@@ -89,6 +88,7 @@ export default {
         index: '索引列',
         expand: '折叠功能',
         operation: '操作列',
+        drag: '拖拽列',
       }
       const arr = []
       const specialArr = []

@@ -7,13 +7,15 @@
     <template v-if="fieldItem.children">
       <slot name="groupTitle">
         <div class="form-group-title" @click="changeCollapsed(fieldItem)">
-          {{ fieldItem.label }}
+          <span class="title"> {{ fieldItem.label }}</span>
+          <i
+            :class="
+              fieldItem.collapsed ? ' el-icon-arrow-down' : ' el-icon-arrow-up'
+            "
+          ></i>
         </div>
       </slot>
-      <div
-        class="form-group-content"
-        v-show="!fieldItem.collapsed"
-      >
+      <div class="form-group-content" v-show="!fieldItem.collapsed">
         <colItem
           v-for="subFieldItem in fieldItem.children"
           :key="subFieldItem.prop + subFieldItem.label"
@@ -112,10 +114,16 @@ export default {
 .form-group {
   padding: 0 !important;
   .form-group-title {
-    font-weight: bold;
     border-bottom: 1px solid #dadada;
     padding: 4px 0;
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    .title {
+      font-weight: bold;
+    }
   }
   .form-group-content {
   }

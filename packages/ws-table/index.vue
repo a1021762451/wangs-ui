@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-25 17:31:36
+ * @LastEditTime: 2025-01-07 16:14:24
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -160,6 +160,23 @@
       @filterColumnsConfirm="filterColumnsConfirm"
       ref="filterColumns"
     ></filterColumns>
+    <!-- 单条展示 -->
+    <el-dialog
+      append-to-body
+      modal-append-to-body
+      title="单条展示"
+      :visible.sync="showSingleStatus"
+      width="70%"
+    >
+        <ws-table
+          style="height: 500px"
+          :showSearch="false"
+          :showPagination="false"
+          :data="singleTableData"
+          :tableColumns="singleColunms"
+        >
+        </ws-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -184,7 +201,6 @@ let defaultTableRequestConfig = {
     current: 'pageNum',
   },
 }
-let singleColunms = [] // 单条展示
 let temColumns = [] // 临时列配置
 let temTableData = [] // 临时数据
 const allUtils = [
@@ -400,6 +416,8 @@ export default {
       columnsNoChange: false,
       switchModeData: this.switchMode,
       loadingData: this.loading,
+      singleColunms: [],
+      singleTableData: [],
     }
   },
   computed: {
@@ -543,11 +561,11 @@ export default {
     },
   },
   created() {
+    this.getSingleColunms()
     this.importPackage()
     this.getTabledataByFn()
   },
   mounted() {
-    this.getSingleColunms()
     this.rowDrop()
     this.columnDrop()
     // window.addEventListener('resize', this.doLayout)
@@ -849,7 +867,7 @@ export default {
     },
     // 获取单行模式columns
     getSingleColunms() {
-      singleColunms = [
+      const arr = [
         // {
         //   prop: 'prop',
         //   label: '字段',
@@ -863,6 +881,7 @@ export default {
           label: '字段值',
         },
       ]
+      this.singleColunms = arr
     },
     // 根据表格配置生成默认表单配置
     getDefaultFormConfigList(getForm = false) {
@@ -1031,8 +1050,8 @@ export default {
         }
         // 确保最后一级有label__table
         if (prop) {
-          def(item, 'label__table', `${fatherLabel}` + label)
-          // item.label__table = `${fatherLabel}` + label
+          // def(item, 'label__table', `${fatherLabel}` + label)
+          item.label__table = `${fatherLabel}` + label
         }
       })
     },
@@ -1306,6 +1325,11 @@ export default {
         this.$message.warning('请先选中一条数据')
         return
       }
+      // 方式一: 弹窗展示
+      this.singleTableData = this.getSingleTableData(this.currentRow)
+      this.showSingleStatus = true
+      // 方式二: 原表格展示
+      return
       if (!this.showSingleStatus) {
         const { tableData } = this.tableForm
         // temColumns = deepClone(this.columns)
@@ -1315,9 +1339,8 @@ export default {
         this.tableForm.tableData = this.getSingleTableData(this.currentRow)
         this.columns = []
         this.$nextTick(() => {
-          this.columns = singleColunms
+          this.columns = this.singleColunms
         })
-        // this.columns = singleColunms
         this.showSingleStatus = true
       } else {
         // this.currentRow = {}
