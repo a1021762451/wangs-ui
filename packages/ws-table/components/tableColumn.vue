@@ -135,7 +135,7 @@
         "
         :rules="getRules(fieldItem, row)"
         :allOptions="allOptions"
-        :fieldItem="fieldItem"
+        :fieldItem="setFieldItem(fieldItem, row, column, $index)"
         :formData="row"
         :fieldItemChange="fieldItemChange"
         :vFocus="
@@ -243,6 +243,13 @@ export default {
     // 表单元素切换判断函数
     switchFn: {
       type: Function,
+    },
+    // 表单项单独配置
+    setFieldItem: {
+      type: Function,
+      default(fieldItem, row, column, $index) {
+        return fieldItem
+      },
     },
     // 列切换模式
     switchModeData: {

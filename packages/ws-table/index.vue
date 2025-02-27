@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-01-07 16:14:24
+ * @LastEditTime: 2025-02-21 10:54:44
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -124,6 +124,7 @@
           :formData="formData"
           :showSearchHeader="showSearchHeader"
           :TDConfig="TDConfig"
+          :setFieldItem="setFieldItem"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -168,14 +169,14 @@
       :visible.sync="showSingleStatus"
       width="70%"
     >
-        <ws-table
-          style="height: 500px"
-          :showSearch="false"
-          :showPagination="false"
-          :data="singleTableData"
-          :tableColumns="singleColunms"
-        >
-        </ws-table>
+      <ws-table
+        style="height: 500px"
+        :showSearch="false"
+        :showPagination="false"
+        :data="singleTableData"
+        :tableColumns="singleColunms"
+      >
+      </ws-table>
     </el-dialog>
   </div>
 </template>
@@ -389,6 +390,13 @@ export default {
       type: Object,
       default() {
         return {}
+      },
+    },
+    // 表单项单独配置
+    setFieldItem: {
+      type: Function,
+      default(fieldItem, row, column, $index) {
+        return fieldItem
       },
     },
   },

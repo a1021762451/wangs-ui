@@ -67,6 +67,10 @@ export default {
     }
   },
   props: {
+    value: {
+      type: Array,
+      default: () => [],
+    },
     // 复选框组名称
     name: {
       type: String,
