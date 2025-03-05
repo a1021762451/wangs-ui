@@ -51,6 +51,40 @@ export const formConfigList = [
     },
   },
   {
+    label: '分组一',
+    children: [
+      {
+        component: 'el-input',
+        prop: 'testInput1',
+        label: '输入框11',
+        required: true,
+      },
+      {
+        component: 'el-input',
+        prop: 'testInput12',
+        label: '输入框2',
+        required: true,
+      },
+    ],
+  },
+  {
+    label: '分组二',
+    children: [
+      {
+        component: 'el-input',
+        prop: 'testInput21',
+        label: '输入框1',
+        required: true,
+      },
+      {
+        component: 'el-input',
+        prop: 'testInput22',
+        label: '输入框2',
+        required: true,
+      },
+    ],
+  },
+  {
     component: 'el-input',
     prop: 'testTextarea',
     label: '文本域',
