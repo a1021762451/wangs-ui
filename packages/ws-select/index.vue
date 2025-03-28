@@ -3,6 +3,7 @@
     ref="wsSelect"
     :value="value"
     :filter-method="isTreeSelect ? filterMethodToTree : undefined"
+    @blur="handleBlur"
     v-bind="{
       filterable: true,
       'popper-class': isTreeSelect ? 'ws-treeSelect ws-select' : 'ws-select',
@@ -201,6 +202,12 @@ export default {
     },
   },
   methods: {
+    // 下拉框失焦事件-对树单独处理
+    handleBlur() {
+      if (this.isTreeSelect) {
+        this.filterMethodToTree('')
+      }
+    },
     // 全选操作
     selectAll(checked) {
       const selectValue = checked ? this.flatOptions.map((d) => d.value) : []

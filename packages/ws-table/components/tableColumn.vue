@@ -86,8 +86,8 @@
     v-bind="{
       align: 'center',
       resizable: true,
-      ...fieldItem,
       showOverflowTooltip: true,
+      ...fieldItem,
     }"
   >
     <!-- 表头插槽 -->

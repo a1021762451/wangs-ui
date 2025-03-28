@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-17 10:53:12
+ * @LastEditTime: 2025-03-26 15:00:21
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -80,6 +80,7 @@
                 :content="node.label"
                 overflow
                 :placement="'right'"
+                :disabled="tooltipDisabled"
               >
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
@@ -117,6 +118,7 @@
                 :content="node.label"
                 :overflow="false"
                 :placement="'right'"
+                :disabled="tooltipDisabled"
               >
                 <div
                   v-if="judgeDisabled(data, node)"
@@ -190,6 +192,11 @@ export default {
     wsButtons,
   },
   props: {
+    // tootip是否禁用
+    tooltipDisabled: {
+      default: false,
+      type: Boolean,
+    },
     // 增删改查模式
     changeMode: {
       default: '', // contextMenu / hover
