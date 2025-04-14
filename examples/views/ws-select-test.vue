@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-03-05 09:23:26
+ * @LastEditTime: 2025-04-14 19:22:47
 -->
 <template>
   <el-form
@@ -25,7 +25,7 @@
         }"
         clearable
       >
-        <!-- <template v-slot="{ label }">{{ label }} default </template> -->
+        <!-- <template v-slot="{ data }">{{ data.label }} default </template> -->
         <template v-slot:prefix>
           <i class="el-icon-s-data"></i>
         </template>

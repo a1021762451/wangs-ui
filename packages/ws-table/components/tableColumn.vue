@@ -32,7 +32,7 @@
       fixed: 'right',
       align: 'center',
       resizable: true,
-      width: (fieldItem.buttonConfigList || []).length * 55,
+      width: fieldItem.width || (fieldItem.buttonConfigList || []).length * 55,
       ...fieldItem,
     }"
   >

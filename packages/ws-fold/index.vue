@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-02-04 12:21:06
+ * @LastEditTime: 2025-04-14 19:23:24
 -->
 <template>
   <div
@@ -126,7 +126,7 @@ export default {
     // 拖拽中
     resize(event) {
       const container = this.$refs.container
-      const width = event.clientX - container.offsetLeft
+      const width = event.clientX - container.getBoundingClientRect().left
       this.width = Math.max(
         this.minwidthComputed,
         Math.min(this.maxwidthComputed, width)
