@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-14 19:22:47
+ * @LastEditTime: 2025-04-18 17:38:38
 -->
 <template>
   <el-form
@@ -20,8 +20,12 @@
         :options="defaultOptions"
         multiple
         :treeConfig="{
-          data: treeData,
-          dataIsFlat: false,
+          data: flatTreeData,
+          dataIsFlat: true,
+          nodeKey: 'nodekey',
+          props: {
+            id: 'id',
+          },
         }"
         clearable
       >
@@ -36,7 +40,6 @@
 </template>
 
 <script>
-import request from '../request.js'
 import { getSelectData } from '../mock/api.js'
 export default {
   name: 'ws-select-test',
@@ -64,20 +67,25 @@ export default {
         {
           label: '根节点',
           id: '根节点',
+          nodekey: '0',
           children: [
             {
+              nodekey: '1',
               id: 1,
               label: '我恨你 1',
               children: [
                 {
+                  nodekey: '2',
                   id: 4,
                   label: '二级 1-1',
                   children: [
                     {
+                      nodekey: '3',
                       id: 9,
                       label: '三级 1-1-1',
                     },
                     {
+                      nodekey: '4',
                       id: 10,
                       label: '三级 1-1-2',
                     },
@@ -86,44 +94,63 @@ export default {
               ],
             },
             {
+              nodekey: '5',
               id: 2,
               label: '像快 2',
               children: [
                 {
+                  nodekey: '6',
                   id: 5,
                   label: '二级 2-1',
                 },
                 {
+                  nodekey: '7',
                   id: 6,
                   label: '二级 2-2',
                   nameFirstSpell: 'e', //  测试首拼过滤
                   disabled: true, // 测试禁止点击
                 },
+                {
+                  nodekey: '8',
+                  id: 10,
+                  label: '三级 1-1-2',
+                },
               ],
             },
             {
+              nodekey: '9',
               id: 3,
               label: '木头 3',
               children: [
                 {
+                  nodekey: '10',
                   id: 7,
                   label: '二级 3-1',
                 },
                 {
+                  nodekey: '11',
                   id: 8,
                   label: '二级 3-2',
                   children: [
                     {
+                      nodekey: '12',
                       id: 11,
                       label: '三级 3-2-1',
                     },
                     {
+                      nodekey: '13',
                       id: 12,
                       label: '三级 3-2-2三级 3-2-2',
                     },
                     {
+                      nodekey: '14',
                       id: 13,
                       label: '三级 3-2-3',
+                    },
+                    {
+                      nodekey: '15',
+                      id: 5,
+                      label: '二级 2-1',
                     },
                   ],
                 },
@@ -131,6 +158,61 @@ export default {
             },
           ],
         },
+      ],
+      flatTreeData: [
+        {
+          label: '根节点',
+          id: '根节点',
+          nodekey: '0',
+          pid: null,
+        },
+        {
+          nodekey: '1',
+          id: 1,
+          label: '我恨你 1',
+          pid: '根节点',
+        },
+        {
+          nodekey: '2',
+          id: 4,
+          label: '二级 1-1',
+          pid: 1,
+        },
+        { nodekey: '3', id: 9, label: '三级 1-1-1', pid: 4 },
+        { nodekey: '4', id: 10, label: '三级 1-1-2', pid: 4 },
+        {
+          nodekey: '5',
+          id: 2,
+          label: '像快 2',
+          pid: '根节点',
+        },
+        { nodekey: '6', id: 5, label: '二级 2-1', pid: 2 },
+        {
+          nodekey: '7',
+          id: 6,
+          label: '二级 2-2',
+          nameFirstSpell: 'e',
+          disabled: true,
+          pid: 2,
+        },
+        { nodekey: '8', id: 10, label: '三级 1-1-2', pid: 2 },
+        {
+          nodekey: '9',
+          id: 3,
+          label: '木头 3',
+          pid: '根节点',
+        },
+        { nodekey: '10', id: 7, label: '二级 3-1', pid: 3 },
+        {
+          nodekey: '11',
+          id: 8,
+          label: '二级 3-2',
+          pid: 3,
+        },
+        { nodekey: '12', id: 11, label: '三级 3-2-1', pid: 8 },
+        { nodekey: '13', id: 12, label: '三级 3-2-2三级 3-2-2', pid: 8 },
+        { nodekey: '14', id: 13, label: '三级 3-2-3', pid: 8 },
+        { nodekey: '15', id: 5, label: '二级 2-1', pid: 8 },
       ],
     }
   },

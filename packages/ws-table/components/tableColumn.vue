@@ -158,7 +158,10 @@
       <template v-else>
         <!-- 命名插槽 -->
         <template
-          v-if="fieldItem.columnSlotName && row.rowType__table !== 'searchRow'"
+          v-if="
+            fieldItem.columnSlotName &&
+            (fieldItem.searchRowShowSlot || row.rowType__table !== 'searchRow')
+          "
         >
           <slot
             :name="fieldItem.columnSlotName"

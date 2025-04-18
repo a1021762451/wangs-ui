@@ -1,3 +1,4 @@
+import { format } from '../packages/utils/util'
 export const list = [
   'ws-form',
   'ws-table',
@@ -97,12 +98,17 @@ export const formConfigList = [
     prop: 'testMinDatetime',
     label: '小时间',
     required: true,
-    maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
+    // maxTimeProp: 'testMaxDatetime', // 用于比较的最大时间对应字段
     timeDisabled: true, // 时间限制精度是否到时分秒
-    defaultTimeType: 'today', // 默认当前时间
+    // defaultTimeType: 'today', // 默认当前时间
+    minDate: () => {
+      return format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+    },
     componentAttrs: {
-      type: 'date',
-      valueFormat: 'yyyy-MM-dd',
+      type: 'datetime',
+      valueFormat: 'yyyy-MM-dd HH:mm:ss',
+      format: 'yyyy-MM-dd HH:mm:ss',
+      clearable: true,
     },
   },
   {

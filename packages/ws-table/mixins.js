@@ -82,5 +82,22 @@ export default {
       }
       return iterateFn(this.tableData, rowKeyValue)
     },
+    // 重置搜索数据
+    resetFormData() {
+      if (this.showSearchRow || this.showSearchHeader) {
+        this.initFormData(true)
+        this.happenEvent({
+          buttonItem: { method: 'search' },
+        })
+      } else if (this.showSearchForm) {
+        const wsForm = this.$refs.wsForm
+        const buttonsList = wsForm.buttonsList
+        let resetButton = buttonsList.find((item) => item.method === 'reset')
+        resetButton = resetButton || {
+          method: 'reset',
+        }
+        wsForm.happenEvent(resetButton)
+      }
+    },
   },
 }

@@ -19,6 +19,7 @@
             showSearch: false,
             showOverflowTooltip: true,
             'default-expand-all': true,
+            currentNodeKey: typeof value === 'string' ? value : undefined,
             ...treeConfig,
             'check-on-click-node': true,
             showCheckbox: multiple,
@@ -38,7 +39,7 @@
         v-for="item in flatTreeData"
         :key="item[treeNodeKey]"
         :label="item[treeLabelKey]"
-        :value="item[treeNodeKey]"
+        :value="item[valueKey]"
       />
     </template>
     <template v-else>
@@ -99,6 +100,9 @@
   </el-select>
 </template>
 <script>
+let treeNodeKeyMap = {}
+let valueKeyMap = {}
+let lastCheckedKeys = []
 import { treeToFlat, getObjAttr } from '../utils/util'
 import wsTree from '../ws-tree/index.vue'
 import wsTooltip from '../ws-tooltip/index.vue'
@@ -172,11 +176,14 @@ export default {
         this.value.length > 0 && this.value.length < this.flatOptions.length
       )
     },
+    treeProps() {
+      return this.treeConfig.props || {}
+    },
     treeNodeKey() {
       return getObjAttr(this.treeConfig, 'nodeKey') || 'id'
     },
-    treeProps() {
-      return this.treeConfig.props || {}
+    valueKey() {
+      return this.treeProps.id || this.treeNodeKey
     },
     treeLabelKey() {
       return this.treeProps['label'] || 'label'
@@ -186,9 +193,12 @@ export default {
       return dataIsFlat
         ? data
         : treeToFlat(data, {
-            ...this.treeProps,
             id: this.treeNodeKey,
-          })
+            ...this.treeProps,
+          }, false)
+    },
+    keyIsOnly() {
+      return this.valueKey === this.treeNodeKey
     },
   },
   watch: {
@@ -196,6 +206,14 @@ export default {
       handler() {
         if (this.isTreeSelect) {
           this.playbackTree()
+        }
+      },
+      immediate: true,
+    },
+    flatTreeData: {
+      handler() {
+        if (this.isTreeSelect) {
+          this.getDataMap()
         }
       },
       immediate: true,
@@ -219,6 +237,10 @@ export default {
         const wsTree = this.$refs.wsTree
         if (!wsTree) return
         const valueIsArray = Array.isArray(this.value)
+        if (!this.keyIsOnly) {
+          this.playbackTreeNotOnly(valueIsArray, wsTree)
+          return
+        }
         if (this.multiple) {
           const value = valueIsArray ? this.value : []
           wsTree.setCheckedKeys(value)
@@ -235,15 +257,83 @@ export default {
     handleNodeClick(data, node, el) {
       if (this.multiple) return
       if (this.treeLeafOnly && !node.isLeaf) return
-      const dataValue = data[this.treeNodeKey]
+      const dataValue = data[this.valueKey]
       this.$emit('change', dataValue)
       this.$refs.wsSelect.blur()
     },
     // 树节点选中事件
     handleCheck() {
       if (!this.multiple) return
-      const checkedValues = this.$refs.wsTree.getCheckedKeys(this.treeLeafOnly)
-      this.$emit('change', checkedValues)
+      const currentCheckedKeys = this.$refs.wsTree.getCheckedKeys(
+        this.treeLeafOnly
+      )
+      if (!this.keyIsOnly) {
+        this.handleCheckNotOnly(currentCheckedKeys)
+        return
+      }
+      this.$emit('change', currentCheckedKeys)
+    },
+    // 兼容nodeKey和valueKey不同的情况
+    handleCheckNotOnly(currentCheckedKeys) {
+      const removeArr = lastCheckedKeys.filter(
+        (item) => !currentCheckedKeys.includes(item)
+      )
+      const removeValueKeys = this.getReleatedValueKeys(removeArr)
+      const currentValuesKeys =
+        this.getReleatedValueKeys(currentCheckedKeys)
+      const valueKeys = currentValuesKeys.filter((key) => {
+        return !removeValueKeys.includes(key)
+      })
+      this.$emit('change', valueKeys)
+    },
+    // 兼容nodeKey和valueKey不同的情况
+    playbackTreeNotOnly(valueIsArray, wsTree) {
+      if (this.multiple) {
+        const value = valueIsArray ? this.value : []
+        let checkedKeys = []
+        value.forEach((item) => {
+          if (valueKeyMap[item]) {
+            const itemCheckedKeys = valueKeyMap[item].map(
+              (item) => item[this.treeNodeKey]
+            )
+            checkedKeys = checkedKeys.concat(itemCheckedKeys)
+          }
+        })
+        lastCheckedKeys = checkedKeys
+        wsTree.setCheckedKeys(checkedKeys)
+      } else {
+        const nodeArr = valueKeyMap[this.value]
+        !valueIsArray &&
+          nodeArr &&
+          wsTree.setCurrentKey(nodeArr[0][this.treeNodeKey])
+      }
+    },
+    getReleatedValueKeys(keys) {
+      let keysNodes = []
+      keys.forEach((key) => {
+        keysNodes = keysNodes.concat(treeNodeKeyMap[key] || [])
+      })
+      const valueKeys = Array.from(
+        new Set(keysNodes.map((item) => item[this.valueKey]))
+      )
+      return valueKeys
+    },
+    // 获取数据map
+    getDataMap() {
+      treeNodeKeyMap = {}
+      valueKeyMap = {}
+      this.flatTreeData.forEach((item) => {
+        if (treeNodeKeyMap[item[this.treeNodeKey]]) {
+          treeNodeKeyMap[item[this.treeNodeKey]].push(item)
+        } else {
+          treeNodeKeyMap[item[this.treeNodeKey]] = [item]
+        }
+        if (valueKeyMap[item[this.valueKey]]) {
+          valueKeyMap[item[this.valueKey]].push(item)
+        } else {
+          valueKeyMap[item[this.valueKey]] = [item]
+        }
+      })
     },
   },
 }

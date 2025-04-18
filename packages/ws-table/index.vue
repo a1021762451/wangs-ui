@@ -3,12 +3,13 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-02-21 10:54:44
+ * @LastEditTime: 2025-04-16 14:36:42
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
     <ws-form
       v-if="showSearchForm"
+      ref="wsForm"
       @happenEvent="happenEvent"
       style="margin-bottom: 6px"
       v-bind="{
@@ -954,7 +955,7 @@ export default {
       // }
       this.switchStatus(obj, true)
     },
-    initFormData() {
+    initFormData(isReset) {
       this.flatColums.forEach((item) => {
         const { component, defaultTimeType, componentAttrs = {}, prop } = item
         // 设置默认时间
@@ -967,7 +968,7 @@ export default {
           return
         }
         // 判断是否需要初始化表单值
-        if (prop && !this.formData.hasOwnProperty(prop)) {
+        if (prop && (isReset || !this.formData.hasOwnProperty(prop))) {
           this.$set(this.formData, prop, '')
           // 特殊情况
           if (
@@ -1097,7 +1098,7 @@ export default {
       const { tableData } = this.tableForm
       columns.forEach((column) => {
         const conditon = column.selfAdjust
-        if (conditon) {
+        if (conditon && !column.width) {
           const arr = this.getColumnData(tableData, column, childrenKey)
           // 迭代获取每一列的所有数据
           arr.push(column.label) // 把每列的表头也加进去算
