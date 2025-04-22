@@ -3,23 +3,24 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-14 19:23:24
+ * @LastEditTime: 2025-04-22 16:33:15
 -->
 <template>
   <div
     class="resizable"
+    :class="`${direction}`"
     ref="container"
     :style="{
       width: width + 'px',
-      paddingRight: width ? '4px' : '0px',
+      paddingRight: width && isLeft ? '4px' : '0px',
+      paddingLeft: width && isRight ? '4px' : '0px',
     }"
   >
     <!-- 组件内容 -->
-    <div class="content">
+    <div v-if="isLeft" class="content">
       <slot></slot>
     </div>
     <!-- 折叠按钮 -->
-    <template v-if="allowCollapse"> </template>
     <div
       class="asideStow"
       @click="toggleCollapse(!collapsed)"
@@ -36,6 +37,9 @@
     </div>
     <!-- 右侧拖拽区域 -->
     <div class="resize-handle" @mousedown="startResize" v-if="allowDrag"></div>
+    <div v-if="isRight" class="content">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -78,6 +82,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    // 内容相对折叠按钮的方向
+    direction: {
+      type: String,
+      default: 'left',
+    },
   },
   data() {
     return {
@@ -99,6 +108,12 @@ export default {
     },
     defaultWidthComputed() {
       return this.getWidth(this.defaultWidth)
+    },
+    isLeft() {
+      return this.direction === 'left'
+    },
+    isRight() {
+      return this.direction === 'right'
     },
   },
   mounted() {
@@ -126,7 +141,13 @@ export default {
     // 拖拽中
     resize(event) {
       const container = this.$refs.container
-      const width = event.clientX - container.getBoundingClientRect().left
+      let width = 0
+      if (this.isLeft) {
+        width = event.clientX - container.getBoundingClientRect().left
+      }
+      if (this.isRight) {
+        width = container.getBoundingClientRect().right - event.clientX
+      }
       this.width = Math.max(
         this.minwidthComputed,
         Math.min(this.maxwidthComputed, width)
@@ -172,44 +193,60 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .resizable {
   position: relative;
   height: 100%;
   background-color: #f0f0f0;
+  .asideStow {
+    position: absolute;
+    top: 50%;
+    z-index: 100;
+    cursor: pointer;
+    .collapsedContainer {
+      width: 12px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: #a1a5ad;
+      font-size: 12px;
+      border-radius: 0px 7px 7px 0px;
+    }
+  }
+  .resize-handle {
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 1;
+  }
+  .content {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+}
+.resizable.left {
   margin-right: 12px;
+  .resize-handle {
+    right: -2px;
+  }
+  .asideStow {
+    right: 0px;
+    transform: translateX(100%) translateY(-50%);
+  }
 }
-.resize-handle {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  width: 4px;
-  height: 100%;
-  cursor: ew-resize;
-  z-index: 1;
-}
-.content {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-.asideStow {
-  position: absolute;
-  right: 0px;
-  top: 50%;
-  z-index: 100;
-  transform: translateX(100%) translateY(-50%);
-  cursor: pointer;
-}
-.collapsedContainer {
-  width: 12px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: #a1a5ad;
-  font-size: 12px;
-  border-radius: 0px 7px 7px 0px;
+.resizable.right {
+  margin-left: 12px;
+  .resize-handle {
+    left: -2px;
+  }
+  .asideStow {
+    left: 0px;
+    transform: translateX(-100%) translateY(-50%) rotate(180deg);
+  }
 }
 </style>
