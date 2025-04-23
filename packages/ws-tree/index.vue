@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-23 10:31:53
+ * @LastEditTime: 2025-04-23 17:41:20
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -76,11 +76,13 @@
             >
               <!-- 内容 -->
               <wsTooltip
-                popper-class="el-tooltip_custom"
-                :content="node.label"
-                overflow
-                :placement="'right'"
-                :disabled="tooltipDisabled"
+                v-bind="{
+                  'popper-class': 'el-tooltip_custom',
+                  content: node.label,
+                  overflow: true,
+                  placement: 'right',
+                  ...getTooltipConfig(data, node),
+                }"
               >
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
@@ -114,11 +116,13 @@
               </span>
               <!-- 禁用蒙层 -->
               <wsTooltip
-                popper-class="el-tooltip_custom"
-                :content="node.label"
-                :overflow="false"
-                :placement="'right'"
-                :disabled="tooltipDisabled"
+                v-bind="{
+                  'popper-class': 'el-tooltip_custom',
+                  content: node.label,
+                  overflow: true,
+                  placement: 'right',
+                  ...getTooltipConfig(data, node),
+                }"
               >
                 <div
                   v-if="judgeDisabled(data, node)"
@@ -185,10 +189,10 @@ export default {
     wsContextmenu,
   },
   props: {
-    // tootip是否禁用
-    tooltipDisabled: {
-      default: false,
-      type: Boolean,
+    // tooltip配置
+    tooltipConfig: {
+      default: () => ({}),
+      type: Object,
     },
     // 增删改查模式
     changeMode: {
@@ -371,6 +375,19 @@ export default {
     },
   },
   methods: {
+    // 动态获取tooltip配置
+    getTooltipConfig(data, node) {
+      const obj = {}
+      let { disabled, content } = this.tooltipConfig
+      if (typeof disabled === 'function') obj.disabled = disabled(data, node)
+      if (typeof content === 'function') obj.content = content(data, node)
+      return Object.keys(obj).length
+        ? {
+            ...this.tooltipConfig,
+            ...obj,
+          }
+        : this.tooltipConfig
+    },
     // 获取过滤后的按钮
     getButtonConfigList(operationsList, data, node, type) {
       let buttonConfigList =

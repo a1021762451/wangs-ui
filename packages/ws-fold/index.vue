@@ -48,12 +48,12 @@ export default {
   name: 'ws-fold',
   props: {
     // 最小宽度
-    minwidth: {
+    minWidth: {
       type: Number,
       default: 100,
     },
     // 最大宽度
-    maxwidth: {
+    maxWidth: {
       type: Number,
       default: 600,
     },
@@ -101,10 +101,10 @@ export default {
   },
   computed: {
     minwidthComputed() {
-      return this.getWidth(this.minwidth)
+      return this.getWidth(this.minWidth)
     },
     maxwidthComputed() {
-      return this.getWidth(this.maxwidth)
+      return this.getWidth(this.maxWidth)
     },
     defaultWidthComputed() {
       return this.getWidth(this.defaultWidth)

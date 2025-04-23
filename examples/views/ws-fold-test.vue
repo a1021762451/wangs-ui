@@ -12,8 +12,8 @@
       class="ws-fold"
       @collapse="collapse"
       isPercent
-      :minwidth="10"
-      :maxwidth="60"
+      :minWidth="10"
+      :maxWidth="60"
       :defaultWidth="30"
       direction="left"
     >
