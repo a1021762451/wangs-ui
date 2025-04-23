@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-18 17:35:55
+ * @LastEditTime: 2025-04-23 10:31:53
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -132,32 +132,23 @@
       </el-tree>
     </div>
     <!-- 右键菜单栏 -->
-    <div
-      :style="{
-        left: optionCardX + 'px',
-        bottom: optionCardY + 'px',
-      }"
-      class="contextmenu"
-      v-show="optionCardShow"
-      id="option-button-group"
+    <ws-contextmenu
+      ref="wsContextmenu"
+      :buttonConfigList="
+        getButtonConfigList(
+          operationsList,
+          optionData,
+          optionNode,
+          'contextMenu'
+        )
+      "
+      :visible.sync="optionCardShow"
+      @happenEvent="happenEvent($event, optionData, optionNode)"
     >
-      <ws-buttons
-        class="ws-buttons-option"
-        :buttonConfigList="
-          getButtonConfigList(
-            operationsList,
-            optionData,
-            optionNode,
-            'contextMenu'
-          )
-        "
-        @happenEvent="happenEvent($event, optionData, optionNode)"
-      >
-        <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
-          <slot :name="name" v-bind="scope"></slot>
-        </template>
-      </ws-buttons>
-    </div>
+      <template v-for="(index, name) in $scopedSlots" v-slot:[name]="scope">
+        <slot :name="name" v-bind="scope"></slot>
+      </template>
+    </ws-contextmenu>
   </div>
 </template>
 
@@ -183,6 +174,7 @@ const defaultButtons = [
 import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
+import wsContextmenu from '../ws-contextmenu/index.vue'
 import { flatToTree, debounce, getObjAttr } from '../utils/util.js'
 export default {
   name: 'ws-tree',
@@ -190,6 +182,7 @@ export default {
   components: {
     wsTooltip,
     wsButtons,
+    wsContextmenu,
   },
   props: {
     // tootip是否禁用
@@ -283,12 +276,9 @@ export default {
   },
   data() {
     return {
-      optionCardX: '',
-      optionCardY: '',
       optionCardShow: false,
       optionData: {},
       optionNode: {},
-      optionNodeRef: {},
       iAct: '',
       filterText: '',
       searchText: '',
@@ -344,7 +334,6 @@ export default {
     if (this.changeByContextMenu) {
       const container = this.$refs.container
       container.addEventListener('scroll', this.scroll)
-      document.addEventListener('click', this.OptionCardClose)
     }
   },
   beforeDestroy() {
@@ -352,7 +341,6 @@ export default {
       const container = this.$refs.container
       container.removeEventListener('scroll', this.scroll)
     }
-    document.removeEventListener('click', this.OptionCardClose)
   },
   watch: {
     filterText(val) {
@@ -429,15 +417,9 @@ export default {
     floderOption(e, data, node, nodeRef) {
       this.$emit('nodeContextmenu', e, data, node, nodeRef)
       if (this.judgeDisabledContextmenu(data, node)) return
-      const clientHeight = document.documentElement.clientHeight
-      this.optionCardShow = false
-      this.optionCardX = e.x + 10
-      // this.optionCardY = e.y + 10
-      this.optionCardY = clientHeight - e.y
+      this.$refs.wsContextmenu.contextmenuOpen(e)
       this.optionData = data
       this.optionNode = node
-      this.optionNodeRef = nodeRef
-      this.optionCardShow = true
     },
     // 判断节点是否禁用右键
     judgeDisabledContextmenu(data, node) {
@@ -477,16 +459,6 @@ export default {
     // 滚动隐藏菜单
     scroll() {
       this.optionCardShow = false
-    },
-    // 点击框外区域 隐藏菜单
-    OptionCardClose(event) {
-      var currentCli = document.getElementById('option-button-group')
-      if (currentCli) {
-        if (!currentCli.contains(event.target)) {
-          //点击到了id为option-button-group以外的区域，就隐藏菜单
-          this.optionCardShow = false
-        }
-      }
     },
     // 鼠标悬浮
     mouseenter(data) {
@@ -574,25 +546,6 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-.contextmenu {
-  transition: all 0.3s;
-  display: flex;
-  flex-direction: column;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-  z-index: 99;
-  position: fixed;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  overflow: hidden;
-  .option-card-button {
-    width: 100%;
-    margin-left: 0 !important;
-    font-size: 10px;
-    border-radius: 0;
-    padding: 8px 10px;
-  }
-}
 .tree-content {
   height: 100%;
   width: 100%;
@@ -703,16 +656,5 @@ export default {
     margin-left: 0;
   }
   margin-right: 0;
-}
-/deep/ .ws-buttons-option {
-  display: flex;
-  flex-direction: column;
-  .el-button {
-    width: 100%;
-    margin-left: 0 !important;
-    font-size: 10px;
-    border-radius: 0;
-    padding: 8px 10px;
-  }
 }
 </style>

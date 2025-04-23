@@ -2,7 +2,7 @@
  * @Author: wanns 1021762451@qq.com
  * @Date: 2023-03-15 19:36:28
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-16 14:29:58
+ * @LastEditTime: 2025-04-23 10:28:17
  * @FilePath: \ws-ui\packages\componentes\ws-buttons.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -19,8 +19,11 @@
       <el-dropdown
         v-else-if="buttonItem.children"
         :key="buttonItem.method + buttonItem.label + buttonItem.icon"
-        :size="buttonSize"
-        trigger="click"
+        v-bind="{
+          size: buttonSize,
+          trigger: 'click ',
+          ...dropdownConfig,
+        }"
         @command="happenCommand($event, buttonItem.children)"
       >
         <component
@@ -121,6 +124,13 @@ export default {
         return {}
       },
     },
+    // 下拉按钮组配置
+    dropdownConfig: {
+      type: Object,
+      default() {
+        return {}
+      },
+    }
   },
   data() {
     return {
