@@ -3,12 +3,12 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-22 16:33:15
+ * @LastEditTime: 2025-04-24 19:09:34
 -->
 <template>
   <div
     class="resizable"
-    :class="`${direction}`"
+    :class="`${direction} ${allowCollapse ? 'collapsable' : 'non-collapsible'}`"
     ref="container"
     :style="{
       width: width + 'px',
@@ -248,5 +248,8 @@ export default {
     left: 0px;
     transform: translateX(-100%) translateY(-50%) rotate(180deg);
   }
+}
+.resizable.non-collapsible {
+  margin: 0;
 }
 </style>

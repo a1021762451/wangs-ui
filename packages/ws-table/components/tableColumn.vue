@@ -108,6 +108,7 @@
         :allOptions="allOptions"
         :fieldItem="fieldItem"
         :formData="formData"
+        :extraComponents="extraComponents"
         :fieldItemChange="
           (fieldItem, formData) => {
             fieldItemChange(fieldItem, formData, 'search')
@@ -138,6 +139,7 @@
         :fieldItem="setFieldItem(fieldItem, row, column, $index)"
         :formData="row"
         :fieldItemChange="fieldItemChange"
+        :extraComponents="extraComponents"
         :vFocus="
           switchModeData.includes('dblclick') &&
           property === fieldItem.prop &&
@@ -290,6 +292,13 @@ export default {
       default() {
         return {}
       },
+    },
+    // 额外的引入的组件
+    extraComponents: {
+      default() {
+        return {}
+      },
+      type: Object,
     },
   },
   data() {

@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-16 14:36:42
+ * @LastEditTime: 2025-04-29 17:15:43
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -126,6 +126,7 @@
           :showSearchHeader="showSearchHeader"
           :TDConfig="TDConfig"
           :setFieldItem="setFieldItem"
+          :extraComponents="extraComponents"
           @happenEvent="happenEvent"
         >
           <!-- 将父组件插槽内容转发给子组件 -->
@@ -399,6 +400,13 @@ export default {
       default(fieldItem, row, column, $index) {
         return fieldItem
       },
+    },
+    // 额外的引入的组件
+    extraComponents: {
+      default() {
+        return {}
+      },
+      type: Object,
     },
   },
   data() {

@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-23 17:41:20
+ * @LastEditTime: 2025-04-29 15:54:55
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -534,7 +534,11 @@ export default {
     },
     // 迭代函数，如果字节点不满足条件，则判断父节点
     getHasKeyword(value, node) {
-      const { firstSpellKey, label = 'label' } = this.props
+      const {
+        pinyin,
+        pinyinInitial,
+        label = 'label',
+      } = this.props
       let data
       if (node.data instanceof Array) {
         // data = node.data.length > 0 ? node.data[0] : {}
@@ -542,11 +546,13 @@ export default {
       } else {
         data = node.data || {}
       }
+      const someArr = [data[label]]
+      if (pinyin) someArr.push(data[pinyin])
+      if (pinyinInitial) someArr.push(data[pinyinInitial])
       if (
-        data[label].indexOf(value) !== -1 ||
-        (firstSpellKey &&
-          data[firstSpellKey] &&
-          data[firstSpellKey].indexOf(value) !== -1)
+        someArr.some((keyword) => {
+          return keyword.toLowerCase().indexOf(value.toLowerCase()) > -1
+        })
       ) {
         return true
       } else {
