@@ -2,7 +2,7 @@
  * @Author: wang shuai
  * @Date: 2024-12-25 09:59:15
  * @LastEditors: wang shuai
- * @LastEditTime: 2024-12-31 09:07:58
+ * @LastEditTime: 2025-04-30 11:08:12
 -->
 <template>
   <div
@@ -290,17 +290,21 @@ export default {
           },
         ]
         if (ruleDateComponent.includes(fieldItem.component)) {
-          if (fieldItem.minTimeProp) {
-            const minField = fieldItem.minTimeProp
+          const formData = this.formData
+          let { minTimeProp, maxTimeProp, minDate, maxDate } = fieldItem
+          minDate = typeof minDate === 'function' ? minDate() : minDate
+          maxDate = typeof maxDate === 'function' ? maxDate() : maxDate
+          const minValue = formData[minTimeProp] || minDate || 0
+          const maxValue = formData[maxTimeProp] || maxDate || 0
+          if (minValue) {
             obj[fieldItem.prop].push({
-              validator: getMinValidator(fieldItem, this.formData[minField]),
+              validator: getMinValidator(fieldItem, minValue),
               trigger: 'change',
             })
           }
-          if (fieldItem.maxTimeProp) {
-            const maxField = fieldItem.maxTimeProp
+          if (maxValue) {
             obj[fieldItem.prop].push({
-              validator: getMaxValidator(fieldItem, this.formData[maxField]),
+              validator: getMaxValidator(fieldItem, maxValue),
               trigger: 'change',
             })
           }

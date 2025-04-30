@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-29 17:15:43
+ * @LastEditTime: 2025-04-30 08:57:56
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -435,6 +435,7 @@ export default {
       loadingData: this.loading,
       singleColunms: [],
       singleTableData: [],
+      defaultFormData: {},
     }
   },
   computed: {
@@ -578,6 +579,7 @@ export default {
     },
   },
   created() {
+    this.defaultFormData = deepClone(this.formData)
     this.getSingleColunms()
     this.importPackage()
     this.getTabledataByFn()
@@ -964,6 +966,10 @@ export default {
       this.switchStatus(obj, true)
     },
     initFormData(isReset) {
+      // console.log('initFormData------')
+      let defaultFormData = isReset
+        ? deepClone(this.defaultFormData)
+        : this.formData
       this.flatColums.forEach((item) => {
         const { component, defaultTimeType, componentAttrs = {}, prop } = item
         // 设置默认时间
@@ -976,14 +982,18 @@ export default {
           return
         }
         // 判断是否需要初始化表单值
-        if (prop && (isReset || !this.formData.hasOwnProperty(prop))) {
-          this.$set(this.formData, prop, '')
-          // 特殊情况
-          if (
-            component === 'el-checkbox-group' ||
-            (component === 'el-select' && componentAttrs.multiple)
-          )
-            this.$set(this.formData, prop, [])
+        if (prop) {
+          if (!defaultFormData.hasOwnProperty(prop)) {
+            this.$set(this.formData, prop, '')
+            // 特殊情况
+            if (
+              component === 'el-checkbox-group' ||
+              (component === 'el-select' && componentAttrs.multiple)
+            )
+              this.$set(this.formData, prop, [])
+          } else {
+            this.$set(this.formData, prop, defaultFormData[prop])
+          }
         }
       })
     },

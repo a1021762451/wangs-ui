@@ -338,17 +338,21 @@ export default {
       ]
       let rules = deepClone(this.rules[fieldItem.prop])
       if (ruleDateComponent.includes(fieldItem.component)) {
-        if (fieldItem.minTimeProp) {
-          const minField = fieldItem.minTimeProp
+        const formData = row
+        let { minTimeProp, maxTimeProp, minDate, maxDate } = fieldItem
+        minDate = typeof minDate === 'function' ? minDate() : minDate
+        maxDate = typeof maxDate === 'function' ? maxDate() : maxDate
+        const minValue = formData[minTimeProp] || minDate || 0
+        const maxValue = formData[maxTimeProp] || maxDate || 0
+        if (minValue) {
           rules.push({
-            validator: getMinValidator(fieldItem, row[minField]),
+            validator: getMinValidator(fieldItem, minValue),
             trigger: 'change',
           })
         }
-        if (fieldItem.maxTimeProp) {
-          const maxField = fieldItem.maxTimeProp
+        if (maxValue) {
           rules.push({
-            validator: getMaxValidator(fieldItem, row[maxField]),
+            validator: getMaxValidator(fieldItem, maxValue),
             trigger: 'change',
           })
         }
