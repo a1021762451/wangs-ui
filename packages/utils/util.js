@@ -814,11 +814,20 @@ export const vResize = {
     // delete el.__bindingValue__
   },
 }
-
-// 连接url和参数
-export function concatUrlAndParams(url, params = {}) {
-  if (!params || typeof params !== 'object' || !Object.keys(params).length)
-    return url
+// 删除对象中的undefined, 迭代
+export function deleteUndefined(obj) {
+  if (getObjType(obj) === 'object') {
+    Object.keys(obj).forEach((key) => {
+      if (obj[key] === undefined) {
+        delete obj[key]
+      } else {
+        deleteUndefined(obj[key])
+      }
+    })
+  }
+}
+// 获取url中参数对象
+export function getUrlParams(url) {
   // 解析url中的参数
   let urlParamsStr = url.split('?')[1]
   url = url.split('?')[0]
@@ -833,12 +842,26 @@ export function concatUrlAndParams(url, params = {}) {
       urlParams[key] = value
     })
   }
+  return { urlParams, url }
+}
+// 连接url和参数
+export function concatUrlAndParams(url, params = {}) {
+  deleteUndefined(params)
+  console.log(params, 'concatUrlAndParams---')
+  if (!params || typeof params !== 'object' || !Object.keys(params).length)
+    return url
+  const urlParamsObj = getUrlParams(url)
+  url = urlParamsObj.url
+  const urlParams = urlParamsObj.urlParams
   params = Object.assign({}, urlParams, params)
   let str = ''
   const paramsKeys = Object.keys(params)
   paramsKeys.forEach((key) => {
     let value = params[key]
-    value = typeof value === 'object' ? JSON.stringify(value) : value
+    value =
+      typeof value === 'object'
+        ? encodeURIComponent(JSON.stringify(value))
+        : value
     str += `${key}=${value}&`
   })
   // 删除最后的&

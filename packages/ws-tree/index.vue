@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-29 15:54:55
+ * @LastEditTime: 2025-05-06 15:28:20
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -77,10 +77,6 @@
               <!-- 内容 -->
               <wsTooltip
                 v-bind="{
-                  'popper-class': 'el-tooltip_custom',
-                  content: node.label,
-                  overflow: true,
-                  placement: 'right',
                   ...getTooltipConfig(data, node),
                 }"
               >
@@ -117,10 +113,6 @@
               <!-- 禁用蒙层 -->
               <wsTooltip
                 v-bind="{
-                  'popper-class': 'el-tooltip_custom',
-                  content: node.label,
-                  overflow: true,
-                  placement: 'right',
                   ...getTooltipConfig(data, node),
                 }"
               >
@@ -377,16 +369,24 @@ export default {
   methods: {
     // 动态获取tooltip配置
     getTooltipConfig(data, node) {
-      const obj = {}
-      let { disabled, content } = this.tooltipConfig
-      if (typeof disabled === 'function') obj.disabled = disabled(data, node)
-      if (typeof content === 'function') obj.content = content(data, node)
-      return Object.keys(obj).length
-        ? {
-            ...this.tooltipConfig,
-            ...obj,
-          }
-        : this.tooltipConfig
+      const obj = {
+        'popper-class': 'el-tooltip_custom',
+        content: node.label,
+        overflow: true,
+        placement: 'right',
+        ...this.tooltipConfig,
+      }
+      const objKeys = Object.keys(obj)
+      if (!objKeys.length) return {}
+      objKeys.forEach((key) => {
+        if (typeof obj[key] === 'function') {
+          obj[key] = obj[key](data, node)
+        }
+      })
+      if (!objKeys.includes('disabled')) {
+        obj.disabled = !obj.content
+      }
+      return obj
     },
     // 获取过滤后的按钮
     getButtonConfigList(operationsList, data, node, type) {
