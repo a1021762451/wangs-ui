@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-06 15:28:20
+ * @LastEditTime: 2025-05-09 09:58:08
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -534,11 +534,7 @@ export default {
     },
     // 迭代函数，如果字节点不满足条件，则判断父节点
     getHasKeyword(value, node) {
-      const {
-        pinyin,
-        pinyinInitial,
-        label = 'label',
-      } = this.props
+      const { pinyin, pinyinInitial, label = 'label' } = this.props
       let data
       if (node.data instanceof Array) {
         // data = node.data.length > 0 ? node.data[0] : {}
@@ -551,6 +547,7 @@ export default {
       if (pinyinInitial) someArr.push(data[pinyinInitial])
       if (
         someArr.some((keyword) => {
+          keyword = keyword || ''
           return keyword.toLowerCase().indexOf(value.toLowerCase()) > -1
         })
       ) {
@@ -646,10 +643,7 @@ export default {
   }
 }
 .custom-tree-button {
-  i {
-    padding: 2px;
-    color: #66b1ff;
-  }
+  z-index: 2;
 }
 .disabled {
   cursor: not-allowed;
@@ -658,7 +652,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 11;
+  z-index: 1;
 }
 /deep/ .el-tree-node__content {
   position: relative;
@@ -672,7 +666,11 @@ export default {
   }
 }
 /deep/ .ws-buttons {
-  .el-link:not(:last-child) {
+  // .el-link:not(:last-child) {
+  //   margin-right: 2px;
+  // }
+  padding-right: 2px;
+  .el-link {
     margin-right: 2px;
   }
   span.el-link--inner {

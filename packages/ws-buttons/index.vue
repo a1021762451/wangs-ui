@@ -21,7 +21,7 @@
         :key="buttonItem.method + buttonItem.label + buttonItem.icon"
         v-bind="{
           size: buttonSize,
-          trigger: 'click ',
+          trigger: 'click',
           ...dropdownConfig,
         }"
         @command="happenCommand($event, buttonItem.children)"
