@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-17 08:59:05
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-18 17:38:38
+ * @LastEditTime: 2025-05-15 12:06:09
 -->
 <template>
   <el-form
@@ -223,6 +223,9 @@ export default {
     async getSelectData() {
       const res = await getSelectData()
       console.log(res, 'getSelectData')
+      res.list.forEach((item, index) => {
+        item.value = `${item.value}-${index}`
+      })
       this.defaultOptions = res.list
     },
   },

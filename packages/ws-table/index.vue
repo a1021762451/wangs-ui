@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-30 08:57:56
+ * @LastEditTime: 2025-05-15 13:43:40
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -184,7 +184,7 @@
 </template>
 
 <script>
-let defaultTableRequestConfig = {
+let wsTableRequestConfig = {
   //  后台请求，promise, resole值为{rows: 表格数据, columns: 列设置,total: 总数-非必填}
   requestFn: null,
   // 后台请求是否返回columns
@@ -408,6 +408,11 @@ export default {
       },
       type: Object,
     },
+    // 使用请求
+    useRequest: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -517,14 +522,15 @@ export default {
     requestConfigCpt() {
       // 针对项目的全局配置
       const defaultConfig = deepMerge(
-        deepClone(defaultTableRequestConfig),
-        window.defaultTableRequestConfig || {}
+        deepClone(wsTableRequestConfig),
+        window.wsTableRequestConfig || {}
       )
       const obj = deepMerge(defaultConfig, this.requestConfig)
       obj.request = obj.request || window.request
       return obj
     },
     requestFn() {
+      if (!this.useRequest) return null
       return this.createRequestFn() || this.requestConfigCpt.requestFn
     },
     requestHasColumns() {
@@ -582,7 +588,7 @@ export default {
     this.defaultFormData = deepClone(this.formData)
     this.getSingleColunms()
     this.importPackage()
-    this.getTabledataByFn()
+    this.getDataByFn()
   },
   mounted() {
     this.rowDrop()
@@ -625,7 +631,7 @@ export default {
       })
     },
     // 通过配置的接口获取数据
-    async getTabledataByFn() {
+    async getDataByFn() {
       if (!this.requestFn) return
       this.loadingData = true
       const {
@@ -1155,7 +1161,7 @@ export default {
         method: 'search',
         buttonItem: { method: 'search' },
       })
-      this.getTabledataByFn()
+      this.getDataByFn()
     },
     happenEvent(params) {
       const {
@@ -1164,7 +1170,7 @@ export default {
       } = params
       if (method === 'search') {
         this.changePageInfo({ current: 1 })
-        this.getTabledataByFn()
+        this.getDataByFn()
       }
       this.$emit('happenEvent', params)
       // 首行搜索逻辑

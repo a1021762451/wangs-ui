@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-11-22 14:25:16
  * @LastEditors: wang shuai
- * @LastEditTime: 2023-11-22 15:58:50
+ * @LastEditTime: 2025-05-14 16:52:25
  */
 // 引用 Mock
 const Mock = require('mockjs')
@@ -36,7 +36,7 @@ Mock.mock('/data/getTableData', 'post', {
 // 获取表格数据
 Mock.mock('/data/getSelectData', 'post', {
   // 属性 list 的值是一个数组，随机生成 1 到 10 个元素
-  'list|10': [
+  'list|100': [
     {
       label: '@cname',
       value: '@name',
