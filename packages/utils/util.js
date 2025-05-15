@@ -34,18 +34,18 @@ const commonAttrs = {
   },
   'el-date-picker': {
     default: {
-      placeholder: '选择时间',
+      placeholder: '请选择时间',
       clearable: false,
     },
   },
   'el-time-picker': {
     default: {
-      placeholder: '选择时间',
+      placeholder: '请选择时间',
     },
   },
   'el-time-select': {
     default: {
-      placeholder: '选择时间',
+      placeholder: '请选择时间',
     },
   },
   'el-checkbox': {

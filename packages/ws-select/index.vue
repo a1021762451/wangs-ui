@@ -9,6 +9,8 @@
       'popper-class': isTreeSelect ? 'ws-treeSelect ws-select' : 'ws-select',
       ...$attrs,
       'filter-method': filterMethod,
+      'remote-method': remoteMethod,
+      loading: loadingData,
     }"
     v-on="$listeners"
   >
@@ -56,7 +58,7 @@
       />
     </template>
     <template v-else>
-      <template v-for="item in optionsCpt">
+      <template v-for="item in optionsFilterData">
         <el-option-group
           v-if="item.children"
           :key="item[labelKey]"
@@ -220,11 +222,19 @@ export default {
       type: Boolean,
       default: false,
     },
+    // 为true remoteMethod 不调用接口
+    fakeRemote: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       optionsData: null,
+      optionsFilterData: [],
       hasRequested: false,
+      loadingData: this.loading,
+      query: '',
     }
   },
   computed: {
@@ -238,8 +248,16 @@ export default {
     treeNodeKey() {
       return getObjAttr(this.treeConfig, 'nodeKey') || 'id'
     },
+    remote() {
+      return this.$attrs.remote
+    },
     filterMethod() {
+      if (this.remote) return undefined
       return getObjAttr(this.$attrs, 'filterMethod') || this.filterMethodCustom
+    },
+    remoteMethod() {
+      if (!this.remote) return undefined
+      return getObjAttr(this.$attrs, 'remoteMethod') || this.remoteMethodCustom
     },
     multiple() {
       // 布尔值简写获取到的是空字符串
@@ -311,6 +329,7 @@ export default {
     },
   },
   watch: {
+    // 树回显
     value: {
       handler() {
         if (this.isTreeSelect) {
@@ -319,11 +338,25 @@ export default {
       },
       immediate: true,
     },
+    // 获取映射数据
     flatOptions: {
       handler() {
         if (this.isTreeSelect) {
           this.getDataMap()
         }
+      },
+      immediate: true,
+    },
+    // 初始化下拉框数据
+    optionsCpt: {
+      handler() {
+        this.optionsFilterData = this.flatOptions
+      },
+      immediate: true,
+    },
+    loading: {
+      handler(newData) {
+        this.loadingData = newData
       },
       immediate: true,
     },
@@ -379,24 +412,32 @@ export default {
     },
     // 转成下拉搜索
     filterMethodToSelect(query) {
-      const { pinyin, pinyinInitial, label = 'label' } = this.props
-      const someArr = [data[label]]
-      if (pinyin) someArr.push(data[pinyin])
-      if (pinyinInitial) someArr.push(data[pinyinInitial])
-      if (
-        someArr.some((keyword) => {
+      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      if (!query) this.optionsFilterData = this.flatOptions
+      this.optionsFilterData = this.flatOptions.filter((data) => {
+        // console.log(item.name, 'item.name')
+        const someArr = [data[this.labelKey]]
+        if (data[pinyin]) someArr.push(data[pinyin])
+        if (data[pinyinInitial]) someArr.push(data[pinyinInitial])
+        return someArr.some((keyword) => {
           keyword = keyword || ''
           return keyword.toLowerCase().indexOf(query.toLowerCase()) > -1
         })
-      ) {
-        return true
-      }
+      })
     },
     filterMethodCustom(query) {
       if (this.isTreeSelect) {
         this.filterMethodToTree(query)
       } else {
         this.filterMethodToSelect(query)
+      }
+    },
+    remoteMethodCustom(query) {
+      if (this.fakeRemote) {
+        this.filterMethodCustom(query)
+      } else {
+        this.query = query
+        this.getDataByFn()
       }
     },
     // 树节点点击事件。
@@ -499,13 +540,15 @@ export default {
     },
     // 创建请求函数
     createRequestFn() {
-      const { request, params, method, url, fields } = this.requestConfigCpt
+      const { request, requestCb, params, method, url, fields } =
+        this.requestConfigCpt
       let { dataLevel } = this.requestConfigCpt
-      const { label, value } = fields
+      const { label, value, query = 'query' } = fields
       if (!url || !request) return
       const obj = {
         ...params,
       }
+      obj[query] = this.query
       return () => {
         return new Promise((resolve, reject) => {
           request({
@@ -526,6 +569,9 @@ export default {
                 value: item[value],
               }
             })
+            if (typeof requestCb === 'function') {
+              res = requestCb(res)
+            }
             resolve(res)
           })
         })
@@ -534,7 +580,9 @@ export default {
     // 通过配置的接口获取数据
     async getDataByFn() {
       if (!this.requestFn) return
-      const data = await this.requestFn()
+      this.loadingData = true
+      const data = await this.requestFn(this.query)
+      this.loadingData = false
       this.optionsData = data
     },
   },
