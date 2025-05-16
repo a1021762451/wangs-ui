@@ -233,7 +233,7 @@ export default {
     // 开启前端拼音搜索功能
     needPinyin: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   data() {
@@ -247,7 +247,7 @@ export default {
   },
   computed: {
     optionsCpt() {
-      return this.optionsData || this.options
+      return this.optionsData || this.options || this.treeConfig.data || []
     },
     // 优先treeConfig的props，其次props
     treeProps() {
@@ -347,19 +347,14 @@ export default {
       immediate: true,
     },
     // 获取映射数据
-    flatOptions: {
-      handler() {
-        if (this.isTreeSelect) {
-          this.getDataMap()
-        }
-      },
-      immediate: true,
-    },
     // 初始化下拉框数据
     flatOptions: {
       handler() {
         if (!this.isTreeSelect) this.optionsFilterData = this.flatOptions
         if (this.needPinyin) this.handlePinyin(this.flatOptions)
+        if (this.isTreeSelect) {
+          this.getDataMap()
+        }
       },
       immediate: true,
     },
@@ -606,6 +601,7 @@ export default {
       this.optionsData = data
     },
     handlePinyin(data) {
+      if (!pinyinPackage) this.importPackage()
       const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
       data.forEach((item) => {
         def(
@@ -630,7 +626,7 @@ export default {
       // 判断是否有拖拽,有就引入Sortable
       // 判断是否工具箱是否有下载,有就引入table-excel
       try {
-        if (this.needPinyin) {
+        if (this.needPinyin && !pinyinPackage) {
           pinyinPackage = require('pinyin')
         }
       } catch (error) {
