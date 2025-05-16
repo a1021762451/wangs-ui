@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-15 15:05:15
+ * @LastEditTime: 2025-05-16 10:14:34
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -171,7 +171,14 @@ import mixins from './mixins'
 import wsTooltip from '../ws-tooltip/index.vue'
 import wsButtons from '../ws-buttons/index.vue'
 import wsContextmenu from '../ws-contextmenu/index.vue'
-import { flatToTree, debounce, getObjAttr } from '../utils/util.js'
+import {
+  flatToTree,
+  treeToFlat,
+  debounce,
+  getObjAttr,
+  def,
+} from '../utils/util.js'
+let pinyinPackage = null
 export default {
   name: 'ws-tree',
   mixins: [mixins],
@@ -269,6 +276,25 @@ export default {
       type: String,
       default: '',
     },
+    // 开启前端拼音搜索功能
+    needPinyin: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否只过滤叶子节点
+    filterLeaf: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否过滤自身， 不判断父元素是否满足条件
+    filterSelf: {
+      type: Boolean,
+      default: true,
+    },
+    // 过滤时的细节控制函数
+    filterCb: {
+      type: Function,
+    },
   },
   data() {
     return {
@@ -282,7 +308,7 @@ export default {
       alreadySet: false,
       operationsList: [],
       treeData: [],
-      filterTextFn: debounce(this.filterTextCallback),
+      filterTextFn: debounce(this.filterTextCallback, 300),
     }
   },
   computed: {
@@ -319,12 +345,18 @@ export default {
     nodeKey() {
       return getObjAttr(this.$attrs, 'nodeKey') || 'id'
     },
+    defaultExpandedKeys() {
+      return getObjAttr(this.$attrs, 'defaultExpandedKeys')
+    },
     changeByHover() {
       return this.changeMode.includes('hover')
     },
     changeByContextMenu() {
       return this.changeMode.includes('contextMenu')
     },
+  },
+  created() {
+    this.importPackage()
   },
   mounted() {
     if (this.changeByContextMenu) {
@@ -351,6 +383,13 @@ export default {
               ...this.props,
             })
           : data
+        if (this.needPinyin) {
+          //   if (!this.dataIsFlat) data = treeToFlat(data, this.props, this.nodeKey)
+          const flatOptions = this.dataIsFlat
+            ? data
+            : treeToFlat(data, this.props)
+          this.handlePinyin(flatOptions)
+        }
         this.setCurrentKeyByProp()
       },
       immediate: true,
@@ -495,7 +534,13 @@ export default {
     },
     // 默认过滤函数
     filterNode(value, data, node) {
-      if (!value) return true
+      if (!value) {
+        // 折叠状态回归初始状态 defaultExpandedKeys
+        if (this.defaultExpandedKeys && this.defaultExpandedKeys.length) {
+          node.expanded = this.defaultExpandedKeys.includes(node.key)
+        }
+        return true
+      }
       // debugger
       const res = this.getHasKeyword(value, node)
       return res
@@ -550,6 +595,8 @@ export default {
       if (data[pinyin]) someArr.push(data[pinyin])
       if (data[pinyinInitial]) someArr.push(data[pinyinInitial])
       if (
+        (!this.filterLeaf || node.isLeaf) &&
+        (typeof this.filterCb !== 'function' || this.filterCb(data, node)) &&
         someArr.some((keyword) => {
           keyword = keyword || ''
           return keyword.toLowerCase().indexOf(value.toLowerCase()) > -1
@@ -557,7 +604,45 @@ export default {
       ) {
         return true
       } else {
-        return node.parent && this.getHasKeyword(value, node.parent)
+        // return false
+        return (
+          !this.filterSelf &&
+          node.parent &&
+          this.getHasKeyword(value, node.parent)
+        )
+      }
+    },
+    handlePinyin(data) {
+      if (!pinyinPackage) this.importPackage()
+      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      data.forEach((item) => {
+        def(
+          item,
+          pinyin,
+          pinyinPackage(item[this.labelKey], {
+            style: pinyinPackage.STYLE_NORMAL,
+          }).join('')
+        )
+        def(
+          item,
+          pinyinInitial,
+          pinyinPackage(item[this.labelKey], {
+            style: pinyinPackage.STYLE_FIRST_LETTER,
+          }).join('')
+        )
+      })
+      return data
+    },
+    // 导入包
+    importPackage() {
+      // 判断是否有拖拽,有就引入Sortable
+      // 判断是否工具箱是否有下载,有就引入table-excel
+      try {
+        if (this.needPinyin && !pinyinPackage) {
+          pinyinPackage = require('pinyin')
+        }
+      } catch (error) {
+        console.error('请安装对应的依赖包')
       }
     },
   },

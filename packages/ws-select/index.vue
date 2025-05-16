@@ -4,6 +4,7 @@
     :value="value"
     @blur="handleBlur"
     @focus="handleFocus"
+    @visible-change="handleVisibleChange"
     v-bind="{
       filterable: true,
       'popper-class': isTreeSelect ? 'ws-treeSelect ws-select' : 'ws-select',
@@ -148,12 +149,14 @@ let wsSelectRequestConfig = {
 let treeNodeKeyMap = {}
 let valueKeyMap = {}
 let lastCheckedKeys = []
+let pinyinPackage = null
 import {
   treeToFlat,
   getObjAttr,
   dispatch,
   deepMerge,
   deepClone,
+  def,
 } from '../utils/util'
 import wsTree from '../ws-tree/index.vue'
 import wsTooltip from '../ws-tooltip/index.vue'
@@ -226,6 +229,11 @@ export default {
     fakeRemote: {
       type: Boolean,
       default: false,
+    },
+    // 开启前端拼音搜索功能
+    needPinyin: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -348,9 +356,10 @@ export default {
       immediate: true,
     },
     // 初始化下拉框数据
-    optionsCpt: {
+    flatOptions: {
       handler() {
-        this.optionsFilterData = this.flatOptions
+        if (!this.isTreeSelect) this.optionsFilterData = this.flatOptions
+        if (this.needPinyin) this.handlePinyin(this.flatOptions)
       },
       immediate: true,
     },
@@ -363,9 +372,19 @@ export default {
   },
   created() {
     !this.requestAfterFocus && this.getDataByFn()
+    this.importPackage()
   },
   methods: {
     dispatch,
+    // handleChange
+    handleVisibleChange(status) {
+      // 非树
+      if (!this.isTreeSelect) {
+        this.query = ''
+        // 单选 面板关闭后重置下拉选项
+        if (!this.multiple && !status) this.optionsFilterData = this.flatOptions
+      }
+    },
     // 下拉框失焦事件-对树单独处理
     handleBlur() {
       if (this.isTreeSelect) {
@@ -426,6 +445,7 @@ export default {
       })
     },
     filterMethodCustom(query) {
+      this.query = query
       if (this.isTreeSelect) {
         this.filterMethodToTree(query)
       } else {
@@ -433,10 +453,10 @@ export default {
       }
     },
     remoteMethodCustom(query) {
+      this.query = query
       if (this.fakeRemote) {
         this.filterMethodCustom(query)
       } else {
-        this.query = query
         this.getDataByFn()
       }
     },
@@ -584,6 +604,38 @@ export default {
       const data = await this.requestFn(this.query)
       this.loadingData = false
       this.optionsData = data
+    },
+    handlePinyin(data) {
+      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      data.forEach((item) => {
+        def(
+          item,
+          pinyin,
+          pinyinPackage(item[this.labelKey], {
+            style: pinyinPackage.STYLE_NORMAL,
+          }).join('')
+        )
+        def(
+          item,
+          pinyinInitial,
+          pinyinPackage(item[this.labelKey], {
+            style: pinyinPackage.STYLE_FIRST_LETTER,
+          }).join('')
+        )
+      })
+      return data
+    },
+    // 导入包
+    importPackage() {
+      // 判断是否有拖拽,有就引入Sortable
+      // 判断是否工具箱是否有下载,有就引入table-excel
+      try {
+        if (this.needPinyin) {
+          pinyinPackage = require('pinyin')
+        }
+      } catch (error) {
+        console.error('请安装对应的依赖包')
+      }
     },
   },
 }

@@ -1,3 +1,9 @@
+/*
+ * @Author: wang shuai
+ * @Date: 2023-08-10 18:40:54
+ * @LastEditors: wang shuai
+ * @LastEditTime: 2025-05-16 10:15:25
+ */
 export default {
   methods: {
     filter() {
@@ -53,6 +59,12 @@ export default {
     },
     insertAfter() {
       return this.$refs.tree.insertAfter(...arguments)
+    },
+    setExpanded(cb) {
+      const allNodes = this.$refs.tree.store._getAllNodes()
+      allNodes.forEach((node) => {
+         node.expanded = cb(node)
+      })
     },
   },
 }
