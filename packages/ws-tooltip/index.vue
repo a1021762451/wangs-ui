@@ -6,14 +6,21 @@ export default {
   extends: Tooltip, // 组件继承
   props: {
     ...Tooltip.props,
+    // 重写content，支持传入字符串或数字
     content: {
       type: String | Number,
-      default: ''
+      default: '',
     },
+    // 文字溢出才显示
     overflow: {
       type: Boolean,
-      default: true
-    } // 新增props属性
+      default: true,
+    },
+    // 不用填content ，自动获取innerText
+    showInnerText: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
     // 重写show方法
@@ -22,12 +29,13 @@ export default {
       if (this.overflow) {
         if (this.$el.scrollWidth <= this.$el.clientWidth) return
       }
-      // 自动获取content
+      // 自动获取content(非必要不用)
       if (!this.content) {
-        this.content = this.$el.innerText
+        if (this.showInnerText) this.content = this.$el.innerText
+        else return
       }
       Tooltip.methods.show.call(this) //执行原版的逻辑，绑定当前实例的this
-    }
-  }
+    },
+  },
 }
 </script>

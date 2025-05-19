@@ -273,14 +273,14 @@ export function getShowValue(
   return fieldItem.formatter
     ? fieldItem.formatter(row, column, value, $index)
     : value || value === 0
-      ? value
-      : fieldItem.placeholder || placeholder
+    ? value
+    : fieldItem.placeholder || placeholder
 }
 // 获取下拉框，勾选框等选项
 export function getOptions(fieldItem, allOptions, row) {
   const { prop } = fieldItem
   // 选项关联行内/配置/全局
-  return row[`${prop}__options`] || fieldItem.options || allOptions[prop] || []
+  return row[`${prop}__options`] || fieldItem.options || allOptions[prop]
 }
 /**
  * 对象深拷贝
@@ -379,9 +379,9 @@ export function deepMerge(obj1, obj2) {
     // 如果obj2[key]没有值或者值不是对象，此时直接替换obj1[key]
     obj1[key] =
       obj1[key] &&
-        obj1[key].toString() === '[object Object]' &&
-        obj2[key] &&
-        obj2[key].toString() === '[object Object]'
+      obj1[key].toString() === '[object Object]' &&
+      obj2[key] &&
+      obj2[key].toString() === '[object Object]'
         ? deepMerge(obj1[key], obj2[key])
         : (obj1[key] = obj2[key])
   }
@@ -531,7 +531,12 @@ const typeFuMap = {
     getFn: 'getMilliseconds',
   },
 }
-export function handleDate(num, type = 'day', date = new Date(), hasCalculate = true) {
+export function handleDate(
+  num,
+  type = 'day',
+  date = new Date(),
+  hasCalculate = true
+) {
   //计算出要加/减的毫秒数
   const { setFn, getFn } = typeFuMap[type]
   const time = new Date(date)
@@ -871,7 +876,11 @@ export function concatUrlAndParams(url, params = {}) {
 }
 
 // 二次确认
-export function twiceConfirm(msg = '是否继续此操作?', tip = '提示', options = {}) {
+export function twiceConfirm(
+  msg = '是否继续此操作?',
+  tip = '提示',
+  options = {}
+) {
   return new Promise((resolve, reject) => {
     this.$confirm(msg, tip, {
       confirmButtonText: '确定',

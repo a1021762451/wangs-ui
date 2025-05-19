@@ -24,8 +24,8 @@
       @blur="handleBlur(formData, fieldItem)"
       @input="handleInput($event, formData, fieldItem)"
       v-bind="{
+        options,
         disabled: fieldItem.disabledKey && formData[fieldItem.disabledKey],
-        options: getOptions(fieldItem, allOptions, formData),
         ...getAttrs(fieldItem, formData, formStatus !== 'edit'),
       }"
       v-on="{
@@ -35,7 +35,7 @@
       v-focus="vFocus"
     >
       <template v-if="fieldItem.component === 'el-select'">
-        <template v-for="item in getOptions(fieldItem, allOptions, formData)">
+        <template v-for="item in options">
           <el-option-group v-if="item.children" :key="item.label" v-bind="item">
             <el-option
               v-for="nextItem in item.children"
@@ -60,7 +60,7 @@
       </template>
       <template v-if="fieldItem.component === 'el-radio-group'">
         <el-radio
-          v-for="item in getOptions(fieldItem, allOptions, formData)"
+          v-for="item in options"
           :key="item.value"
           v-bind="{
             ...item,
@@ -71,7 +71,7 @@
       </template>
       <template v-if="fieldItem.component === 'el-checkbox-group'">
         <el-checkbox
-          v-for="item in getOptions(fieldItem, allOptions, formData)"
+          v-for="item in options"
           :key="item.value"
           v-bind="{
             ...item,
@@ -143,6 +143,11 @@ export default {
   data() {
     return {
       temRow: {},
+    }
+  },
+  computed: {
+    options() {
+      return this.getOptions(this.fieldItem, this.allOptions, this.formData)
     }
   },
   created() {
