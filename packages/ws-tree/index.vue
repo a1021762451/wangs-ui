@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-16 10:14:34
+ * @LastEditTime: 2025-05-21 10:31:09
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -614,19 +614,23 @@ export default {
     },
     handlePinyin(data) {
       if (!pinyinPackage) this.importPackage()
-      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      const {
+        pinyin = 'pinyin',
+        pinyinInitial = 'pinyinInitial',
+        label = 'label',
+      } = this.props
       data.forEach((item) => {
         def(
           item,
           pinyin,
-          pinyinPackage(item[this.labelKey], {
+          pinyinPackage(item[label], {
             style: pinyinPackage.STYLE_NORMAL,
           }).join('')
         )
         def(
           item,
           pinyinInitial,
-          pinyinPackage(item[this.labelKey], {
+          pinyinPackage(item[label], {
             style: pinyinPackage.STYLE_FIRST_LETTER,
           }).join('')
         )
