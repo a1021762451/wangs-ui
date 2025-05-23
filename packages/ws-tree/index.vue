@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-21 10:31:09
+ * @LastEditTime: 2025-05-23 08:55:52
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -63,6 +63,7 @@
           'highlight-current': true,
           ...$attrs,
           nodeKey,
+          props,
           data: treeData,
         }"
         v-on="$listeners"
@@ -312,6 +313,9 @@ export default {
     }
   },
   computed: {
+    nodeKey() {
+      return getObjAttr(this.$attrs, 'nodeKey') || 'id'
+    },
     // 树节点名称字段
     props() {
       // 默认属性值
@@ -321,7 +325,10 @@ export default {
       //   children: 'children',
       //   parent: 'pid',
       // }
-      return this.$attrs.props || {}
+      return {
+        id: this.nodeKey,
+        ...this.$attrs.props,
+      }
     },
     titleTip() {
       if (this.headerConfig.hasOwnProperty('titleTip'))
@@ -341,9 +348,6 @@ export default {
       return this.headerConfig.hasOwnProperty('title')
         ? this.headerConfig.title
         : '类型'
-    },
-    nodeKey() {
-      return getObjAttr(this.$attrs, 'nodeKey') || 'id'
     },
     defaultExpandedKeys() {
       return getObjAttr(this.$attrs, 'defaultExpandedKeys')
@@ -377,14 +381,8 @@ export default {
     data: {
       handler() {
         const data = this.data || []
-        this.treeData = this.dataIsFlat
-          ? flatToTree(data, {
-              id: this.nodeKey,
-              ...this.props,
-            })
-          : data
+        this.treeData = this.dataIsFlat ? flatToTree(data, this.props) : data
         if (this.needPinyin) {
-          //   if (!this.dataIsFlat) data = treeToFlat(data, this.props, this.nodeKey)
           const flatOptions = this.dataIsFlat
             ? data
             : treeToFlat(data, this.props)
@@ -706,6 +704,7 @@ export default {
     border: none;
     flex: 1;
     margin-top: 4px;
+    min-height: 0;
     /deep/ .el-tree {
       display: inline-block;
       min-width: 100%;
