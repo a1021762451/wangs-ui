@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-23 08:55:52
+ * @LastEditTime: 2025-05-23 09:14:00
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -383,9 +383,7 @@ export default {
         const data = this.data || []
         this.treeData = this.dataIsFlat ? flatToTree(data, this.props) : data
         if (this.needPinyin) {
-          const flatOptions = this.dataIsFlat
-            ? data
-            : treeToFlat(data, this.props)
+          const flatOptions = treeToFlat(this.treeData, this.props)
           this.handlePinyin(flatOptions)
         }
         this.setCurrentKeyByProp()

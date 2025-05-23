@@ -645,10 +645,11 @@ export function treeToFlat(data = [], props = {}, useDef = true) {
     data.forEach((item) => {
       if (useDef) {
         if (!item[id]) def(item, id, getRandomId())
-        def(item, parent, parentId)
+        if (!item[parent] || item[parent] != parentId)
+          def(item, parent, parentId)
       } else {
         if (!item[id]) item[id] = getRandomId()
-        item[parent] = parentId
+        if (!item[parent] || item[parent] != parentId) item[parent] = parentId
       }
       result.push(item)
       if (item[children] && item[children].length) {
