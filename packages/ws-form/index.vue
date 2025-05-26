@@ -2,7 +2,7 @@
  * @Author: wang shuai
  * @Date: 2024-12-25 09:59:15
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-30 11:08:12
+ * @LastEditTime: 2025-05-26 10:25:44
 -->
 <template>
   <div
@@ -386,8 +386,9 @@ export default {
             this.$set(this.formData, item.prop, '')
             // 特殊情况
             if (
-              component === 'el-checkbox-group' ||
-              (component === 'el-select' && componentAttrs.multiple)
+              component &&
+              (component === 'el-checkbox-group' ||
+                (component.includes('select') && componentAttrs.multiple))
             )
               this.$set(this.formData, item.prop, [])
           }

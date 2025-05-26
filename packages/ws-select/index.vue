@@ -6,6 +6,7 @@
     @focus="handleFocus"
     @visible-change="handleVisibleChange"
     v-bind="{
+      placeholder: '请选择',
       filterable: true,
       'popper-class': isTreeSelect ? 'ws-treeSelect ws-select' : 'ws-select',
       ...$attrs,
@@ -35,8 +36,8 @@
             'default-expand-all': true,
             currentNodeKey: typeof value === 'string' ? value : undefined,
             ...treeConfig,
-            data: treeConfig.data || optionsCpt,
-            props: treeProps,
+            data: optionsCpt,
+            props: propsCpt,
             'check-on-click-node': true,
             showCheckbox: multiple,
           }"
@@ -61,25 +62,25 @@
     <template v-else>
       <template v-for="item in optionsFilterData">
         <el-option-group
-          v-if="item.children"
+          v-if="item[childrenKey]"
           :key="item[labelKey]"
           v-bind="item"
         >
           <el-option
-            v-for="nextItem in item.children"
+            v-for="nextItem in item[childrenKey]"
             :key="nextItem[labelKey] + nextItem[valueKey]"
             v-bind="nextItem"
           >
             <!-- 内容 -->
             <wsTooltip
               popper-class="el-tooltip_custom"
-              :content="nextItem[labelKey]"
+              :content="nextItem[showLabelKey]"
               overflow
               :placement="'right'"
             >
               <div class="ws-select__label">
                 <slot name="label" v-bind="nextItem">
-                  {{ nextItem[labelKey] }}
+                  {{ nextItem[showLabelKey] }}
                 </slot>
               </div>
             </wsTooltip>
@@ -94,27 +95,27 @@
           >
             <wsTooltip
               popper-class="el-tooltip_custom"
-              :content="item[labelKey]"
+              :content="item[showLabelKey]"
               overflow
               :placement="'right'"
             >
               <div class="ws-select__label">
                 <slot name="label" v-bind="item">
-                  {{ item[labelKey] }}
+                  {{ item[showLabelKey] }}
                 </slot>
               </div>
             </wsTooltip>
           </el-checkbox>
           <wsTooltip
             popper-class="el-tooltip_custom"
-            :content="item[labelKey]"
+            :content="item[showLabelKey]"
             overflow
             :placement="'right'"
             v-else
           >
             <div class="ws-select__label">
               <slot name="label" v-bind="item">
-                {{ item[labelKey] }}
+                {{ item[showLabelKey] }}
               </slot>
             </div>
           </wsTooltip>
@@ -247,11 +248,11 @@ export default {
   },
   computed: {
     optionsCpt() {
-      return this.optionsData || this.options || this.treeConfig.data || []
-    },
-    // 优先treeConfig的props，其次props
-    treeProps() {
-      return this.treeConfig.props || this.props
+      return (
+        this.optionsData ||
+        this.options ||
+        (this.isTreeSelect && this.treeConfig.data ? this.treeConfig.data : [])
+      )
     },
     treeNodeKey() {
       return getObjAttr(this.treeConfig, 'nodeKey') || 'id'
@@ -267,29 +268,30 @@ export default {
       if (!this.remote) return undefined
       return getObjAttr(this.$attrs, 'remoteMethod') || this.remoteMethodCustom
     },
+    // 是否多选
     multiple() {
       // 布尔值简写获取到的是空字符串
       return this.$attrs.multiple === '' || !!this.$attrs.multiple
     },
+    // 扁平化数据
     flatOptions() {
-      const { dataIsFlat } = this.treeConfig
-      return dataIsFlat
-        ? this.optionsCpt
-        : treeToFlat(this.optionsCpt, {
-            id: this.treeNodeKey,
-            ...this.treeProps,
-          })
+      if (this.isTreeSelect) {
+        const { dataIsFlat } = this.treeConfig
+        return dataIsFlat
+          ? this.optionsCpt
+          : treeToFlat(this.optionsCpt, this.propsCpt)
+      } else {
+        return treeToFlat(this.optionsCpt, this.propsCpt)
+      }
     },
     checkableOptions() {
-      if (!this.isTreeSelect) return this.flatOptions.filter((d) => !d.disabled)
-      else {
-        const childrenKey = this.treeProps.children || 'children'
-        return this.flatOptions.filter(
-          (d) =>
-            !d.disabled &&
-            (!this.treeLeafOnly || !d[childrenKey] || !d[childrenKey].length)
-        )
-      }
+      return this.flatOptions.filter(
+        (d) =>
+          !d.disabled &&
+          (!this.treeLeafOnly ||
+            !d[this.childrenKey] ||
+            !d[this.childrenKey].length)
+      )
     },
     isCheckAll() {
       return this.value.length === this.checkableOptions.length
@@ -300,22 +302,38 @@ export default {
         this.value.length < this.checkableOptions.length
       )
     },
+    //  树组件合并props取值 优先treeConfig的props，其次props
+    propsCpt() {
+      return this.isTreeSelect
+        ? {
+            ...this.props,
+            id: this.treeNodeKey,
+            ...(this.treeConfig.props || {}),
+          }
+        : this.props
+    },
     valueKey() {
-      if (!this.isTreeSelect) return this.props['value'] || 'value'
-      else return this.treeProps['id'] || this.treeNodeKey
+      if (!this.isTreeSelect) return this.propsCpt['value'] || 'value'
+      else return this.propsCpt['id']
     },
     labelKey() {
-      if (!this.isTreeSelect) return this.props['label'] || 'label'
-      else return this.treeProps['label'] || 'label'
+      return this.propsCpt['label'] || 'label'
+    },
+    // 节点展示名称
+    showLabelKey() {
+      return this.propsCpt['showLabel'] || this.labelKey
+    },
+    // 节点展示名称
+    childrenKey() {
+      return this.propsCpt['children'] || 'children'
     },
     treeKeyIsOnly() {
       return this.valueKey === this.treeNodeKey
     },
     // 树数据只有一级
     treeDataIsOneLevel() {
-      const childrenKey = this.treeProps.children || 'children'
       return this.flatOptions.every(
-        (d) => !d[childrenKey] || !d[childrenKey].length
+        (d) => !d[this.childrenKey] || !d[this.childrenKey].length
       )
     },
     requestConfigCpt() {
@@ -426,11 +444,12 @@ export default {
     },
     // 转成下拉搜索
     filterMethodToSelect(query) {
-      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } =
+        this.propsCpt
       if (!query) this.optionsFilterData = this.flatOptions
       this.optionsFilterData = this.flatOptions.filter((data) => {
         // console.log(item.name, 'item.name')
-        const someArr = [data[this.labelKey]]
+        const someArr = [data[this.showLabelKey]]
         if (data[pinyin]) someArr.push(data[pinyin])
         if (data[pinyinInitial]) someArr.push(data[pinyinInitial])
         return someArr.some((keyword) => {
@@ -602,19 +621,20 @@ export default {
     },
     handlePinyin(data) {
       if (!pinyinPackage) this.importPackage()
-      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } = this.props
+      const { pinyin = 'pinyin', pinyinInitial = 'pinyinInitial' } =
+        this.propsCpt
       data.forEach((item) => {
         def(
           item,
           pinyin,
-          pinyinPackage(item[this.labelKey], {
+          pinyinPackage(item[this.showLabelKey], {
             style: pinyinPackage.STYLE_NORMAL,
           }).join('')
         )
         def(
           item,
           pinyinInitial,
-          pinyinPackage(item[this.labelKey], {
+          pinyinPackage(item[this.showLabelKey], {
             style: pinyinPackage.STYLE_FIRST_LETTER,
           }).join('')
         )
@@ -671,6 +691,7 @@ export default {
   white-space: nowrap;
 }
 /deep/ .tree-content {
+  padding-right: 10px;
   .container-showOverflowTooltip {
     overflow: visible;
   }

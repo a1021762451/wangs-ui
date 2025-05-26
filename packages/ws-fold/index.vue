@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-04-20 11:54:48
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-04-24 19:09:34
+ * @LastEditTime: 2025-05-23 09:56:49
 -->
 <template>
   <div
@@ -132,11 +132,13 @@ export default {
       event.preventDefault()
       document.addEventListener('mousemove', this.resize, false)
       document.addEventListener('mouseup', this.stopResize, false)
+      document.addEventListener('mouseleave', this.stopResize, false)
     },
     // 结束拖拽
     stopResize() {
       document.removeEventListener('mousemove', this.resize, false)
       document.removeEventListener('mouseup', this.stopResize, false)
+      document.removeEventListener('mouseleave', this.stopResize, false)
     },
     // 拖拽中
     resize(event) {

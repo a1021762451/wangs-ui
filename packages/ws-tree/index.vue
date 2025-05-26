@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-03-03 15:24:34
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-23 09:14:00
+ * @LastEditTime: 2025-05-26 10:29:03
 -->
 <template>
   <div class="tree-content" :style="{ backgroundColor }">
@@ -83,7 +83,7 @@
               >
                 <span class="custom-tree-label">
                   <slot v-bind="{ data, node }">
-                    {{ node.label }}
+                    {{ data[showLabelKey] }}
                   </slot>
                 </span>
               </wsTooltip>
@@ -330,6 +330,10 @@ export default {
         ...this.$attrs.props,
       }
     },
+    // 节点展示名称
+    showLabelKey() {
+      return this.props['showLabel'] || this.props['label'] || 'showLabel'
+    },
     titleTip() {
       if (this.headerConfig.hasOwnProperty('titleTip'))
         return this.headerConfig.titleTip
@@ -406,7 +410,7 @@ export default {
     getTooltipConfig(data, node) {
       const obj = {
         'popper-class': 'el-tooltip_custom',
-        content: node.label,
+        content: data[this.showLabelKey],
         overflow: true,
         placement: 'right',
         ...this.tooltipConfig,
@@ -578,7 +582,6 @@ export default {
       const {
         pinyin = 'pinyin',
         pinyinInitial = 'pinyinInitial',
-        label = 'label',
       } = this.props
       let data
       if (node.data instanceof Array) {
@@ -587,7 +590,7 @@ export default {
       } else {
         data = node.data || {}
       }
-      const someArr = [data[label]]
+      const someArr = [data[this.showLabelKey]]
       if (data[pinyin]) someArr.push(data[pinyin])
       if (data[pinyinInitial]) someArr.push(data[pinyinInitial])
       if (
@@ -613,20 +616,19 @@ export default {
       const {
         pinyin = 'pinyin',
         pinyinInitial = 'pinyinInitial',
-        label = 'label',
       } = this.props
       data.forEach((item) => {
         def(
           item,
           pinyin,
-          pinyinPackage(item[label], {
+          pinyinPackage(item[this.showLabelKey], {
             style: pinyinPackage.STYLE_NORMAL,
           }).join('')
         )
         def(
           item,
           pinyinInitial,
-          pinyinPackage(item[label], {
+          pinyinPackage(item[this.showLabelKey], {
             style: pinyinPackage.STYLE_FIRST_LETTER,
           }).join('')
         )

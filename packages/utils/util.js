@@ -11,6 +11,12 @@ const commonAttrs = {
       placeholder: '请选择',
     },
   },
+  'ws-select': {
+    default: {
+      filterable: true,
+      placeholder: '请选择',
+    },
+  },
   'el-input': {
     default: {
       placeholder: '请输入',

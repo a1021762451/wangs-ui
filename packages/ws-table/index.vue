@@ -3,7 +3,7 @@
  * @Author: wang shuai
  * @Date: 2023-12-25 09:24:53
  * @LastEditors: wang shuai
- * @LastEditTime: 2025-05-15 13:43:40
+ * @LastEditTime: 2025-05-26 10:28:44
 -->
 <template>
   <div class="table-container" v-resize="resizeTable">
@@ -993,8 +993,9 @@ export default {
             this.$set(this.formData, prop, '')
             // 特殊情况
             if (
-              component === 'el-checkbox-group' ||
-              (component === 'el-select' && componentAttrs.multiple)
+              component &&
+              (component === 'el-checkbox-group' ||
+                (component.includes('select') && componentAttrs.multiple))
             )
               this.$set(this.formData, prop, [])
           } else {
